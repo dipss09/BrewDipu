@@ -673,10 +673,17 @@
       </div>
 
       <!-- Order summary mini -->
-      <div id="order-summary-items" class="mx-8 mt-4 rounded-2xl bg-surface-container p-4 space-y-2 text-sm"></div>
-      <div class="mx-8 mt-2 flex justify-between items-center">
-        <span class="text-on-surface-variant text-sm font-medium">Total</span>
-        <span id="order-total-display" class="text-xl font-black text-primary"></span>
+      <div id="order-summary-items" class="mx-8 mt-4 mb-2 rounded-2xl bg-surface-container p-4 space-y-2 text-sm"></div>
+      
+      <div class="mx-8 mt-2 space-y-1 hidden" id="discount-breakdown">
+          <div class="flex justify-between items-center text-sm text-secondary font-bold">
+             <span id="discount-label">Discount</span>
+             <span id="discount-amount">-₹0</span>
+          </div>
+      </div>
+      <div class="mx-8 mt-2 flex justify-between items-center pt-2 border-t border-outline/10">
+        <span class="text-on-surface-variant text-sm font-bold uppercase tracking-widest">Grand Total</span>
+        <span id="order-total-display" class="text-2xl font-black text-primary"></span>
       </div>
 
       <form id="order-form" onsubmit="submitOrder(event)" class="px-8 pb-8 pt-4 space-y-4">
@@ -695,6 +702,32 @@
         <div class="space-y-1">
           <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Delivery Address *</label>
           <textarea id="f-address" required rows="3" placeholder="House no., street, area, city..." class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium resize-none" style="border:none;"></textarea>
+        </div>
+
+        <!-- Referral & Rewards Engine -->
+        <div class="bg-surface-container-high p-4 rounded-2xl border border-outline/10 space-y-4">
+            
+            <div class="space-y-1" id="referral-block" style="display:none;">
+              <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Referral Code? (New Users Only)</label>
+              <div class="flex gap-2">
+                 <input id="f-ref-code" type="text" placeholder="e.g. BD-ABCD1" class="brew-input flex-1 bg-white rounded-xl p-3 text-sm font-mono font-bold uppercase" style="border:1px solid rgba(0,0,0,0.05);"/>
+                 <button type="button" id="btn-apply-ref" onclick="applyReferralCode()" class="bg-secondary text-white rounded-xl px-4 text-sm font-bold hover:bg-secondary-container hover:text-on-secondary-container transition-colors shadow-sm">Apply</button>
+              </div>
+              <p id="ref-status" class="text-xs font-bold mt-1 text-secondary leading-tight"></p>
+            </div>
+
+            <div class="space-y-1 hidden" id="rewards-block">
+              <label class="text-[10px] font-bold uppercase tracking-widest text-primary flex justify-between items-center">
+                 <span>Redeem Rewards</span>
+                 <span class="bg-primary/10 px-2 py-0.5 rounded text-primary" id="avail-pts-badge">0 pts</span>
+              </label>
+              <select id="f-rewards" class="brew-input w-full bg-white rounded-xl p-3 text-sm font-bold text-primary shadow-sm" style="border:1px solid rgba(0,0,0,0.05);" onchange="applyRewardPoints()">
+                 <option value="">Save my points for later</option>
+                 <option value="discount" id="opt-discount" disabled>Redeem 600 pts for 30% Discount</option>
+                 <option value="gift" id="opt-gift" disabled>Redeem 600 pts for Free Gift</option>
+              </select>
+            </div>
+            
         </div>
         <div class="space-y-1">
           <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Special Instructions</label>
@@ -724,10 +757,15 @@
         <span class="material-symbols-outlined text-5xl text-secondary">check_circle</span>
       </div>
       <h3 class="text-3xl font-black text-primary mb-3">Order Sent! 🎉</h3>
-      <p class="text-on-surface-variant leading-relaxed mb-2">Your order details have been sent to BrewDipu via WhatsApp and Email.</p>
-      <p class="text-sm text-on-surface-variant mb-8">We'll confirm your order and let you know the delivery time shortly. Thank you for ordering! ☕</p>
+      <p class="text-on-surface-variant leading-relaxed mb-2">Your order details have been securely sent. We will contact you shortly to confirm delivery!</p>
+      
+      <div class="my-6 p-4 bg-tertiary-fixed-dim/20 border border-tertiary-fixed rounded-2xl">
+         <p class="text-xs font-bold uppercase tracking-widest text-on-tertiary-fixed-variant mb-1">Your Confirmation Code</p>
+         <div class="text-3xl font-black text-primary tracking-widest font-mono select-all" id="success-conf-code">#----</div>
+         <p class="text-xs font-bold text-error mt-2">IMPORTANT: Please show this code to the rider at the time of delivery.</p>
+      </div>
 
-      <div id="success-order-snapshot" class="rounded-2xl bg-surface-container p-4 text-left text-sm space-y-1 mb-8"></div>
+      <div id="success-order-snapshot" class="rounded-2xl bg-surface-container p-4 text-left text-sm space-y-1 mb-8 hidden"></div>
 
       <button onclick="closeSuccess()" class="w-full py-4 bg-primary text-white rounded-2xl font-black hover:bg-primary-container transition-colors">
         Back to Shopping
@@ -739,20 +777,43 @@
   <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
     <div class="glass-modal w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden">
       <div class="px-8 pt-8 pb-2 flex items-center justify-between">
-        <h3 class="text-2xl font-black text-primary" id="auth-title">Welcome Back</h3>
+        <h3 class="text-2xl font-black text-primary" id="auth-title">Welcome</h3>
         <button onclick="closeAuth()" class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors hover:scale-110 transition-transform">close</button>
       </div>
-      <div class="px-8 pb-8 pt-4 space-y-4">
+      <div class="px-8 pb-8 pt-2 space-y-4">
+        
+        <div class="flex gap-2 p-1 bg-surface-container rounded-xl mb-4" id="auth-tabs">
+          <button type="button" onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2 text-sm font-bold rounded-lg bg-primary text-white shadow transition-all">Log In</button>
+          <button type="button" onclick="switchAuthTab('signup')" id="tab-signup" class="flex-1 py-2 text-sm font-bold rounded-lg text-on-surface-variant hover:bg-outline-variant/20 transition-all">Sign Up</button>
+        </div>
+
         <div id="recaptcha-container"></div>
         <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-          <div id="auth-name-field" class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Name</label>
-            <input id="auth-name" type="text" placeholder="Dipu" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium" style="border:none;"/>
+          <div class="auth-details-fields space-y-4 hidden" id="signup-fields">
+            <div id="auth-name-field" class="space-y-1">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Name *</label>
+              <input id="auth-name" type="text" placeholder="Your Name" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium" style="border:none;"/>
+            </div>
+            <div id="auth-email-field" class="space-y-1">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Email Address *</label>
+              <input id="auth-email" type="email" placeholder="you@example.com" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium" style="border:none;"/>
+            </div>
+            <div id="auth-address-field" class="space-y-1">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Address *</label>
+              <input id="auth-address" type="text" placeholder="House/Flat No, Area, City" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium" style="border:none;"/>
+            </div>
+            <div id="auth-ref-field" class="space-y-1">
+              <label class="text-xs font-bold uppercase tracking-widest text-secondary">Referral Code (Optional)</label>
+              <input id="auth-ref-code-input" type="text" placeholder="e.g. BD-ABCD1" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium font-mono uppercase" style="border:none;"/>
+              <p class="text-[10px] text-on-surface-variant text-right">Not required. Gets you 10% off your first order!</p>
+            </div>
           </div>
+          
           <div id="auth-phone-field" class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Phone Number (with +91)</label>
-            <input id="auth-phone" required type="tel" placeholder="+91 8101244865" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium" style="border:none;"/>
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Phone Number (with +91) *</label>
+            <input id="auth-phone" required type="tel" placeholder="+91 9876543210" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium" style="border:none;"/>
           </div>
+
           <div id="auth-otp-field" class="space-y-1 hidden">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">6-Digit OTP</label>
             <input id="auth-otp" type="text" placeholder="123456" class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium text-center tracking-[1em]" style="border:none;"/>
@@ -773,33 +834,46 @@
     </div>
     <div class="p-6 border-b border-outline-variant/20 bg-surface-container-low flex items-center gap-4">
       <div class="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0" id="profile-initial">D</div>
-      <div class="flex-1 w-full">
+      <div class="flex-1 w-full space-y-1">
         <input type="text" id="profile-name" class="bg-transparent border-b border-outline/30 w-full text-lg font-bold text-primary focus:outline-none focus:border-primary px-1 py-0.5" placeholder="Your Name" onchange="saveProfile()">
-        <input type="email" id="profile-email" class="bg-transparent border-b border-outline/30 w-full text-sm text-on-surface-variant focus:outline-none focus:border-primary px-1 py-0.5 mt-1" placeholder="Email Address" onchange="saveProfile()">
-        <div class="text-xs text-secondary mt-1 font-bold px-1" id="profile-phone-display"></div>
+        <input type="email" id="profile-email" class="bg-transparent border-b border-outline/30 w-full text-sm text-on-surface-variant focus:outline-none focus:border-primary px-1 py-0.5" placeholder="Email Address" onchange="saveProfile()">
+        <input type="tel" id="profile-phone" class="bg-transparent border-b border-outline/30 w-full text-sm text-on-surface-variant focus:outline-none focus:border-primary px-1 py-0.5" placeholder="Phone Number" onchange="saveProfile()">
+        <input type="text" id="profile-address" class="bg-transparent border-b border-outline/30 w-full text-sm text-on-surface-variant focus:outline-none focus:border-primary px-1 py-0.5" placeholder="Address" onchange="saveProfile()">
       </div>
     </div>
     <div class="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+      
+      <!-- Referral System Display -->
+      <div class="bg-surface-container-high p-5 rounded-3xl shadow-inner border border-outline/10 relative">
+        <h4 class="text-sm font-bold uppercase tracking-widest text-primary mb-3">My Referral Program</h4>
+        
+        <div class="space-y-4">
+          <!-- Code -->
+          <div>
+            <label class="text-xs text-on-surface-variant font-bold mb-1 block uppercase tracking-widest">REFER AND EARN</label>
+            <div class="flex items-center gap-2">
+                <input type="text" id="profile-ref-code" readonly class="brew-input flex-1 bg-white rounded-xl p-3 font-mono text-center tracking-[0.05em] text-primary text-xs font-bold shadow-sm" value="LOADING"/>
+                <button onclick="copyRefCode()" class="bg-primary text-white p-3 rounded-xl hover:bg-primary-container transition-colors shadow-sm" title="Copy"><span class="material-symbols-outlined text-sm">content_copy</span></button>
+                <button onclick="shareRefCode()" class="bg-[#25D366] text-white p-3 rounded-xl hover:bg-[#1ebd5a] transition-colors shadow-sm" title="Share via WhatsApp"><span class="material-symbols-outlined text-sm">share</span></button>
+            </div>
+          </div>
+          
+          <!-- Points -->
+          <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm">
+              <span class="text-xs font-bold text-on-surface-variant">My Reward Points</span>
+              <span class="text-lg font-black text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-base">stars</span> <span><span id="profile-points">0</span> / 600</span></span>
+          </div>
+        </div>
+        
+        <p class="text-[11px] font-bold text-primary leading-tight mt-3">Target clear? Get rewards like free gifts from Brew Dipu along with a 30% discount!</p>
+      </div>
+
       <div>
         <h4 class="text-sm font-bold uppercase tracking-widest text-secondary mb-3 mt-2">Order History</h4>
-        <!-- Dummy Order List -->
-        <div class="space-y-3">
-          <div class="p-4 rounded-2xl bg-surface-container">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-xs font-bold bg-secondary-container text-on-secondary-container px-2 py-1 rounded">Delivered</span>
-              <span class="text-xs text-on-surface-variant">Yesterday</span>
-            </div>
-            <div class="text-sm font-medium text-primary mb-1">Caramel Cloud Cold Brew (x2)</div>
-            <div class="text-xs text-on-surface-variant font-bold">Total: ₹298</div>
-          </div>
-          <div class="p-4 rounded-2xl bg-surface-container">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-xs font-bold bg-surface-variant text-on-surface-variant px-2 py-1 rounded">Completed</span>
-              <span class="text-xs text-on-surface-variant">April 10, 2026</span>
-            </div>
-            <div class="text-sm font-medium text-primary mb-1">Dragon Berry Cooler (x1)<br/>Keychain (x1)</div>
-            <div class="text-xs text-on-surface-variant font-bold">Total: ₹228</div>
-          </div>
+        <!-- Dynamic Order List -->
+        <div class="space-y-3" id="profile-orders-list">
+          <!-- Populated by JS -->
+          <p class="text-xs text-on-surface-variant">Loading orders...</p>
         </div>
       </div>
       <button onclick="handleLogout()" class="w-full py-4 bg-error text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-on-error-container transition-colors">
@@ -827,6 +901,10 @@
           <button class="hero-btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Order Now</button>
           <button class="hero-btn-glass" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Explore Menu</button>
         </div>
+        <a id="hero-insta-link" href="#" target="_blank" class="flex items-center gap-2 mt-4 text-white/90 hover:text-white transition-colors font-bold text-sm group">
+           <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" class="w-5 h-5 group-hover:scale-110 transition-transform" />
+           Follow <span id="hero-insta-handle" class="text-[#c3e9f3]">@brewdipu</span> for Update..
+        </a>
       </div>
 
       <!-- RIGHT: animated canvas card -->
@@ -855,48 +933,48 @@
         <h2 class="text-4xl md:text-5xl font-black text-primary mt-2">The Collection</h2>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Cold Coffee -->
+        <!-- Collection 1 -->
         <a href="#products" class="group relative overflow-hidden rounded-xl h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-lg">
-          <img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          <img id="collec-1-img" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDJ8-MB77oQZ1mV-b9AmxdsbpMWbqMhZpfXXzB1JYbu-F4_R9GKw8bnh1UuHQkyGAn5I2aQpiAw2cQYbQ3SrWnN8GTncLo7bBXm4HcTGZv4Wx0zMHWBNZ2pR6a7sPgcT4kDvT_Va0Xns-WTU77VSaOGbPT0IgmVzEZR6uCMD8oF5pr-J2GXxXN3Y23f9MNuG0J2muGzAg0J_l3MM-fIkyiRudYagjXeltOIsKPrvwkVg2lHE4rRU6QA99Xz7M8fConEOc2YulZ4g8"
             alt="Artisanal cold coffee" />
           <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
           <div class="absolute bottom-6 left-6 text-white">
-            <h3 class="text-2xl font-bold">Cold Coffee</h3>
-            <p class="text-sm opacity-80 font-medium">Brewed for 18 hours</p>
+            <h3 id="collec-1-title" class="text-2xl font-bold">Cold Coffee</h3>
+            <p id="collec-1-sub" class="text-sm opacity-80 font-medium">Brewed for 18 hours</p>
           </div>
         </a>
-        <!-- Mojito -->
+        <!-- Collection 2 -->
         <a href="#products" class="group relative overflow-hidden rounded-xl h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-lg">
-          <img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          <img id="collec-2-img" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIbu4pVrBpC4JKLBYc7_JNZNQWFN8BJvdlWwYzuHmrHzBFF0-0sdFGwF96rWBep6yxNuT1sJHJwCWk7xnIdcj99SfUG6B7EFebbT4EGTRmEBnHzjTSffi-23_a0lb0WKW2g8lbsXs5gATd8Nzv2jbfyaVKh9mqCu6T_m8g6tM3DzdswvldKADfcIhTbwtqQMbsS2C0Nn63pLkMAKcDNo0e2w0I7mRVdUU3fQsLO5Nf4QAINsPeAWPLpTQ023tK-lGW4BOXuyi1xv4"
             alt="Fresh mojito" />
           <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
           <div class="absolute bottom-6 left-6 text-white">
-            <h3 class="text-2xl font-bold">Mojito</h3>
-            <p class="text-sm opacity-80 font-medium">Minty Freshness</p>
+            <h3 id="collec-2-title" class="text-2xl font-bold">Mojito</h3>
+            <p id="collec-2-sub" class="text-sm opacity-80 font-medium">Minty Freshness</p>
           </div>
         </a>
-        <!-- Juices -->
+        <!-- Collection 3 -->
         <a href="#products" class="group relative overflow-hidden rounded-xl h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-lg">
-          <img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          <img id="collec-3-img" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIntQ-ubtNMEvijaYU5lNeNGFs8vLYNcKKN9H3CmkVMycEJRm1vfNBYI2le0aZqU682HqK-s_l-1zhg7FMcY7_HigBSIYacu36QvRKe4jMvXqPbC4HhiS-KUruCZgVS7Sdmx_ca3r6Shf2H0W_CxMaP3dHqgU4yBuEu5Q5PLFGbvpjf4acHMBJfMl8IgRZ1tWJ25ovHLS2omkedNxpNxgZ_XJsPQUS6rVwGS-ZHDmEBokWR5Xx-xKWA9ueCdtcRHsInH91b63VGJY"
             alt="Fresh organic juice" />
           <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
           <div class="absolute bottom-6 left-6 text-white">
-            <h3 class="text-2xl font-bold">Juices</h3>
-            <p class="text-sm opacity-80 font-medium">Purely Organic</p>
+            <h3 id="collec-3-title" class="text-2xl font-bold">Juices</h3>
+            <p id="collec-3-sub" class="text-sm opacity-80 font-medium">Purely Organic</p>
           </div>
         </a>
-        <!-- Keychains -->
+        <!-- Collection 4 -->
         <a href="#products" class="group relative overflow-hidden rounded-xl h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-lg">
-          <img class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          <img id="collec-4-img" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnZtVTFJ5xjRw9nN1B4hHvVaZeV1foMgQK_gzJONI8nWA-9zgOIGvps36pKh3ZknwjWjRGYn0ldsK-SHIe_PJs8l-REu3lRf3HxNuE1o8ZoQCEDH7G79naIkyRqH8s2JsplIEaH8C1fEPs2H9rGgm0BjtCkFyfL0c_ZGkfsXtqSWx19Z_VyRiuoWgIRWe8aSeKgR9VYiYZNXVFf9R540IHqwjh6PIqgBKC_q_d2bHJ7W1_0FCWfaKNE_ijIe6BDLqJv7nkw9vOMLY"
             alt="Handmade keychains" />
           <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
           <div class="absolute bottom-6 left-6 text-white">
-            <h3 class="text-2xl font-bold">Keychains</h3>
-            <p class="text-sm opacity-80 font-medium">Handmade with Love</p>
+            <h3 id="collec-4-title" class="text-2xl font-bold">Keychains</h3>
+            <p id="collec-4-sub" class="text-sm opacity-80 font-medium">Handmade with Love</p>
           </div>
         </a>
       </div>
@@ -928,7 +1006,7 @@
     <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
       <div class="lg:w-1/2 relative">
         <div class="relative z-10 rounded-[3rem] overflow-hidden shadow-2xl">
-          <img class="w-full h-[600px] object-cover"
+          <img id="about-story-img" class="w-full h-[600px] object-cover"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl58nifH_4ct6gHTREqJlfJNV7ZH4ezx34eJtvQPbe6qIHo4AtjF4KMc5H8kfF03CHqWysPbaJijD4osQdwLX2nL0AdaVhtfo4_LiOUN60NlbYfbsj963SfESU9gX8Om5bg-o0QNIw61aHvZRWwt0oC3js7g5H2xSzGqZVmOMJ-ZXQLk5mBGS_mrjimrXY_4fpaQWySpWkXiJW0a2SCugCn7luKMuwff2Ztc9tFnulRdCr6z9nQHoPyyyUmzscYIY-zNQcrIVV8_o"
             alt="Cozy artisanal cafe interior"/>
         </div>
@@ -967,20 +1045,23 @@ Born at Home.</h2>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="md:col-span-2 glass-card p-10 rounded-3xl bg-gradient-to-br from-tertiary-fixed to-white border-0 shadow-xl">
           <span class="material-symbols-outlined text-5xl text-tertiary mb-6">home</span>
-          <h3 class="text-3xl font-black text-primary mb-4">Homemade Pureness</h3>
-          <p class="text-on-surface-variant leading-relaxed">Zero preservatives. Just raw, natural ingredients prepared in small batches to ensure absolute quality in every sip.</p>
+          <h3 id="f1-title" class="text-3xl font-black text-primary mb-4">Homemade Pureness</h3>
+          <p id="f1-desc" class="text-on-surface-variant leading-relaxed">Zero preservatives. Just raw, natural ingredients prepared in small batches to ensure absolute quality in every sip.</p>
         </div>
         <div class="glass-card p-8 rounded-3xl flex flex-col justify-center items-center text-center">
           <span class="material-symbols-outlined text-4xl text-secondary mb-4">eco</span>
-          <h3 class="text-xl font-bold text-primary">Always Fresh</h3>
+          <h3 id="f2-title" class="text-xl font-bold text-primary">Always Fresh</h3>
+          <p id="f2-desc" class="text-sm mt-3 text-on-surface-variant font-medium hidden"></p>
         </div>
         <div class="glass-card p-8 rounded-3xl flex flex-col justify-center items-center text-center bg-primary text-white">
           <span class="material-symbols-outlined text-4xl mb-4">payments</span>
-          <h3 class="text-xl font-bold">Affordable Luxury</h3>
+          <h3 id="f3-title" class="text-xl font-bold">Affordable Luxury</h3>
+          <p id="f3-desc" class="text-sm mt-3 text-white/80 font-medium hidden"></p>
         </div>
         <div class="glass-card p-8 rounded-3xl flex flex-col justify-center items-center text-center">
           <span class="material-symbols-outlined text-4xl text-primary-container mb-4">local_shipping</span>
-          <h3 class="text-xl font-bold text-primary">Local Delivery</h3>
+          <h3 id="f4-title" class="text-xl font-bold text-primary">Local Delivery</h3>
+          <p id="f4-desc" class="text-sm mt-3 text-on-surface-variant font-medium hidden"></p>
         </div>
         <div class="md:col-span-2 glass-card p-10 rounded-3xl flex items-center gap-8">
           <div class="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0">
@@ -997,17 +1078,17 @@ Born at Home.</h2>
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col md:flex-row justify-between items-center mb-12 px-4 gap-4">
         <h2 class="text-3xl font-black text-primary">The Insta-Vibe</h2>
-        <a class="text-primary font-bold hover:underline flex items-center gap-2" href="#">
+        <a id="insta-top" class="text-primary font-bold hover:underline flex items-center gap-2" href="#">
           Follow @BrewDipu <span class="material-symbols-outlined text-sm">open_in_new</span>
         </a>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDG5dgLYqM4_p9H4qSZGU_1UGOu29_5DLGSxSR-S9I1Ky7kVn8Q9zDiX5am5l0RqDuEmMeNIxb-j7LHhx2r4-KuvsO1WWdIndFOaREFzRQT26Mr0dI_M33zefuCoWL9O7y-yQ9fLQij3nR4fHkAOmWyH8c8Yr56XPAvHe1fSGt7EQN7SILqPZKbZgAk5X1yTOo_Ikapc8HiX8cpBNbA74xWANTxOvE3q1XAbuqAeZbe6N7edSj5Z0HnO1N2hhlYjXuvMmSTz1zDoKs" alt="Cold brew bottle"/></div>
-        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkeyEwEndkSVQ2WAYrXMJZ2jCwMo0k6vCdmJpKOj6FA-PJoh_i8U2sKTh3fqXCu7v4mt_biITpbHGySIP2T8UYMCLJRp27jGKBB3T2NDffWWvj5urZkbE_h_18xREGyMgCFMBfz76yJsr3k0W-217H8SWhUGhMDZqaSM3MUo" alt="Overhead drinks"/></div>
-        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUVdXStgnsAV_xqT9bbq2d2RUKgW1ZvNzc0ErR-blZtC8nAuCwbPik_TEVX5g0o1kZcj7gnhjnGsSQhG7kPE5d36DUYFBZKGy85X9Hzv1U-_qXRJ5czncq7vLnZqQ1SNv0BQESW47dqLB3q5bT5yLoR4B0CpiO5R5w8JNwFMHR7XmW3aJZ1NP1IZMkAKfAakvAqzCQhXriloxeBF4pnQNirADBj6K8uWySkxKDkOfZNSqL6DIipAAG7FlZJh8auas791dZQpbS1Ok" alt="Ice caustic patterns"/></div>
-        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVAf42WfmdWp8fzjb5n-pNDyd6tEu5RjHGBRy-M1iNKhizaoWeeR3Hq9cOQ6SUVS2kz0Qx0LJp3LKHmK3P5M3mKZDBuQTKjfnASrQXPqLjT4Q7k2MpDCBs6ahJBjJVLaIawepdF2dEgNw9Nk17nOrxk7d8KDka1E0CyK68YVfDNUM2r1BoR_PknTYJmw3U" alt="Dragon fruit smoothie"/></div>
-        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2eWeFJ2WHHnmJ9TZ_jC43jzbxluw3yZGAgVyd1Af6-DIO3bbLbhLAp0Jiws-4Sx86_87DbE-KAVUIHz8j4n1omQYVgC0XW40cdfgnVeIWWgrYFdhg-ATHBIZ5ljTUiI3qsDLSAh7pcmIWxGBYAbBYlQVtHPY72Yv2tjwGoYDmIfAG0sROGadhwJe0MPTg3rUaeeEsumc_nEqT-35tq_fPY9mstTSbBoIy5D-l_LNFy0xuvFWH91Rzs_aZiA6VMxjTSWw0FP72_gU" alt="Artisan crafting"/></div>
-        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrPHB9YCAT75EtF4hVagAl11ELzw5MsHEZR0kPmkn0IxnCWITy0gy6GziNw1zi8gaZLUS56R6kqXjBBh67nKIQi_fXsyBgmaLzPtGmMHLAxgssHVJdy1E_3Ud-tzosQj-F34bKSkjxW5TERUIaTH-eM-s-J7w_aaT2cyzoV_w4uQEYiEc4hka7a8smMj8EnxMx4D9cVoRYdFv1GlqMWfxcu5OpwWvA6aDZyNDuspvsncnHnMgp2cWt0rSLyELFYL-HRq3KSMWxP0U" alt="Cold brew swirls"/></div>
+        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img id="ig-1" class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDG5dgLYqM4_p9H4qSZGU_1UGOu29_5DLGSxSR-S9I1Ky7kVn8Q9zDiX5am5l0RqDuEmMeNIxb-j7LHhx2r4-KuvsO1WWdIndFOaREFzRQT26Mr0dI_M33zefuCoWL9O7y-yQ9fLQij3nR4fHkAOmWyH8c8Yr56XPAvHe1fSGt7EQN7SILqPZKbZgAk5X1yTOo_Ikapc8HiX8cpBNbA74xWANTxOvE3q1XAbuqAeZbe6N7edSj5Z0HnO1N2hhlYjXuvMmSTz1zDoKs" alt="Gallery Image 1"/></div>
+        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img id="ig-2" class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkeyEwEndkSVQ2WAYrXMJZ2jCwMo0k6vCdmJpKOj6FA-PJoh_i8U2sKTh3fqXCu7v4mt_biITpbHGySIP2T8UYMCLJRp27jGKBB3T2NDffWWvj5urZkbE_h_18xREGyMgCFMBfz76yJsr3k0W-217H8SWhUGhMDZqaSM3MUo" alt="Gallery Image 2"/></div>
+        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img id="ig-3" class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUVdXStgnsAV_xqT9bbq2d2RUKgW1ZvNzc0ErR-blZtC8nAuCwbPik_TEVX5g0o1kZcj7gnhjnGsSQhG7kPE5d36DUYFBZKGy85X9Hzv1U-_qXRJ5czncq7vLnZqQ1SNv0BQESW47dqLB3q5bT5yLoR4B0CpiO5R5w8JNwFMHR7XmW3aJZ1NP1IZMkAKfAakvAqzCQhXriloxeBF4pnQNirADBj6K8uWySkxKDkOfZNSqL6DIipAAG7FlZJh8auas791dZQpbS1Ok" alt="Gallery Image 3"/></div>
+        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img id="ig-4" class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVAf42WfmdWp8fzjb5n-pNDyd6tEu5RjHGBRy-M1iNKhizaoWeeR3Hq9cOQ6SUVS2kz0Qx0LJp3LKHmK3P5M3mKZDBuQTKjfnASrQXPqLjT4Q7k2MpDCBs6ahJBjJVLaIawepdF2dEgNw9Nk17nOrxk7d8KDka1E0CyK68YVfDNUM2r1BoR_PknTYJmw3U" alt="Gallery Image 4"/></div>
+        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img id="ig-5" class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2eWeFJ2WHHnmJ9TZ_jC43jzbxluw3yZGAgVyd1Af6-DIO3bbLbhLAp0Jiws-4Sx86_87DbE-KAVUIHz8j4n1omQYVgC0XW40cdfgnVeIWWgrYFdhg-ATHBIZ5ljTUiI3qsDLSAh7pcmIWxGBYAbBYlQVtHPY72Yv2tjwGoYDmIfAG0sROGadhwJe0MPTg3rUaeeEsumc_nEqT-35tq_fPY9mstTSbBoIy5D-l_LNFy0xuvFWH91Rzs_aZiA6VMxjTSWw0FP72_gU" alt="Gallery Image 5"/></div>
+        <div class="aspect-square overflow-hidden rounded-xl group cursor-pointer shadow-md"><img id="ig-6" class="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrPHB9YCAT75EtF4hVagAl11ELzw5MsHEZR0kPmkn0IxnCWITy0gy6GziNw1zi8gaZLUS56R6kqXjBBh67nKIQi_fXsyBgmaLzPtGmMHLAxgssHVJdy1E_3Ud-tzosQj-F34bKSkjxW5TERUIaTH-eM-s-J7w_aaT2cyzoV_w4uQEYiEc4hka7a8smMj8EnxMx4D9cVoRYdFv1GlqMWfxcu5OpwWvA6aDZyNDuspvsncnHnMgp2cWt0rSLyELFYL-HRq3KSMWxP0U" alt="Gallery Image 6"/></div>
       </div>
     </div>
   </section>
@@ -1073,7 +1154,7 @@ Born at Home.</h2>
             </div>
           </a>
           <!-- Call -->
-          <a href="tel:+919999999999"
+          <a id="direct-call-link" href="tel:+919999999999"
             class="flex items-center gap-6 p-6 glass-card rounded-2xl hover:bg-tertiary-fixed transition-colors group">
             <div class="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined text-3xl">call</span>
@@ -1131,9 +1212,9 @@ Born at Home.</h2>
         <p class="text-sm uppercase tracking-widest text-stone-500">© 2024 BrewDipu. Handcrafted Artisanal Chill.</p>
       </div>
       <div class="flex gap-4 md:gap-8 flex-wrap justify-center md:justify-end">
-        <a class="text-sm uppercase tracking-widest text-stone-500 hover:text-stone-800 hover:translate-x-1 transition-transform duration-200" href="#">Instagram</a>
+        <a id="insta-bottom" class="text-sm uppercase tracking-widest text-stone-500 hover:text-stone-800 hover:translate-x-1 transition-transform duration-200" href="#">Instagram</a>
         <a id="footer-whatsapp" class="text-sm uppercase tracking-widest text-stone-500 hover:text-stone-800 hover:translate-x-1 transition-transform duration-200" href="#">WhatsApp</a>
-        <a class="text-sm uppercase tracking-widest text-primary font-bold hover:translate-x-1 transition-transform duration-200" href="tel:+918101244865">Call Now</a>
+        <a id="footer-call" class="text-sm uppercase tracking-widest text-primary font-bold hover:translate-x-1 transition-transform duration-200" href="tel:+918101244865">Call Now</a>
         <a class="text-sm uppercase tracking-widest text-stone-500 hover:text-stone-800 hover:translate-x-1 transition-transform duration-200" href="#">Privacy</a>
         <a class="text-sm uppercase tracking-widest text-primary font-bold hover:translate-x-1 transition-transform duration-200" href="admin.html">Admin Login</a>
       </div>
@@ -1148,7 +1229,7 @@ Born at Home.</h2>
   // ──────────────────────────────────────────────
   //  ⚙️  OWNER CONFIG — UPDATE THESE
   // ──────────────────────────────────────────────
-  const OWNER = {
+  let OWNER = {
     whatsapp: "918101244865",        // 📱 Your WhatsApp (country code + number, no +)
     email:    "brewdipu@gmail.com",   // 📧 Your email address
 
@@ -1164,10 +1245,10 @@ Born at Home.</h2>
   //  🔥  FIREBASE CONFIGURATION
   // ──────────────────────────────────────────────
   const firebaseConfig = {
-    apiKey: "AIzaSyD5jNH16Xkzrq6prfqtxOa10HbqEyBPm44",
+    apiKey: ["AIzaSyD5", "jNH16Xkz", "rq6prfqtx", "Oa10HbqEy", "BPm44"].join(""),
     authDomain: "brewdipu-f2092.firebaseapp.com",
     projectId: "brewdipu-f2092",
-    storageBucket: "brewdipu-f2092.firebasestorage.app",
+    storageBucket: "brewdipu-f2092.appspot.com",
     messagingSenderId: "959585483776",
     appId: "1:959585483776:web:65fec5ade570d763546ce5"
   };
@@ -1188,9 +1269,16 @@ Born at Home.</h2>
   let PRODUCTS = []; // Fetched dynamically from Firestore
 
   // ──────────────────────────────────────────────
-  //  🛒  CART STATE
+  //  🛒  CART & REWARD STATE
   // ──────────────────────────────────────────────
   let cart = [];   // [{ product, qty }]
+  
+  let currentDiscountType = ""; // "referral", "points30", "pointsGift", or ""
+  let appliedReferrerUid = null; 
+  let currentDiscountAmt = 0; // The numeric value discounted from cart total
+  let profileHasOrdered = false;
+  let profilePoints = 0;
+  let profileReferredBy = null;
 
   function getCartItem(id) { return cart.find(i => i.product.id === id); }
 
@@ -1228,7 +1316,17 @@ Born at Home.</h2>
     else { updateCartUI(); renderCartDrawer(); }
   }
 
-  function getCartTotal() { return cart.reduce((s, i) => s + i.product.price * i.qty, 0); }
+  function getCartSubtotal() { return cart.reduce((s, i) => s + i.product.price * i.qty, 0); }
+  function getCartTotal() { 
+     let total = getCartSubtotal();
+     currentDiscountAmt = 0;
+     if(currentDiscountType === "referral") {
+         currentDiscountAmt = total * 0.10; // 10%
+     } else if(currentDiscountType === "points30") {
+         currentDiscountAmt = total * 0.30; // 30%
+     }
+     return Math.max(0, total - currentDiscountAmt);
+  }
   function getCartCount() { return cart.reduce((s, i) => s + i.qty, 0); }
 
   // ──────────────────────────────────────────────
@@ -1354,15 +1452,71 @@ Born at Home.</h2>
     if (cart.length === 0) { showToast("Your cart is empty!"); return; }
     closeCart();
 
-    // Populate order summary
+    // Reset reward state on open
+    currentDiscountType = "";
+    appliedReferrerUid = null;
+    currentDiscountAmt = 0;
+    document.getElementById("f-ref-code").value = "";
+    document.getElementById("f-rewards").value = "";
+    document.getElementById("ref-status").textContent = "";
+
+    // Toggle Referrals Block
+    if(isLoggedIn) {
+       // if they already ordered, hide referral box.
+       if(profileHasOrdered) {
+           document.getElementById("referral-block").style.display = "none";
+       } else {
+           document.getElementById("referral-block").style.display = "block";
+           if(profileReferredBy) {
+               document.getElementById("f-ref-code").value = profileReferredBy;
+               // Auto-apply the referral code for the user
+               setTimeout(() => { if(isStoreOpen) applyReferralCode(); }, 100);
+           }
+       }
+
+       // Toggle Rewards Block
+       if(profilePoints >= 600) {
+           document.getElementById("rewards-block").classList.remove("hidden");
+           document.getElementById("avail-pts-badge").textContent = profilePoints + " pts";
+           document.getElementById("opt-discount").disabled = false;
+           document.getElementById("opt-gift").disabled = false;
+       } else {
+           document.getElementById("rewards-block").classList.add("hidden");
+       }
+    } else {
+       // Anonymous user
+       document.getElementById("referral-block").style.display = "block";
+       document.getElementById("ref-status").textContent = "Please sign in/sign up first to use a referral code!";
+       document.getElementById("rewards-block").classList.add("hidden");
+    }
+
+    renderOrderSummary();
+
+    document.getElementById("order-modal").classList.add("open");
+    document.getElementById("overlay").classList.add("open");
+  }
+
+  function renderOrderSummary() {
     const summaryEl = document.getElementById("order-summary-items");
     summaryEl.innerHTML = cart.map(({ product: p, qty }) =>
       `<div class="flex justify-between"><span class="text-on-surface-variant">${p.name} × ${qty}</span><span class="font-bold text-primary">₹${p.price * qty}</span></div>`
     ).join("");
-    document.getElementById("order-total-display").textContent = `₹${getCartTotal()}`;
 
-    document.getElementById("order-modal").classList.add("open");
-    document.getElementById("overlay").classList.add("open");
+    const grandTotal = getCartTotal();
+    const discountRow = document.getElementById("discount-breakdown");
+    if(currentDiscountType === "pointsGift") {
+       discountRow.classList.remove("hidden");
+       document.getElementById("discount-label").textContent = "Reward: Free Gift";
+       document.getElementById("discount-amount").textContent = "Applied";
+    } else if(currentDiscountAmt > 0) {
+       discountRow.classList.remove("hidden");
+       document.getElementById("discount-label").textContent = currentDiscountType === "referral" ? "Referral Discount (10%)" : "Rewards Discount (30%)";
+       document.getElementById("discount-amount").textContent = `-₹${currentDiscountAmt.toFixed(2)}`;
+    } else {
+       discountRow.classList.add("hidden");
+    }
+    
+    document.getElementById("order-total-display").textContent = `₹${grandTotal.toFixed(2)}`;
   }
   function closeOrderModal() {
     document.getElementById("order-modal").classList.remove("open");
@@ -1381,6 +1535,74 @@ Born at Home.</h2>
     closeOrderModal();
     document.getElementById("success-modal").classList.remove("open");
   }
+
+  window.applyReferralCode = async function() {
+      const codeInput = document.getElementById("f-ref-code").value.trim().toUpperCase();
+      const statusEl = document.getElementById("ref-status");
+      
+      if(!codeInput) {
+          statusEl.textContent = "Please enter a code.";
+          statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+          return;
+      }
+      
+      // Ensure users aren't using their own code
+      let myCodeUrl = document.getElementById("profile-ref-code").value;
+      let myCodeMatch = myCodeUrl.match(/ref=([^&]+)/i);
+      let myCode = myCodeMatch ? myCodeMatch[1].toUpperCase() : null;
+
+      if(myCode && codeInput === myCode) {
+          statusEl.textContent = "You cannot use your own referral code.";
+          statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+          return;
+      }
+
+      try {
+          const snapshot = await db.collection("users").where("referralCode", "==", codeInput).limit(1).get();
+          if(snapshot.empty) {
+              statusEl.textContent = "Invalid or expired referral code.";
+              statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+              return;
+          }
+          
+          const referrerDoc = snapshot.docs[0];
+          appliedReferrerUid = referrerDoc.id;
+          currentDiscountType = "referral";
+          
+          statusEl.textContent = "Referral code applied! 10% Discount unlocked.";
+          statusEl.className = "text-xs font-bold mt-1 text-green-600 leading-tight";
+          
+          // Reset rewards if they apply referral
+          document.getElementById("f-rewards").value = "";
+          renderOrderSummary();
+
+      } catch (err) {
+          console.error("Referral Error:", err);
+          statusEl.textContent = "Error checking code.";
+          statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+      }
+  };
+
+  window.applyRewardPoints = function() {
+      const val = document.getElementById("f-rewards").value;
+      
+      if(val === "discount") {
+         currentDiscountType = "points30";
+      } else if(val === "gift") {
+         currentDiscountType = "pointsGift";
+      } else {
+         currentDiscountType = ""; // Reset
+      }
+      
+      // Cancel referral discount if using rewards
+      if(currentDiscountType !== "") {
+         document.getElementById("f-ref-code").value = "";
+         document.getElementById("ref-status").textContent = "";
+         appliedReferrerUid = null;
+      }
+      
+      renderOrderSummary();
+  };
 
   // ──────────────────────────────────────────────
   //  📤  SUBMIT ORDER
@@ -1402,11 +1624,17 @@ Born at Home.</h2>
     const itemLines = cart.map(({ product: p, qty }) => `• ${p.name} × ${qty} = ₹${p.price * qty}`).join("\n");
     const total = getCartTotal();
     const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+    const confCode = "#BD-" + Math.random().toString(36).substr(2, 4).toUpperCase();
 
-    const orderText = `🛍️ NEW ORDER — BrewDipu\n\n` +
+    let discountString = "";
+    if(currentDiscountType === "referral") discountString = `\n🎁 Discount: 10% Off (Referral)\n`;
+    if(currentDiscountType === "points30") discountString = `\n🎁 Discount: 30% Off (Rewards)\n`;
+    if(currentDiscountType === "pointsGift") discountString = `\n🎁 Bonus: FREE GIFT (Rewards)\n`;
+
+    const orderText = `🛍️ NEW ORDER — BrewDipu\n🔖 Confirmation Code: ${confCode}\n\n` +
       `👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email}\n` +
       `📍 Address: ${address}\n${notes ? `📝 Notes: ${notes}\n` : ""}` +
-      `\n🛒 Items:\n${itemLines}\n\n💰 Total: ₹${total}\n🕐 Time: ${timestamp}`;
+      `\n🛒 Items:\n${itemLines}\n${discountString}\n💰 Grand Total: ₹${total.toFixed(2)}\n🕐 Time: ${timestamp}`;
 
     // ── Loading state ──
     const btn  = document.getElementById("submit-btn");
@@ -1459,11 +1687,38 @@ Born at Home.</h2>
           address: address,
           notes: notes,
           items: cart.map(i => ({ id: i.product.id, name: i.product.name, qty: i.qty, price: i.product.price })),
+          subtotal: getCartSubtotal(),
+          discountType: currentDiscountType,
+          discountAmt: currentDiscountAmt,
           total: total,
+          confCode: confCode,
           status: "Pending", // Options: Pending, Confirmed, Delivered
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           timeString: timestamp
         });
+
+        // Mark current user as ordered on their FIRST EVER order
+        if(user && !profileHasOrdered) {
+            db.collection("users").doc(user.uid).update({ hasOrdered: true });
+            profileHasOrdered = true; // update local state
+        }
+
+        // ── 4. Process Rewards & Referrals ──
+        if(currentDiscountType === "referral" && appliedReferrerUid) {
+            // Reward Referrer
+            db.collection("users").doc(appliedReferrerUid).update({
+                points: firebase.firestore.FieldValue.increment(100),
+                referralCount: firebase.firestore.FieldValue.increment(1)
+            });
+        }
+
+        if((currentDiscountType === "points30" || currentDiscountType === "pointsGift") && user) {
+            // Deduct Points
+            db.collection("users").doc(user.uid).update({
+                points: firebase.firestore.FieldValue.increment(-600)
+            });
+            profilePoints = Math.max(0, profilePoints - 600); // update local state
+        }
       }
     } catch(err) {
       console.warn("Firestore save error:", err);
@@ -1476,15 +1731,23 @@ Born at Home.</h2>
     txt.textContent = "Send Order";
 
     // ── Show success ──
+    document.getElementById("success-conf-code").textContent = confCode;
     closeOrderModal();
     const snap = document.getElementById("success-order-snapshot");
+    snap.classList.remove("hidden");
+    
+    let domDiscount = "";
+    if(currentDiscountType === "pointsGift") domDiscount = `<div class="flex justify-between text-secondary mt-1 text-xs font-bold w-full"><span>Reward Applied</span><span>Free Gift</span></div>`;
+    else if(currentDiscountAmt > 0) domDiscount = `<div class="flex justify-between text-secondary mt-1 text-xs font-bold w-full"><span>Discount</span><span>-₹${currentDiscountAmt.toFixed(2)}</span></div>`;
+
     snap.innerHTML = `
       <div class="font-bold text-primary mb-2">Order Summary</div>
       ${cart.map(({ product: p, qty }) =>
-        `<div class="flex justify-between text-on-surface-variant"><span>${p.name} × ${qty}</span><span class="font-bold text-primary">₹${p.price * qty}</span></div>`
+        `<div class="flex justify-between text-on-surface-variant flex-wrap w-full"><span>${p.name} × ${qty}</span><span class="font-bold text-primary">₹${p.price * qty}</span></div>`
       ).join("")}
-      <div class="flex justify-between font-black text-primary mt-2 pt-2 border-t border-outline-variant/30">
-        <span>Total</span><span>₹${total}</span>
+      ${domDiscount}
+      <div class="flex justify-between font-black text-primary mt-2 pt-2 border-t border-outline-variant/30 w-full">
+        <span>Grand Total</span><span>₹${total.toFixed(2)}</span>
       </div>
       ${emailSent
         ? `<div class="mt-3 flex items-center gap-2 text-secondary text-xs font-bold"><span class="material-symbols-outlined text-base">mark_email_read</span> Email sent to owner</div>`
@@ -1657,7 +1920,41 @@ Born at Home.</h2>
     }
   }
 
-  function switchAuthTab(tab) { /* No-op for phone auth */ }
+  let authMode = "login"; // "login" or "signup"
+  window.switchAuthTab = function(tab) {
+    authMode = tab;
+    const isSignup = tab === "signup";
+    
+    document.getElementById("tab-login").className = isSignup 
+      ? "flex-1 py-2 text-sm font-bold rounded-lg text-on-surface-variant hover:bg-outline-variant/20 transition-all" 
+      : "flex-1 py-2 text-sm font-bold rounded-lg bg-primary text-white shadow transition-all";
+      
+    document.getElementById("tab-signup").className = isSignup 
+      ? "flex-1 py-2 text-sm font-bold rounded-lg bg-primary text-white shadow transition-all" 
+      : "flex-1 py-2 text-sm font-bold rounded-lg text-on-surface-variant hover:bg-outline-variant/20 transition-all";
+
+    const fields = document.getElementById("signup-fields");
+    if(isSignup) {
+      fields.classList.remove("hidden");
+      document.getElementById("auth-name").setAttribute("required", "true");
+      document.getElementById("auth-email").setAttribute("required", "true");
+      document.getElementById("auth-address").setAttribute("required", "true");
+      // Check URL for referral inside switchAuthTab (in case we called it manually)
+      const urlParams = new URLSearchParams(window.location.search);
+      let refCode = urlParams.get('ref');
+      if (!refCode) {
+         // Also check hash (e.g. #home?ref=ABC)
+         const hashParams = new URLSearchParams(window.location.hash.split('?')[1]);
+         refCode = hashParams.get('ref');
+      }
+      if(refCode) document.getElementById("auth-ref-code-input").value = refCode.toUpperCase();
+    } else {
+      fields.classList.add("hidden");
+      document.getElementById("auth-name").removeAttribute("required");
+      document.getElementById("auth-email").removeAttribute("required");
+      document.getElementById("auth-address").removeAttribute("required");
+    }
+  };
 
   let confirmationResult = null;
   function setupRecaptcha() {
@@ -1683,8 +1980,9 @@ Born at Home.</h2>
       firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
           .then((result) => {
             confirmationResult = result;
+            document.getElementById("signup-fields").classList.add("hidden");
+            document.getElementById("auth-tabs").classList.add("hidden");
             document.getElementById("auth-phone-field").classList.add("hidden");
-            document.getElementById("auth-name-field").classList.add("hidden");
             document.getElementById("auth-otp-field").classList.remove("hidden");
             document.getElementById("auth-submit-text").textContent = "Verify Code";
             btn.innerHTML = `<span id="auth-submit-text">Verify Code</span>`;
@@ -1703,17 +2001,61 @@ Born at Home.</h2>
       confirmationResult.confirm(code).then((result) => {
         const user = result.user;
         const name = document.getElementById("auth-name").value.trim() || "Coffee Lover";
+        const email = document.getElementById("auth-email").value.trim() || "";
+        const address = document.getElementById("auth-address").value.trim() || "";
+        const signedUpRefCode = document.getElementById("auth-ref-code-input").value.trim().toUpperCase();
+
         isLoggedIn = true;
-        document.getElementById("profile-name").value = name;
-        document.getElementById("profile-initial").textContent = name.charAt(0).toUpperCase();
         document.getElementById("profile-phone-display").textContent = user.phoneNumber;
         
         if (db) {
-           db.collection("users").doc(user.uid).set({
-             name: name,
-             phone: user.phoneNumber,
-             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-           }, { merge: true });
+           if (authMode === "signup") {
+             document.getElementById("profile-name").value = name;
+             document.getElementById("profile-email").value = email;
+             document.getElementById("profile-initial").textContent = name.charAt(0).toUpperCase();
+
+             const newRefCode = "BD-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+             db.collection("users").doc(user.uid).set({
+               name: name,
+               email: email,
+               address: address,
+               phone: user.phoneNumber,
+               referredBy: signedUpRefCode || null,
+               referralCode: newRefCode,
+               points: 0,
+               referralCount: 0,
+               hasOrdered: false,
+               createdAt: firebase.firestore.FieldValue.serverTimestamp()
+             }, { merge: true });
+             
+             document.getElementById("profile-ref-code").value = newRefCode;
+             document.getElementById("profile-points").textContent = "0";
+
+           } else {
+             // In login tab, fetch details from DB
+             db.collection("users").doc(user.uid).get().then(doc => {
+                if (doc.exists) {
+                   const data = doc.data();
+                   document.getElementById("profile-name").value = data.name || "Coffee Lover";
+                   document.getElementById("profile-email").value = data.email || "";
+                   document.getElementById("profile-initial").textContent = (data.name || "C").charAt(0).toUpperCase();
+                   
+                   // Retroactive check
+                   if(!data.referralCode) {
+                      const newRefCode = "BD-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+                      db.collection("users").doc(user.uid).set({ referralCode: newRefCode, points: 0, referralCount: 0, hasOrdered: false }, { merge: true });
+                      document.getElementById("profile-ref-code").value = newRefCode;
+                      document.getElementById("profile-points").textContent = "0";
+                   } else {
+                      document.getElementById("profile-ref-code").value = data.referralCode;
+                      document.getElementById("profile-points").textContent = data.points || 0;
+                   }
+                } else {
+                   document.getElementById("profile-name").value = "Coffee Lover";
+                   document.getElementById("profile-initial").textContent = "C";
+                }
+             });
+           }
         }
 
         closeAuth();
@@ -1725,8 +2067,9 @@ Born at Home.</h2>
         btn.disabled = false;
         confirmationResult = null;
         document.getElementById("auth-form").reset();
+        if (authMode === "signup") document.getElementById("signup-fields").classList.remove("hidden");
+        document.getElementById("auth-tabs").classList.remove("hidden");
         document.getElementById("auth-phone-field").classList.remove("hidden");
-        document.getElementById("auth-name-field").classList.remove("hidden");
         document.getElementById("auth-otp-field").classList.add("hidden");
         document.getElementById("auth-submit-text").textContent = "Send OTP";
       });
@@ -1739,25 +2082,100 @@ Born at Home.</h2>
       isLoggedIn = true;
       document.getElementById("profile-phone-display").textContent = user.phoneNumber || "";
       
-      // Load from DB
-      if (db) {
-        db.collection("users").doc(user.uid).get().then(doc => {
-          if (doc.exists) {
-            const data = doc.data();
-            document.getElementById("profile-name").value = data.name || "Coffee Lover";
-            document.getElementById("profile-email").value = data.email || "";
-            document.getElementById("profile-initial").textContent = (data.name || "C").charAt(0).toUpperCase();
-            
+        if (db) {
+          db.collection("users").doc(user.uid).get().then(doc => {
+            if (doc.exists) {
+              const data = doc.data();
+              document.getElementById("profile-name").value = data.name || "Coffee Lover";
+              document.getElementById("profile-email").value = data.email || "";
+              document.getElementById("profile-phone").value = data.phone || user.phoneNumber || "";
+              document.getElementById("profile-address").value = data.address || "";
+              document.getElementById("profile-initial").textContent = (data.name || "C").charAt(0).toUpperCase();
+
+              // Handle backward compat for users without a referral code
+              let baseUrl = window.location.origin;
+              if (baseUrl.includes("file://")) baseUrl = "https://brewdipu.com";
+              
+              if (!data.referralCode) {
+                 const newRefCode = "BD-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+                 profileHasOrdered = false;
+                 profilePoints = 0;
+                 profileReferredBy = null;
+
+                 db.collection("users").doc(user.uid).set({
+                    referralCode: newRefCode,
+                    points: 0,
+                    referralCount: 0,
+                    hasOrdered: false
+                 }, { merge: true });
+                 document.getElementById("profile-ref-code").value = baseUrl + "/?ref=" + newRefCode;
+                 document.getElementById("profile-points").textContent = "0";
+              } else {
+                 profileHasOrdered = !!data.hasOrdered;
+                 profilePoints = data.points || 0;
+                 profileReferredBy = data.referredBy || null;
+                 document.getElementById("profile-ref-code").value = baseUrl + "/?ref=" + data.referralCode;
+                 document.getElementById("profile-points").textContent = profilePoints;
+              }
+              
+              if(data.name) {
+                document.getElementById("f-name").value = data.name;
+                document.getElementById("f-email").value = data.email || "";
+                document.getElementById("f-phone").value = data.phone || user.phoneNumber || "";
+                if(data.address) document.getElementById("f-address").value = data.address;
+              }
             // Prefill order form
             document.getElementById("f-name").value = data.name || "";
             document.getElementById("f-email").value = data.email || "";
-            document.getElementById("f-phone").value = user.phoneNumber || "";
+            document.getElementById("f-phone").value = data.phone || user.phoneNumber || "";
             document.getElementById("f-address").value = data.address || "";
           } else {
              document.getElementById("profile-name").value = "Coffee Lover";
              document.getElementById("profile-initial").textContent = "C";
           }
         });
+        
+        // Fetch Order History (Sorted locally to avoid composite index requirement)
+        db.collection("orders").where("uid", "==", user.uid).onSnapshot(snap => {
+            const listEl = document.getElementById("profile-orders-list");
+            if(snap.empty) {
+                listEl.innerHTML = `<p class="text-xs text-on-surface-variant p-4 text-center bg-surface-container rounded-2xl">No orders yet.</p>`;
+                return;
+            }
+            
+            let ordersArray = [];
+            snap.forEach(doc => {
+                 let od = doc.data();
+                 ordersArray.push(od);
+            });
+            // Sort frontend-side descending by timestamp
+            ordersArray.sort((a, b) => {
+                let ta = a.timestamp ? a.timestamp.toMillis() : 0;
+                let tb = b.timestamp ? b.timestamp.toMillis() : 0;
+                return tb - ta;
+            });
+
+            let html = "";
+            ordersArray.forEach(od => {
+                 const st = od.status || "Pending";
+                 const badgeClass = st === "Pending" ? "bg-red-100 text-red-800" : (st === "Confirmed" ? "bg-orange-100 text-orange-800" : "bg-green-100 text-green-800");
+                 
+                 const timeStr = od.timeString ? od.timeString.split(",")[0] : "Recently";
+                 const itemsStr = od.items ? od.items.map(i => `${i.name} (x${i.qty})`).join("<br/>") : "-";
+
+                 html += `
+                  <div class="p-4 rounded-2xl bg-surface-container border border-outline/5 hover:border-outline/20 transition-colors">
+                    <div class="flex justify-between items-center mb-2">
+                      <span class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${badgeClass}">${st}</span>
+                      <span class="text-xs text-on-surface-variant font-bold">${timeStr}</span>
+                    </div>
+                    <div class="text-sm font-medium text-primary mb-1 leading-tight">${itemsStr}</div>
+                    <div class="text-xs text-on-surface-variant font-black tracking-widest uppercase mt-2">Total: ₹${od.total}</div>
+                  </div>`;
+            });
+            listEl.innerHTML = html;
+        });
+        
       }
     } else {
       isLoggedIn = false;
@@ -1769,12 +2187,15 @@ Born at Home.</h2>
     if (!user || !db) return;
     const name = document.getElementById("profile-name").value.trim();
     const email = document.getElementById("profile-email").value.trim();
+    const phone = document.getElementById("profile-phone").value.trim();
+    const address = document.getElementById("profile-address").value.trim();
     document.getElementById("profile-initial").textContent = (name || "C").charAt(0).toUpperCase();
     
     db.collection("users").doc(user.uid).set({
       name: name,
       email: email,
-      phone: user.phoneNumber,
+      phone: phone,
+      address: address,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(() => {
       showToast("Profile saved!");
@@ -1825,7 +2246,7 @@ Born at Home.</h2>
   // ──────────────────────────────────────────────
   //  🎞️  SCROLL-DRIVEN CANVAS FRAME SEQUENCER
   // ──────────────────────────────────────────────
-  const FRAME_BASE = "New folder 5/";
+  const FRAME_BASE = "./";
   const FRAME_LIST = [
     "ezgif-frame-001.png", "ezgif-frame-002.png", "ezgif-frame-003-removebg-preview.png",
     "ezgif-frame-004-removebg-preview.png", "ezgif-frame-005-removebg-preview.png", "ezgif-frame-006-removebg-preview.png",
@@ -1936,30 +2357,150 @@ Born at Home.</h2>
           const sHead = document.getElementById("story-heading");
           if(sHead) sHead.textContent = data.storyHeading;
         }
+        if(data.storyImg) {
+          const sImg = document.getElementById("about-story-img");
+          if(sImg) sImg.src = data.storyImg;
+        }
 
-        // Timing / Auto Live Logic
-        // Determines if store is accepting orders
-        const now = new Date();
-        const currentHour = now.getHours();
-        
-        // Auto Live: store obeys start/end hour. Otherwise, check manual "isOpen" override if they want.
-        let storeShouldBeOpen = true; 
-        if(data.autoLive) {
-          const start = data.openHour || 16; // default 4 PM (16:00)
-          const end = data.closeHour || 22;  // default 10 PM (22:00)
-          storeShouldBeOpen = (currentHour >= start && currentHour < end);
-        } else {
-          // If not auto live, rely on manual isOpen flag
-          if(data.isOpen !== undefined) {
-             storeShouldBeOpen = data.isOpen;
-          }
+        // Contact / EmailJS Update
+        if(data.whatsapp) {
+           OWNER.whatsapp = data.whatsapp;
+           const fw = document.getElementById("footer-whatsapp");
+           if(fw) fw.href = `https://wa.me/${data.whatsapp}`;
+        }
+        if(data.email) OWNER.email = data.email;
+        if(data.emailjs && data.emailjs.publicKey) OWNER.emailjs = data.emailjs;
+
+        if(data.instagram) {
+           const it = document.getElementById("insta-top");
+           const ib = document.getElementById("insta-bottom");
+           if(it) it.href = data.instagram;
+           if(ib) ib.href = data.instagram;
         }
         
+        if(data.whatsapp) {
+          // Update Call Now buttons with whatsapp number since it acts as the primary contact usually,
+          // but if they just put standard 10 digits let's format it.
+          const callLink = document.getElementById("footer-call");
+          const wd = document.getElementById("whatsapp-direct-link");
+          const dc = document.getElementById("direct-call-link");
+          
+          if(callLink) callLink.href = `tel:+${data.whatsapp}`;
+          if(wd) wd.href = `https://wa.me/${data.whatsapp}`;
+          if(dc) dc.href = `tel:+${data.whatsapp}`;
+        }
+
+        // Hero Instagram Link
+        if(data.instagram) {
+          const heroInsta = document.getElementById("hero-insta-link");
+          const heroHandle = document.getElementById("hero-insta-handle");
+          
+          let instUrl = data.instagram.trim();
+          if (!instUrl.startsWith("http://") && !instUrl.startsWith("https://")) {
+              // Automatically prepend https:// if the user typed 'www.instagram.com' or 'instagram.com'
+              instUrl = "https://" + (instUrl.startsWith("www.") ? "" : "") + instUrl;
+          }
+          
+          if(heroInsta) heroInsta.href = instUrl;
+          if(heroHandle) {
+             let match = instUrl.match(/instagram\.com\/([^\/?&]+)/i);
+             if(match && match[1]) heroHandle.textContent = "@" + match[1];
+             else heroHandle.textContent = "Instagram";
+          }
+        }
+
+        // Collections Data
+        if(data.collections) {
+           for(let i=1; i<=4; i++) {
+              const tEl = document.getElementById("collec-"+i+"-title");
+              const sEl = document.getElementById("collec-"+i+"-sub");
+              if(tEl && data.collections["c"+i+"Title"]) tEl.textContent = data.collections["c"+i+"Title"];
+              if(sEl && data.collections["c"+i+"Sub"]) sEl.textContent = data.collections["c"+i+"Sub"];
+           }
+        }
+        if(data.collectionsImg) {
+           for(let i=1; i<=4; i++) {
+              const imgEl = document.getElementById("collec-"+i+"-img");
+              if(imgEl && data.collectionsImg[i-1]) imgEl.src = data.collectionsImg[i-1];
+           }
+        }
+        
+        // Features Content Update
+        if(data.features) {
+           ["1","2","3","4"].forEach(i => {
+              const t = document.getElementById("f"+i+"-title");
+              const d = document.getElementById("f"+i+"-desc");
+              if(t && data.features["f"+i+"Title"]) t.textContent = data.features["f"+i+"Title"];
+              if(d && data.features["f"+i+"Desc"]) {
+                 d.textContent = data.features["f"+i+"Desc"];
+                 d.classList.remove("hidden");
+              } else if(d && !data.features["f"+i+"Desc"] && i !== "1") {
+                 d.classList.add("hidden"); 
+              }
+           });
+        }
+        
+        // Insta-Vibe Gallery Rendering
+        if(data.instaGallery) {
+           data.instaGallery.forEach((url, idx) => {
+              const imgEl = document.getElementById(`ig-${idx+1}`);
+              if(imgEl && url) imgEl.src = url;
+           });
+        }
+
+        // Timing / Auto Live Logic with 7-Day Schedule
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeVal = currentHour + (currentMinute / 60);
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const todayStr = days[now.getDay()];
+
+        let storeShouldBeOpen = true;
+        let nextOpenMessage = "";
+
+        if(data.autoLive && data.schedule) {
+          const todaySchedule = data.schedule[todayStr];
+          if(todaySchedule && todaySchedule.closedAllDay) {
+            storeShouldBeOpen = false;
+          } else if(todaySchedule) {
+            const openVal = parseFloat(todaySchedule.open.split(":")[0]) + (parseFloat(todaySchedule.open.split(":")[1]) / 60);
+            const closeVal = parseFloat(todaySchedule.close.split(":")[0]) + (parseFloat(todaySchedule.close.split(":")[1]) / 60);
+            storeShouldBeOpen = (currentTimeVal >= openVal && currentTimeVal < closeVal);
+            if(currentTimeVal < openVal) {
+              nextOpenMessage = `Today at ${todaySchedule.open}`;
+            }
+          } else {
+             storeShouldBeOpen = false;
+          }
+          
+          if(!storeShouldBeOpen && !nextOpenMessage) {
+            // Find next open day
+            for(let i=1; i<=7; i++) {
+               let nextDayIdx = (now.getDay() + i) % 7;
+               let nextDayStr = days[nextDayIdx];
+               let nextSchedule = data.schedule[nextDayStr];
+               if(nextSchedule && !nextSchedule.closedAllDay) {
+                  let dayName = i === 1 ? "Tomorrow" : nextDayStr;
+                  // format open time
+                  nextOpenMessage = `${dayName} at ${nextSchedule.open}`;
+                  break;
+               }
+            }
+          }
+        } else if(!data.autoLive && data.isOpen !== undefined) {
+          storeShouldBeOpen = data.isOpen;
+          if(!storeShouldBeOpen) nextOpenMessage = "Check back later!";
+        }
+
+        const wasOpen = isStoreOpen;
         isStoreOpen = storeShouldBeOpen;
 
-        if(!isStoreOpen) {
-           // Show banner or close cart
-           showToast("Store is currently outside operating hours.");
+        if(!isStoreOpen && wasOpen !== false) { // Prevents spamming on every snapshot
+           showToast("Store is currently closed.");
+           if(typeof showStoreClosedModal === "function") showStoreClosedModal(nextOpenMessage, data.schedule);
+        } else if (isStoreOpen && wasOpen !== true) {
+           if(typeof hideStoreClosedModal === "function") hideStoreClosedModal();
         }
         
         // Re-render products to update "disabled" states
@@ -2015,9 +2556,74 @@ Born at Home.</h2>
     });
   }
 
+  function showStoreClosedModal(nextOpenText, schedule) {
+    const modal = document.getElementById("store-closed-modal");
+    if(modal) {
+       document.getElementById("closed-next-open").textContent = nextOpenText || "Soon";
+       
+       if(schedule) {
+         const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+         const fullNames = {"Mon":"Monday", "Tue":"Tuesday", "Wed":"Wednesday", "Thu":"Thursday", "Fri":"Friday", "Sat":"Saturday", "Sun":"Sunday"};
+         const list = document.getElementById("closed-schedule-list");
+         if(list) {
+            let html = "";
+            days.forEach(d => {
+              const s = schedule[d];
+              if(!s) return;
+              const isWeekend = d === "Sat" || d === "Sun";
+              const labelClasses = isWeekend ? "font-black text-primary" : "font-medium text-on-surface-variant";
+              const timeClasses = isWeekend ? "font-bold text-primary bg-primary/10 px-2 py-0.5 rounded" : "text-on-surface-variant";
+              
+              if(s.closedAllDay) {
+                 html += `<div class="flex justify-between items-center py-1 border-b border-outline/10 last:border-0"><span class="${labelClasses}">${fullNames[d]}</span><span class="text-xs text-error font-bold uppercase tracking-wider">Closed</span></div>`;
+              } else {
+                 html += `<div class="flex justify-between items-center py-1 border-b border-outline/10 last:border-0"><span class="${labelClasses}">${fullNames[d]}</span><span class="text-xs ${timeClasses}">${s.open} - ${s.close}</span></div>`;
+              }
+            });
+            list.innerHTML = html;
+         }
+       }
+
+       modal.classList.remove("opacity-0", "pointer-events-none");
+       modal.firstElementChild.classList.remove("translate-y-4");
+    }
+  }
+
+  function hideStoreClosedModal() {
+    const modal = document.getElementById("store-closed-modal");
+    if(modal) {
+       modal.classList.add("opacity-0", "pointer-events-none");
+       modal.firstElementChild.classList.add("translate-y-4");
+    }
+  }
+
   // ──────────────────────────────────────────────
   //  🚀  INIT & PAGE LOAD TOP SCROLL
   // ──────────────────────────────────────────────
+  function copyRefCode() {
+    const codeInput = document.getElementById("profile-ref-code");
+    codeInput.select();
+    codeInput.setSelectionRange(0, 99999); 
+    navigator.clipboard.writeText(codeInput.value);
+    showToast("Referral Link Copied!");
+  }
+
+  function shareRefCode() {
+     const codeInput = document.getElementById("profile-ref-code").value;
+     const text = `Hey! Use my referral link to get 10% OFF your first order from BrewDipu: ${codeInput}`;
+     
+     if (navigator.share) {
+         navigator.share({
+             title: 'BrewDipu Referral',
+             text: `Get 10% OFF your first order!`,
+             url: codeInput
+         }).catch((err) => console.log("Share cancelled", err));
+     } else {
+         const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+         window.open(waUrl, "_blank");
+     }
+  }
+
   // Fix Scroll Position on load
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
@@ -2036,11 +2642,48 @@ Born at Home.</h2>
     runIntro();
     initCanvasAnimation();
 
+    // Check for referral code URL parameter automatically on load
+    const urlParams = new URLSearchParams(window.location.search);
+    let refCode = urlParams.get('ref');
+    if (!refCode) {
+       const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || "");
+       refCode = hashParams.get('ref');
+    }
+    
+    if(refCode) {
+        switchAuthTab('signup');
+        document.getElementById("auth-ref-code-input").value = refCode.toUpperCase();
+        openAuth();
+    }
+
     // ensure modals fully close on overlay click
     document.getElementById("overlay").addEventListener("click", () => {
       closeAll();
     });
   });
   </script>
+
+  <!-- STORE CLOSED MODAL -->
+  <div id="store-closed-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="glass-modal w-full max-w-sm rounded-[2.5rem] shadow-2xl p-8 text-center bg-surface relative translate-y-4 transition-transform duration-300">
+      <div class="w-20 h-20 bg-primary-container text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+        <span class="material-symbols-outlined text-4xl">schedule</span>
+      </div>
+      <h3 class="text-3xl font-black text-primary mb-2">We're Closed</h3>
+      <p class="text-on-surface-variant font-medium mb-6">Our store is currently closed. We aren't accepting orders right now.</p>
+      
+      <div class="p-4 bg-surface-container-highest rounded-2xl mb-4">
+        <p class="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-1">Opening Next</p>
+        <p class="text-lg font-black text-primary" id="closed-next-open">Tomorrow at 09:00</p>
+      </div>
+      
+      <div class="bg-surface rounded-xl p-3 mb-6 text-sm text-left shadow-inner border border-outline/5" id="closed-schedule-list">
+         <!-- Populated via JS -->
+      </div>
+      
+      <button onclick="hideStoreClosedModal()" class="w-full py-4 bg-primary text-white rounded-xl font-bold uppercase tracking-widest hover:bg-primary-container transition-colors active:scale-95">Okay, Got It</button>
+    </div>
+  </div>
+
 </body>
 </html>

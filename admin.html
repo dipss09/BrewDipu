@@ -88,6 +88,7 @@
         <button onclick="switchTab('orders')" id="tab-btn-orders" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 bg-primary text-white transition-colors"><span class="material-symbols-outlined">receipt_long</span> Orders</button>
         <button onclick="switchTab('products')" id="tab-btn-products" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">inventory_2</span> Products</button>
         <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">reviews</span> Reviews</button>
+        <button onclick="switchTab('users')" id="tab-btn-users" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">group</span> Users & Referrals</button>
         <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">settings</span> Store Settings</button>
       </nav>
       <div class="p-4 border-t border-outline/20">
@@ -119,6 +120,36 @@
               <tbody id="orders-tbody" class="divide-y divide-outline/10">
                 <!-- Populated by JS -->
                 <tr><td colspan="6" class="p-8 text-center text-on-surface-variant">Loading orders...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- USERS TAB -->
+      <section id="tab-users" class="tab-pane hidden">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+              <h2 class="text-3xl font-black text-primary">Users & Referrals</h2>
+              <p class="text-sm text-on-surface-variant mt-1">Manage user reward points and view referral tracking.</p>
+          </div>
+        </div>
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-surface-container-highest text-on-surface-variant text-xs uppercase tracking-widest">
+                <tr>
+                  <th class="p-4 rounded-tl-2xl">User</th>
+                  <th class="p-4">Contact</th>
+                  <th class="p-4">Code</th>
+                  <th class="p-4">Referrals</th>
+                  <th class="p-4">Points</th>
+                  <th class="p-4 rounded-tr-2xl">Action</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody" class="divide-y divide-outline/10">
+                <!-- Populated by JS -->
+                <tr><td colspan="6" class="p-8 text-center text-on-surface-variant">Loading users...</td></tr>
               </tbody>
             </table>
           </div>
@@ -167,8 +198,9 @@
               <div>
                 <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Product Image Upload</label>
                 <input type="file" id="prod-img" accept="image/*" class="w-full bg-white rounded-xl p-3 border border-outline/20">
+                <input type="text" id="prod-img-newurl" placeholder="Or paste image URL" class="w-full bg-white rounded-xl p-3 border border-outline/20 mt-2 text-sm">
                 <input type="hidden" id="prod-img-url">
-                <div id="upload-progress" class="text-xs text-secondary mt-1 hidden">Uploading...</div>
+                <div id="upload-progress" class="text-xs text-secondary mt-1 hidden font-bold animate-pulse">Uploading...</div>
               </div>
               <div>
                 <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Description</label>
@@ -232,15 +264,105 @@
             </label>
           </div>
 
-          <!-- Operating Hours -->
-          <div class="grid grid-cols-2 gap-4">
+          <!-- 7-Day Operating Hours -->
+          <div class="bg-surface rounded-2xl border border-outline/10 p-6 space-y-4">
             <div>
-              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Opening Time</label>
-              <input type="time" id="set-open" required class="w-full bg-white rounded-xl p-4 border border-outline/20">
+              <h4 class="font-bold text-primary">7-Day Schedule</h4>
+              <p class="text-xs text-on-surface-variant mb-2">Set opening and closing times for each day.</p>
             </div>
-            <div>
-              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Closing Time</label>
-              <input type="time" id="set-close" required class="w-full bg-white rounded-xl p-4 border border-outline/20">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Monday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Monday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="mon-closed" onchange="toggleDayInputs('Mon')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="mon-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="mon-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
+              <!-- Tuesday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Tuesday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="tue-closed" onchange="toggleDayInputs('Tue')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="tue-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="tue-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
+              <!-- Wednesday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Wednesday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="wed-closed" onchange="toggleDayInputs('Wed')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="wed-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="wed-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
+              <!-- Thursday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Thursday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="thu-closed" onchange="toggleDayInputs('Thu')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="thu-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="thu-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
+              <!-- Friday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Friday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="fri-closed" onchange="toggleDayInputs('Fri')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="fri-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="fri-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
+              <!-- Saturday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Saturday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="sat-closed" onchange="toggleDayInputs('Sat')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="sat-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="sat-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
+              <!-- Sunday -->
+              <div class="p-3 border border-outline/10 rounded-xl bg-white flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-primary text-sm">Sunday</span>
+                  <label class="flex items-center gap-2 text-xs text-on-surface-variant">
+                    <input type="checkbox" id="sun-closed" onchange="toggleDayInputs('Sun')"> Closed
+                  </label>
+                </div>
+                <div class="flex gap-2">
+                  <input type="time" id="sun-open" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                  <input type="time" id="sun-close" class="flex-1 bg-surface rounded-lg p-2 border border-outline/20 text-xs text-center border-none focus:outline-none">
+                </div>
+              </div>
             </div>
           </div>
 
@@ -262,11 +384,179 @@
             <textarea id="set-story-heading" rows="2" class="w-full bg-white rounded-xl p-4 border border-outline/20"></textarea>
           </div>
 
+          <!-- Story Image -->
+          <div>
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Story Image Upload</label>
+            <input type="file" id="set-story-file" accept="image/*" class="w-full bg-white rounded-xl p-3 border border-outline/20">
+            <p class="text-xs text-on-surface-variant mt-1.5">Selecting a new image will overwrite the existing one automatically.</p>
+          </div>
+
           <!-- About Text -->
           <div>
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">About Us text</label>
             <textarea id="set-about" rows="5" class="w-full bg-white rounded-xl p-4 border border-outline/20"></textarea>
             <p class="text-xs text-on-surface-variant mt-1.5">HTML tags like &lt;p&gt; and &lt;br&gt; are allowed.</p>
+          </div>
+
+          <hr class="border-outline/20">
+
+          <!-- Contact Information -->
+          <div class="space-y-4">
+            <div>
+               <h4 class="font-bold text-primary">Contact Information</h4>
+               <p class="text-xs text-on-surface-variant">Update the primary contact methods displayed on the site.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">WhatsApp Number</label>
+                  <input type="text" id="set-whatsapp" class="w-full bg-white rounded-xl p-4 border border-outline/20" placeholder="918101244865">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Email Address</label>
+                  <input type="email" id="set-email" class="w-full bg-white rounded-xl p-4 border border-outline/20" placeholder="brewdipu@gmail.com">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Instagram URL</label>
+                  <input type="url" id="set-instagram" class="w-full bg-white rounded-xl p-4 border border-outline/20" placeholder="https://instagram.com/brewdipu">
+               </div>
+            </div>
+          </div>
+
+          <hr class="border-outline/20">
+
+          <!-- EmailJS Configuration -->
+          <div class="space-y-4">
+            <div>
+               <h4 class="font-bold text-primary">EmailJS Configuration</h4>
+               <p class="text-xs text-on-surface-variant">Setup your automated email notifications.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Public Key</label>
+                  <input type="text" id="set-emailjs-public" class="w-full bg-white rounded-xl p-4 border border-outline/20">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Service ID</label>
+                  <input type="text" id="set-emailjs-service" class="w-full bg-white rounded-xl p-4 border border-outline/20">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Template ID</label>
+                  <input type="text" id="set-emailjs-template" class="w-full bg-white rounded-xl p-4 border border-outline/20">
+               </div>
+            </div>
+          </div>
+
+          <hr class="border-outline/20">
+
+          <!-- Insta-Vibe Gallery Images -->
+          <div class="space-y-4">
+            <div>
+               <h4 class="font-bold text-primary">Insta-Vibe Gallery Images</h4>
+               <p class="text-xs text-on-surface-variant">Upload 6 images for the Instagram grid section.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 border border-outline/20 p-4 rounded-xl bg-white">
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Image 1</label>
+                  <input type="file" id="set-ig-1" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Image 2</label>
+                  <input type="file" id="set-ig-2" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Image 3</label>
+                  <input type="file" id="set-ig-3" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Image 4</label>
+                  <input type="file" id="set-ig-4" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Image 5</label>
+                  <input type="file" id="set-ig-5" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Image 6</label>
+                  <input type="file" id="set-ig-6" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+            </div>
+            <p id="settings-upload-progress" class="text-secondary text-sm font-bold hidden">Compressing and Saving Images...</p>
+          </div>
+          
+          <hr class="border-outline/20">
+
+          <!-- Curated Selection (The Collection) -->
+          <div class="space-y-4 text-sm">
+            <div>
+               <h4 class="font-bold text-primary">Curated Selection (The Collection)</h4>
+               <p class="text-xs text-on-surface-variant mb-4">Edit the 4 collection categories shown on the homepage.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <!-- Collection 1 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Collection 1</label>
+                 <input type="text" id="set-collec-1-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Cold Coffee">
+                 <input type="text" id="set-collec-1-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Brewed for 18 hours">
+                 <input type="file" id="set-collec-1-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <!-- Collection 2 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Collection 2</label>
+                 <input type="text" id="set-collec-2-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Mojito">
+                 <input type="text" id="set-collec-2-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Minty Freshness">
+                 <input type="file" id="set-collec-2-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <!-- Collection 3 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Collection 3</label>
+                 <input type="text" id="set-collec-3-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Juices">
+                 <input type="text" id="set-collec-3-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Purely Organic">
+                 <input type="file" id="set-collec-3-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+               <!-- Collection 4 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Collection 4</label>
+                 <input type="text" id="set-collec-4-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Keychains">
+                 <input type="text" id="set-collec-4-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Handmade with Love">
+                 <input type="file" id="set-collec-4-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+               </div>
+            </div>
+          </div>
+          
+          <hr class="border-outline/20">
+
+          <!-- Why BrewDipu Feature Content -->
+          <div class="space-y-4">
+            <div>
+               <h4 class="font-bold text-primary">"Why BrewDipu?" Features</h4>
+               <p class="text-xs text-on-surface-variant mb-4">Edit the 4 main value propositions on the homepage.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <!-- Feature 1 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Feature 1 (Homemade Pureness)</label>
+                 <input type="text" id="set-f1-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Homemade Pureness">
+                 <textarea id="set-f1-desc" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Zero preservatives..."></textarea>
+               </div>
+               <!-- Feature 2 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Feature 2 (Always Fresh)</label>
+                 <input type="text" id="set-f2-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Always Fresh">
+                 <textarea id="set-f2-desc" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Small batches..."></textarea>
+               </div>
+               <!-- Feature 3 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Feature 3 (Affordable Luxury)</label>
+                 <input type="text" id="set-f3-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Affordable Luxury">
+                 <textarea id="set-f3-desc" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Premium ingredients..."></textarea>
+               </div>
+               <!-- Feature 4 -->
+               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
+                 <label class="text-xs text-primary font-bold block mb-1">Feature 4 (Local Delivery)</label>
+                 <input type="text" id="set-f4-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Local Delivery">
+                 <textarea id="set-f4-desc" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Fast, secure..."></textarea>
+               </div>
+            </div>
           </div>
 
           <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">

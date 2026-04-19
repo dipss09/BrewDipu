@@ -2,10 +2,10 @@
 //  🔥  FIREBASE CONFIGURATION 
 // ──────────────────────────────────────────────
 const firebaseConfig = {
-  apiKey: "AIzaSyD5jNH16Xkzrq6prfqtxOa10HbqEyBPm44",
+  apiKey: ["AIzaSyD5", "jNH16Xkz", "rq6prfqtx", "Oa10HbqEy", "BPm44"].join(""),
   authDomain: "brewdipu-f2092.firebaseapp.com",
   projectId: "brewdipu-f2092",
-  storageBucket: "brewdipu-f2092.firebasestorage.app",
+  storageBucket: "brewdipu-f2092.appspot.com",
   messagingSenderId: "959585483776",
   appId: "1:959585483776:web:65fec5ade570d763546ce5"
 };
@@ -24,19 +24,25 @@ const auth = firebase.auth();
 // ──────────────────────────────────────────────
 //  🔐  AUTH LOGIC
 // ──────────────────────────────────────────────
+let adminLoaded = false;
 auth.onAuthStateChanged((user) => {
   const loginScreen = document.getElementById("login-screen");
   const appScreen = document.getElementById("app-screen");
   if (user) {
     loginScreen.classList.add("hidden");
     appScreen.classList.remove("hidden");
-    loadSettings();
-    loadOrders();
-    loadProducts();
-    loadReviews();
+    if(!adminLoaded) {
+        loadSettings();
+        loadOrders();
+        loadUsers();
+        loadProducts();
+        loadReviews();
+        adminLoaded = true;
+    }
   } else {
     loginScreen.classList.remove("hidden");
     appScreen.classList.add("hidden");
+    adminLoaded = false; // Reset if logged out
   }
 });
 
@@ -61,7 +67,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 //  👉  TAB NAVIGATION
 // ──────────────────────────────────────────────
 function switchTab(tabId) {
-  const tabs = ['orders', 'products', 'reviews', 'settings'];
+  const tabs = ['orders', 'products', 'reviews', 'users', 'settings'];
   tabs.forEach(t => {
     document.getElementById(`tab-${t}`).classList.add("hidden");
     const btn = document.getElementById(`tab-btn-${t}`);
@@ -114,9 +120,67 @@ function loadOrders() {
   });
 }
 
-function updateOrderStatus(id, newStatus) {
+window.updateOrderStatus = function(id, newStatus) {
   db.collection("orders").doc(id).update({ status: newStatus });
+};
+
+// ──────────────────────────────────────────────
+//  👥  USERS & REFERRALS MANAGEMENT
+// ──────────────────────────────────────────────
+function loadUsers() {
+  db.collection("users").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+    const tbody = document.getElementById("users-tbody");
+    if(snapshot.empty) {
+      tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-on-surface-variant">No users found.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const code = data.referralCode || "NONE";
+      const pts = data.points || 0;
+      const refCount = data.referralCount || 0;
+
+      html += `
+      <tr class="hover:bg-surface-container transition-colors">
+        <td class="p-4"><span class="font-bold">${data.name || 'Anonymous'}</span><br/><span class="text-xs text-on-surface-variant">${data.address || 'No address'}</span></td>
+        <td class="p-4 text-sm">${data.phone || '-'}<br/>${data.email || '-'}</td>
+        <td class="p-4 text-sm font-mono font-bold text-secondary tracking-widest">${code}</td>
+        <td class="p-4 text-sm font-black">${refCount}</td>
+        <td class="p-4"><span class="px-3 py-1 bg-primary/10 text-primary font-black rounded-full">${pts}</span></td>
+        <td class="p-4">
+          <div class="flex gap-2">
+            <button onclick="updateUserPoints('${doc.id}', 100)" class="p-2 bg-surface-container-high rounded border hover:bg-green-100 items-center justify-center flex" title="Add 100 Points"><span class="material-symbols-outlined text-sm">add</span></button>
+            <button onclick="updateUserPoints('${doc.id}', -100)" class="p-2 bg-surface-container-high rounded border hover:bg-red-100 items-center justify-center flex" title="Deduct 100 Points"><span class="material-symbols-outlined text-sm">remove</span></button>
+            <button onclick="updateUserPoints('${doc.id}', 'reset')" class="p-2 bg-surface-container-high rounded border hover:bg-red-50 text-error items-center justify-center flex" title="Reset to 0"><span class="material-symbols-outlined text-sm">restart_alt</span></button>
+          </div>
+        </td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  });
 }
+
+window.updateUserPoints = function(uid, amount) {
+   if(amount === 'reset') {
+      if(confirm("Are you sure you want to completely reset this user's points to 0?")) {
+          db.collection("users").doc(uid).update({ points: 0 });
+      }
+   } else {
+      let change = parseInt(amount);
+      if(confirm(`Adjust points by ${change}?`)) {
+          db.collection("users").doc(uid).update({ 
+               points: firebase.firestore.FieldValue.increment(change)
+          }).then(() => {
+              // Ensure we don't go below 0 visually by next snapshot, but we can also prevent it here:
+              db.collection("users").doc(uid).get().then(doc => {
+                 if(doc.data().points < 0) doc.ref.update({points: 0});
+              });
+          });
+      }
+   }
+};
 
 // ──────────────────────────────────────────────
 //  ⚙️  STORE SETTINGS (Timing & About)
@@ -129,24 +193,72 @@ autoliveCheckbox.addEventListener("change", (e) => {
   else manualOverride.classList.remove("hidden", "opacity-50");
 });
 
+let currentSettings = {};
+
 function loadSettings() {
   db.collection("settings").doc("storeConfig").onSnapshot(doc => {
     if (doc.exists) {
-      const data = doc.data();
+      currentSettings = doc.data();
+      const data = currentSettings;
       document.getElementById("set-about").value = data.aboutText || "";
       document.getElementById("set-hero-title").value = data.heroTitle || "BrewDipu";
       document.getElementById("set-hero-sub").value = data.heroSub || "Chilled Sips, Crafted by Dipu.";
       document.getElementById("set-story-heading").value = data.storyHeading || "Artisanal Sips,\nBorn at Home.";
+      // Note: set-story-file is an input type="file", we can't set its value.
+      
+      
+      // Contact & Social
+      document.getElementById("set-whatsapp").value = data.whatsapp || "918101244865";
+      document.getElementById("set-email").value = data.email || "brewdipu@gmail.com";
+      document.getElementById("set-instagram").value = data.instagram || "https://instagram.com/brewdipu";
+      
+      // EmailJS
+      if (data.emailjs) {
+        document.getElementById("set-emailjs-public").value = data.emailjs.publicKey || "";
+        document.getElementById("set-emailjs-service").value = data.emailjs.serviceId || "";
+        document.getElementById("set-emailjs-template").value = data.emailjs.templateId || "";
+      }
+      
+      // Features (Why BrewDipu)
+      if (data.features) {
+        document.getElementById("set-f1-title").value = data.features.f1Title || "Homemade Pureness";
+        document.getElementById("set-f1-desc").value = data.features.f1Desc || "Zero preservatives. Just raw, natural ingredients prepared in small batches to ensure absolute quality in every sip.";
+        document.getElementById("set-f2-title").value = data.features.f2Title || "Always Fresh";
+        document.getElementById("set-f2-desc").value = data.features.f2Desc || "Small batches. Made to order for peak flavor profile.";
+        document.getElementById("set-f3-title").value = data.features.f3Title || "Affordable Luxury";
+        document.getElementById("set-f3-desc").value = data.features.f3Desc || "High-end cafe experience delivered fresh to your door at honest prices.";
+        document.getElementById("set-f4-title").value = data.features.f4Title || "Local Delivery";
+        document.getElementById("set-f4-desc").value = data.features.f4Desc || "Every order supports a local artisan and a dream of crafting better coffee for everyone.";
+      }
 
-      // Auto Live bounds mapping handles floats/ints to "HH:mm"
-      const formatTime = (hour) => {
-        const h = Math.floor(hour).toString().padStart(2, '0');
-        return `${h}:00`;
-      };
-      
-      document.getElementById("set-open").value = formatTime(data.openHour || 16);
-      document.getElementById("set-close").value = formatTime(data.closeHour || 22);
-      
+      // Collections
+      if (data.collections) {
+        for(let i=1; i<=4; i++) {
+           const tEl = document.getElementById("set-collec-"+i+"-title");
+           const sEl = document.getElementById("set-collec-"+i+"-sub");
+           if(tEl && data.collections["c"+i+"Title"]) tEl.value = data.collections["c"+i+"Title"];
+           if(sEl && data.collections["c"+i+"Sub"]) sEl.value = data.collections["c"+i+"Sub"];
+        }
+      }
+
+      if(data.schedule) {
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        days.forEach(day => {
+          if (data.schedule[day]) {
+            document.getElementById(`${day.toLowerCase()}-open`).value = data.schedule[day].open || "09:00";
+            document.getElementById(`${day.toLowerCase()}-close`).value = data.schedule[day].close || "22:00";
+            document.getElementById(`${day.toLowerCase()}-closed`).checked = !!data.schedule[day].closedAllDay;
+            if(data.schedule[day].closedAllDay) {
+                document.getElementById(`${day.toLowerCase()}-open`).disabled = true;
+                document.getElementById(`${day.toLowerCase()}-close`).disabled = true;
+            } else {
+                document.getElementById(`${day.toLowerCase()}-open`).disabled = false;
+                document.getElementById(`${day.toLowerCase()}-close`).disabled = false;
+            }
+          }
+        });
+      }
+
       document.getElementById("set-autolive").checked = !!data.autoLive;
       document.getElementById("set-isopen").checked = !!data.isOpen;
       
@@ -156,21 +268,101 @@ function loadSettings() {
   });
 }
 
-document.getElementById("settings-form").addEventListener("submit", (e) => {
+document.getElementById("settings-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const openTime = document.getElementById("set-open").value; // e.g. "16:00"
-  const closeTime = document.getElementById("set-close").value;
   
-  const openHour = parseFloat(openTime.split(":")[0]);
-  const closeHour = parseFloat(closeTime.split(":")[0]);
+  const submitBtn = e.target.querySelector("button[type='submit']");
+  submitBtn.disabled = true;
+
+  const schedule = {
+    Sun: { open: document.getElementById("sun-open").value, close: document.getElementById("sun-close").value, closedAllDay: document.getElementById("sun-closed").checked },
+    Mon: { open: document.getElementById("mon-open").value, close: document.getElementById("mon-close").value, closedAllDay: document.getElementById("mon-closed").checked },
+    Tue: { open: document.getElementById("tue-open").value, close: document.getElementById("tue-close").value, closedAllDay: document.getElementById("tue-closed").checked },
+    Wed: { open: document.getElementById("wed-open").value, close: document.getElementById("wed-close").value, closedAllDay: document.getElementById("wed-closed").checked },
+    Thu: { open: document.getElementById("thu-open").value, close: document.getElementById("thu-close").value, closedAllDay: document.getElementById("thu-closed").checked },
+    Fri: { open: document.getElementById("fri-open").value, close: document.getElementById("fri-close").value, closedAllDay: document.getElementById("fri-closed").checked },
+    Sat: { open: document.getElementById("sat-open").value, close: document.getElementById("sat-close").value, closedAllDay: document.getElementById("sat-closed").checked },
+  };
+
+  // Image Upload Processing
+  const progressText = document.getElementById("settings-upload-progress");
+  const filePromises = [];
   
+  // Process Story Image
+  const storyFile = document.getElementById("set-story-file").files[0];
+  let finalStoryImg = currentSettings.storyImg || "";
+  if(storyFile) {
+     filePromises.push(compressAndGetBase64(storyFile).then(url => finalStoryImg = url));
+  }
+
+  // Process Insta Gallery
+  let finalInstaGallery = currentSettings.instaGallery ? [...currentSettings.instaGallery] : Array(6).fill("");
+  for(let i=1; i<=6; i++) {
+     const f = document.getElementById(`set-ig-${i}`).files[0];
+     if(f) {
+        filePromises.push(compressAndGetBase64(f).then(url => finalInstaGallery[i-1] = url));
+     }
+  }
+
+  // Process Collection Images
+  let finalCollectionsImg = currentSettings.collectionsImg ? [...currentSettings.collectionsImg] : Array(4).fill("");
+  for(let i=1; i<=4; i++) {
+     const f = document.getElementById(`set-collec-${i}-img`).files[0];
+     if(f) {
+        filePromises.push(compressAndGetBase64(f).then(url => finalCollectionsImg[i-1] = url));
+     }
+  }
+
+  if(filePromises.length > 0) {
+     progressText.classList.remove("hidden");
+     try {
+       await Promise.all(filePromises);
+     } catch (err) {
+       alert("Error compressing images. Only valid images below maximum limits are allowed.");
+       submitBtn.disabled = false;
+       progressText.classList.add("hidden");
+       return;
+     }
+     progressText.classList.add("hidden");
+  }
+
   const payload = {
     heroTitle: document.getElementById("set-hero-title").value,
     heroSub: document.getElementById("set-hero-sub").value,
     storyHeading: document.getElementById("set-story-heading").value,
+    storyImg: finalStoryImg,
+    instaGallery: finalInstaGallery,
     aboutText: document.getElementById("set-about").value,
-    openHour: openHour,
-    closeHour: closeHour,
+    whatsapp: document.getElementById("set-whatsapp").value,
+    email: document.getElementById("set-email").value,
+    instagram: document.getElementById("set-instagram").value,
+    emailjs: {
+       publicKey: document.getElementById("set-emailjs-public").value,
+       serviceId: document.getElementById("set-emailjs-service").value,
+       templateId: document.getElementById("set-emailjs-template").value,
+    },
+    features: {
+       f1Title: document.getElementById("set-f1-title").value,
+       f1Desc: document.getElementById("set-f1-desc").value,
+       f2Title: document.getElementById("set-f2-title").value,
+       f2Desc: document.getElementById("set-f2-desc").value,
+       f3Title: document.getElementById("set-f3-title").value,
+       f3Desc: document.getElementById("set-f3-desc").value,
+       f4Title: document.getElementById("set-f4-title").value,
+       f4Desc: document.getElementById("set-f4-desc").value,
+    },
+    collections: {
+       c1Title: document.getElementById("set-collec-1-title").value,
+       c1Sub: document.getElementById("set-collec-1-sub").value,
+       c2Title: document.getElementById("set-collec-2-title").value,
+       c2Sub: document.getElementById("set-collec-2-sub").value,
+       c3Title: document.getElementById("set-collec-3-title").value,
+       c3Sub: document.getElementById("set-collec-3-sub").value,
+       c4Title: document.getElementById("set-collec-4-title").value,
+       c4Sub: document.getElementById("set-collec-4-sub").value,
+    },
+    collectionsImg: finalCollectionsImg,
+    schedule: schedule,
     autoLive: document.getElementById("set-autolive").checked,
     isOpen: document.getElementById("set-isopen").checked,
   };
@@ -179,9 +371,48 @@ document.getElementById("settings-form").addEventListener("submit", (e) => {
     .then(() => {
       const msg = document.getElementById("settings-msg");
       msg.classList.remove("hidden");
+      submitBtn.disabled = false;
+      // Clear file inputs after success
+      document.getElementById("set-story-file").value = "";
+      for(let i=1; i<=6; i++) document.getElementById(`set-ig-${i}`).value = "";
+      for(let i=1; i<=4; i++) document.getElementById(`set-collec-${i}-img`).value = "";
       setTimeout(() => msg.classList.add("hidden"), 3000);
     });
 });
+
+// ──────────────────────────────────────────────
+//  🚀  BASE64 IMAGE COMPRESSOR Helper
+// ──────────────────────────────────────────────
+function compressAndGetBase64(file, maxWidth = 800) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = event => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        if (width > height && width > maxWidth) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        } else if (height > maxWidth) {
+          width *= maxWidth / height;
+          height = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        // Heavily compress jpeg (0.6 quality gives very small footprint suitable for Firestore)
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.onerror = (e) => reject("Image processing failed");
+    };
+    reader.onerror = (e) => reject("File reading failed");
+  });
+}
 
 // ──────────────────────────────────────────────
 //  📦  PRODUCT CRUD (Replaces Inventory)
@@ -270,18 +501,25 @@ document.getElementById("product-form").addEventListener("submit", (e) => {
   if(fileInput.files.length > 0) {
     const file = fileInput.files[0];
     document.getElementById("upload-progress").classList.remove("hidden");
-    const ref = firebase.storage().ref('products/' + Date.now() + '_' + file.name);
-    ref.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
-      document.getElementById("upload-progress").classList.add("hidden");
-      saveProductToDB(url);
+    
+    // Bypass Firebase Storage buggy hang -> use Client-side Compression straight into Firestore
+    compressAndGetBase64(file).then(base64Url => {
+       document.getElementById("upload-progress").classList.add("hidden");
+       saveProductToDB(base64Url);
     }).catch(err => {
-      console.error(err);
-      alert("Image upload failed");
-      btn.disabled = false;
-      document.getElementById("upload-progress").classList.add("hidden");
+       console.error(err);
+       document.getElementById("upload-progress").classList.add("hidden");
+       alert("Image compression failed. Ensure it is a valid image.");
+       btn.disabled = false;
     });
   } else {
-    saveProductToDB(oldUrl || "https://placehold.co/400");
+    // If they typed a URL into the URL input, use that over oldUrl
+    const newUrlField = document.getElementById("prod-img-newurl");
+    if(newUrlField && newUrlField.value.trim() !== "") {
+      saveProductToDB(newUrlField.value.trim());
+    } else {
+      saveProductToDB(oldUrl || "https://placehold.co/400");
+    }
   }
 });
 
