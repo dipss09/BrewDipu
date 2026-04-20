@@ -2409,7 +2409,7 @@
         await firebase.auth().signInWithEmailAndPassword(email, password);
         // onAuthStateChanged will fire and load the profile
         closeAuth();
-        showToast('Logged in successfully!');
+        showToast('Log In Successful! 🎉');
         document.getElementById('login-form').reset();
       } catch (err) {
         console.error('Login error:', err);
@@ -2524,9 +2524,12 @@
               document.getElementById("profile-address").value = data.address || "";
               document.getElementById("profile-initial").textContent = (data.name || "C").charAt(0).toUpperCase();
 
-              // Handle backward compat for users without a referral code
-              let baseUrl = window.location.origin;
-              if (baseUrl.includes("file://")) baseUrl = "https://brewdipu.com";
+              // Build referral base URL — use full path so GitHub Pages subdirs work
+              // e.g. https://user.github.io/BrewDipu/ → link is /?ref=... relative to that dir,
+              //      not relative to the root which would 404.
+              let rawBase = window.location.href.split('?')[0].split('#')[0];
+              rawBase = rawBase.replace(/\/index\.html$/, '').replace(/\/$/, '');
+              let baseUrl = (window.location.protocol === 'file:') ? 'https://brewdipu.web.app' : rawBase;
 
               if (!data.referralCode) {
                 const newRefCode = "BD-" + Math.random().toString(36).substr(2, 5).toUpperCase();
