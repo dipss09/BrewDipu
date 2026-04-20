@@ -1026,8 +1026,7 @@
         <span class="material-symbols-outlined text-5xl text-secondary">check_circle</span>
       </div>
       <h3 class="text-3xl font-black text-primary mb-3">Order Sent! 🎉</h3>
-      <p class="text-on-surface-variant leading-relaxed mb-2">Your order details have been securely sent. We will
-        contact you shortly to confirm delivery!</p>
+      <p class="text-on-surface-variant leading-relaxed mb-2">Thank you for your order! We will contact you and it will be delivered within <strong class="text-primary">30 minutes</strong>. 🚀</p>
 
       <div class="my-6 p-4 bg-tertiary-fixed-dim/20 border border-tertiary-fixed rounded-2xl">
         <p class="text-xs font-bold uppercase tracking-widest text-on-tertiary-fixed-variant mb-1">Your Confirmation
@@ -1095,31 +1094,16 @@
 
         <!-- ── SIGNUP FORM ── -->
         <form id="signup-form" onsubmit="handleSignup(event)" class="space-y-3 hidden">
+
+          <!-- 1. Full Name -->
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Name *</label>
             <input id="auth-name" required type="text" placeholder="Your full name"
               class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
               style="border:none;" />
           </div>
-          <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Email Address *</label>
-            <input id="auth-email" required type="email" placeholder="you@example.com"
-              autocomplete="email"
-              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
-              style="border:none;" />
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Phone Number *</label>
-            <input id="auth-phone" required type="tel" placeholder="+91 9876543210"
-              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
-              style="border:none;" />
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Address *</label>
-            <input id="auth-address" required type="text" placeholder="House/Flat No, Area, City"
-              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
-              style="border:none;" />
-          </div>
+
+          <!-- 2. Username -->
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Username *</label>
             <input id="auth-username" required type="text" placeholder="choose_a_username"
@@ -1129,8 +1113,10 @@
               style="border:none;" />
             <p class="text-[10px] text-on-surface-variant">3–20 chars · letters, numbers &amp; underscores · used to log in</p>
           </div>
+
+          <!-- 3. Create Your Password -->
           <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Password *</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Create Your Password *</label>
             <div class="relative">
               <input id="auth-password" required type="password" placeholder="Min 8 characters"
                 autocomplete="new-password" minlength="8"
@@ -1140,6 +1126,33 @@
                 class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-base hover:text-primary transition-colors">visibility</button>
             </div>
           </div>
+
+          <!-- 4. Phone Number -->
+          <div class="space-y-1">
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Phone Number *</label>
+            <input id="auth-phone" required type="tel" placeholder="+91 9876543210"
+              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
+              style="border:none;" />
+          </div>
+
+          <!-- 5. Email Address -->
+          <div class="space-y-1">
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Email Address *</label>
+            <input id="auth-email" required type="email" placeholder="you@example.com"
+              autocomplete="email"
+              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
+              style="border:none;" />
+          </div>
+
+          <!-- 6. Full Address -->
+          <div class="space-y-1">
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Full Address *</label>
+            <input id="auth-address" required type="text" placeholder="House/Flat No, Area, City"
+              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
+              style="border:none;" />
+          </div>
+
+          <!-- 7. Referral Code (optional) -->
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-secondary">Referral Code (Optional)</label>
             <input id="auth-ref-code-input" type="text" placeholder="e.g. BD-ABCD1"
@@ -1147,6 +1160,7 @@
               style="border:none;" />
             <p class="text-[10px] text-on-surface-variant text-right">Gets you 10% off your first order!</p>
           </div>
+
           <p id="signup-error" class="text-xs font-bold text-error hidden"></p>
           <button type="submit" id="signup-btn"
             class="w-full py-4 mt-1 bg-gradient-to-br from-primary to-primary-container text-white rounded-2xl font-black uppercase tracking-widest text-sm hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">
@@ -1924,6 +1938,9 @@
 
       renderOrderSummary();
 
+      // Auto-fill form with the logged-in user's stored details
+      prefillCheckoutForm();
+
       document.getElementById("order-modal").classList.add("open");
       document.getElementById("overlay").classList.add("open");
     }
@@ -2186,6 +2203,8 @@
     `;
       document.getElementById("success-modal").classList.add("open");
       document.getElementById("overlay").classList.add("open");
+      // Prominent thank-you popup (5 s)
+      showToast('Thank you for your order! We will contact you and it will be delivered within 30 minutes. 🚀', 5000);
     }
 
     // ──────────────────────────────────────────────
@@ -2249,11 +2268,27 @@
     //  🍞  TOAST
     // ──────────────────────────────────────────────
     let toastTimer;
-    function showToast(msg) {
+    function showToast(msg, duration) {
       clearTimeout(toastTimer);
       document.getElementById("toast-msg").textContent = msg;
       document.getElementById("toast").classList.add("show");
-      toastTimer = setTimeout(() => document.getElementById("toast").classList.remove("show"), 2800);
+      toastTimer = setTimeout(() => document.getElementById("toast").classList.remove("show"), duration || 2800);
+    }
+
+    // ──────────────────────────────────────────────
+    //  📝  AUTO-FILL CHECKOUT FORM (for logged-in users)
+    // ──────────────────────────────────────────────
+    function prefillCheckoutForm() {
+      const user = firebase.auth().currentUser;
+      if (!user || !db) return;
+      db.collection('users').doc(user.uid).get().then(doc => {
+        if (!doc.exists) return;
+        const d = doc.data();
+        if (d.name)    document.getElementById('f-name').value    = d.name;
+        if (d.email)   document.getElementById('f-email').value   = d.email;
+        if (d.phone)   document.getElementById('f-phone').value   = d.phone;
+        if (d.address) document.getElementById('f-address').value = d.address;
+      });
     }
 
     // ──────────────────────────────────────────────
@@ -2603,16 +2638,10 @@
                 document.getElementById("profile-points").textContent = profilePoints;
               }
 
-              if (data.name) {
-                document.getElementById("f-name").value = data.name;
-                document.getElementById("f-email").value = data.email || "";
-                document.getElementById("f-phone").value = data.phone || user.phoneNumber || "";
-                if (data.address) document.getElementById("f-address").value = data.address;
-              }
-              // Prefill order form
-              document.getElementById("f-name").value = data.name || "";
-              document.getElementById("f-email").value = data.email || "";
-              document.getElementById("f-phone").value = data.phone || user.phoneNumber || "";
+              // One clean prefill of checkout form — no duplicates
+              document.getElementById("f-name").value    = data.name    || "";
+              document.getElementById("f-email").value   = data.email   || "";
+              document.getElementById("f-phone").value   = data.phone   || user.phoneNumber || "";
               document.getElementById("f-address").value = data.address || "";
             } else {
               document.getElementById("profile-name").value = "Coffee Lover";
