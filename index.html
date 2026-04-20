@@ -1069,10 +1069,10 @@
         <!-- ── LOGIN FORM ── -->
         <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
           <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Username *</label>
-            <input id="login-username" required type="text" placeholder="your_username"
-              autocomplete="username"
-              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium font-mono"
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Username or Email *</label>
+            <input id="login-username" required type="text" placeholder="your_username or you@email.com"
+              autocomplete="username email"
+              class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
               style="border:none;" />
           </div>
           <div class="space-y-1">
@@ -1657,6 +1657,14 @@
       whatsapp: "918101244865",        // 📱 Your WhatsApp (country code + number, no +)
       email: "brewdipu@gmail.com",   // 📧 Your email address
 
+      // ── WhatsApp Cloud API (optional) ──────────────────────────────────
+      // Leave both blank to use the free wa.me link (opens WhatsApp app).
+      // Fill both to enable SILENT order sending via Meta WhatsApp Cloud API
+      // (1000 free conversations/month). Get credentials from:
+      // https://developers.facebook.com/docs/whatsapp/cloud-api/get-started
+      wapiToken: "",          // Permanent / System User access token
+      wapiPhoneNumberId: "",  // WhatsApp Phone Number ID (not the phone number itself)
+
       // EmailJS credentials — sign up free at emailjs.com
       emailjs: {
         publicKey: "YOUR_EMAILJS_PUBLIC_KEY",    // From EmailJS dashboard → Account
@@ -2069,8 +2077,7 @@
       txt.textContent = "Sending…";
 
       // ── 1. WhatsApp ──
-      const waUrl = `https://wa.me/${OWNER.whatsapp}?text=${encodeURIComponent(orderText)}`;
-      window.open(waUrl, "_blank");
+      await sendOrderToWhatsApp(orderText);
 
       // ── 2. EmailJS ──
       let emailSent = false;
@@ -2384,7 +2391,43 @@
       }
     };
 
-    // ── LOGIN: username → lookup email → Firebase signIn ──
+    // ─────────────────────────────────────────────────────────────
+    //  📤  SEND ORDER TO WHATSAPP  (silent API or wa.me fallback)
+    // ─────────────────────────────────────────────────────────────
+    async function sendOrderToWhatsApp(orderText) {
+      // Try WhatsApp Cloud API (silent — no app opens) if credentials set
+      if (OWNER.wapiToken && OWNER.wapiPhoneNumberId) {
+        try {
+          const res = await fetch(
+            `https://graph.facebook.com/v19.0/${OWNER.wapiPhoneNumberId}/messages`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OWNER.wapiToken}`
+              },
+              body: JSON.stringify({
+                messaging_product: 'whatsapp',
+                to: OWNER.whatsapp,
+                type: 'text',
+                text: { body: orderText }
+              })
+            }
+          );
+          if (res.ok) {
+            showToast('Order sent to BrewDipu via WhatsApp ✅');
+            return; // Silent send succeeded — no app open needed
+          }
+        } catch (apiErr) {
+          console.warn('WA Cloud API failed, falling back to wa.me:', apiErr);
+        }
+      }
+      // Fallback: open wa.me link (works without an API key)
+      const waUrl = `https://wa.me/${OWNER.whatsapp}?text=${encodeURIComponent(orderText)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    // ── LOGIN: username OR email → Firebase signIn ──
     window.handleLogin = async function(e) {
       e.preventDefault();
       const errEl = document.getElementById('login-error');
@@ -2394,20 +2437,24 @@
       btn.disabled = true;
       txt.textContent = 'Signing in…';
 
-      const username = document.getElementById('login-username').value.trim().toLowerCase();
+      const input    = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
+      const isEmail  = input.includes('@'); // detect email vs username
 
       try {
-        // 1. Look up stored email by username
-        const usernameDoc = await db.collection('usernames').doc(username).get();
-        if (!usernameDoc.exists) {
-          throw { code: 'auth/user-not-found', message: 'Username not found.' };
+        let email = input;
+        if (!isEmail) {
+          // Username path: look up registered email from Firestore
+          const usernameDoc = await db.collection('usernames').doc(input.toLowerCase()).get();
+          if (!usernameDoc.exists) {
+            throw { code: 'auth/user-not-found', message: 'Username not found. Try logging in with your email.' };
+          }
+          email = usernameDoc.data().email;
         }
-        const { email } = usernameDoc.data();
 
-        // 2. Sign in with email + password (Firebase handles hashing)
+        // Sign in with email + password (Firebase handles secure hashing)
         await firebase.auth().signInWithEmailAndPassword(email, password);
-        // onAuthStateChanged will fire and load the profile
+        // onAuthStateChanged fires and populates the profile drawer
         closeAuth();
         showToast('Log In Successful! 🎉');
         document.getElementById('login-form').reset();
@@ -2467,7 +2514,10 @@
         await db.collection('usernames').doc(username).set({ email: email, uid: user.uid });
 
         // 4. Generate referral code
-        const newRefCode = 'BD-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+        // Referral code derived from the user's first name for a personal feel
+        // e.g. "Dipu Das" → "BD-DIPU4K"
+        const nameSlug = name.split(' ')[0].toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 5);
+        const newRefCode = 'BD-' + nameSlug + Math.random().toString(36).substr(2, 2).toUpperCase();
 
         // 5. Store full user profile in Firestore
         await db.collection('users').doc(user.uid).set({
