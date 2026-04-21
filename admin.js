@@ -642,7 +642,7 @@ function loadOffers() {
   db.collection("promoCodes").onSnapshot(snapshot => {
     const grid = document.getElementById("offers-grid");
     if(snapshot.empty) {
-      grid.innerHTML = `<div class="p-8 text-center text-on-surface-variant col-span-full">No active offers.</div>`;
+      grid.innerHTML = `<div class="p-8 text-center text-on-surface-variant col-span-full">No active offers. Click "Add Reward / Code" to create one.</div>`;
       return;
     }
 
@@ -650,25 +650,29 @@ function loadOffers() {
     snapshot.forEach(doc => {
       const data = doc.data();
       const code = doc.id;
-      const typeLabel = data.type === 'freeGift' ? '🎁 Free Gift' : '💎 20% Discount';
+      const isGift = data.type === 'freeGift';
+      const typeLabel = isGift ? '🎁 Free Gift' : '💎 20% Discount';
+      const typeBg = isGift ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200';
       const uses = data.uses || 0;
-      const limit = data.limit || '∞';
+      const limit = data.limit;
+      const remaining = limit ? limit - uses : null;
+      const isExpired = limit && uses >= limit;
       
       html += `
-      <div class="glass-card p-6 rounded-2xl flex flex-col justify-between bg-white relative group">
-        <h4 class="font-mono text-2xl font-black text-secondary tracking-widest mb-2">${code}</h4>
-        <div class="text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full inline-block self-start mb-4">${typeLabel}</div>
-        
-        <div class="flex justify-between items-center text-sm mb-6 border-t border-b border-outline/10 py-3">
-           <span class="text-on-surface-variant">Uses: <span class="font-bold text-primary">${uses}</span></span>
-           <span class="text-on-surface-variant">Total Limit: <span class="font-bold text-primary">${limit}</span></span>
+      <div class="glass-card p-5 rounded-2xl flex flex-col bg-white border ${isExpired ? 'border-red-200 opacity-60' : 'border-outline/10'} relative">
+        ${isExpired ? '<div class="absolute top-3 right-3 text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-widest">Expired</div>' : ''}
+        <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border self-start mb-3 ${typeBg}">${typeLabel}</span>
+        <h4 class="font-mono text-lg font-black text-secondary tracking-widest mb-1">${code}</h4>
+        ${data.desc ? `<p class="text-xs text-on-surface-variant mb-3 leading-relaxed">${data.desc}</p>` : ''}
+        ${data.img ? `<img src="${data.img}" class="w-full h-28 object-cover rounded-xl mb-3 border border-outline/10">` : ''}
+        <div class="flex justify-between text-xs text-on-surface-variant border-t border-outline/10 pt-3 mb-3">
+          <span>Uses: <strong class="text-primary">${uses}</strong></span>
+          <span>Limit: <strong class="text-primary">${limit || '∞'}</strong></span>
+          ${remaining !== null ? `<span>Left: <strong class="${remaining <= 3 ? 'text-red-600' : 'text-primary'}">${remaining}</strong></span>` : ''}
         </div>
-        
-        ${data.img ? `<img src="${data.img}" class="w-full h-32 object-cover rounded-xl mb-4 border border-outline/10">` : ''}
-        
-        <div class="mt-auto flex gap-2">
-          <button onclick="editOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100 hidden group-hover:block">Edit</button>
-          <button onclick="deleteOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors border border-red-100 hidden group-hover:block">Delete</button>
+        <div class="flex gap-2 mt-auto">
+          <button onclick="editOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100">✏️ Edit</button>
+          <button onclick="deleteOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors border border-red-100">🗑️ Delete</button>
         </div>
       </div>`;
     });

@@ -849,7 +849,7 @@
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#about">About</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
-          href="#order-section">Order</a>
+          href="#products">Order</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300 flex items-center gap-1"
           href="#rewards"><span class="material-symbols-outlined text-sm" style="font-size:1rem">redeem</span>Redeem Reward</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
@@ -1373,42 +1373,21 @@
   <!-- ══════════════ PRODUCT SECTION ══════════════ -->
   <section class="py-24 bg-surface-container-low" id="products">
     <div class="max-w-7xl mx-auto px-8">
-      <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+      <!-- REDEEM REWARD CTA -->
+      <div class="mb-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <span class="text-secondary font-bold tracking-widest uppercase text-sm">Best Sellers</span>
           <h2 class="text-4xl md:text-5xl font-black text-primary mt-2">Signature Crafts</h2>
+          <div class="flex gap-2 mt-3">
+            <span class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Coffee</span>
+            <span class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Crafts</span>
+          </div>
         </div>
-        <div class="flex gap-2">
-          <span
-            class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Coffee</span>
-          <span
-            class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Crafts</span>
-        </div>
-      </div>
-
-      <!-- REDEEM CODE BANNER -->
-      <div class="mb-10 p-6 md:p-8 bg-surface rounded-[2rem] border border-outline/10 shadow-lg flex flex-col xl:flex-row gap-8 items-center justify-between">
-         <div class="flex-1 w-full relative z-10">
-            <h3 class="font-black text-2xl text-primary mb-2 flex items-center gap-2"><span class="material-symbols-outlined text-secondary">redeem</span> Redeem Promo</h3>
-            <p class="text-on-surface-variant text-sm mb-4">Have you completed a challenge or received a gift code? Enter it below to unlock your reward! Applied automatically to your cart.</p>
-            <div class="flex flex-col md:flex-row gap-2">
-               <input id="f-redeem-list-input" type="text" placeholder="Enter your valid code" class="brew-input flex-1 bg-white rounded-xl p-4 text-sm font-mono font-bold uppercase border-outline/10 border text-secondary" />
-               <button onclick="applyListingOfferCode()" class="bg-primary text-white rounded-xl px-8 py-4 font-bold shadow-sm hover:bg-primary-container transition-colors tracking-widest text-sm">REDEEM</button>
-            </div>
-            <p id="redeem-list-status" class="text-xs font-bold mt-2 text-secondary w-full"></p>
-         </div>
-         
-         <div class="flex-1 w-full lg:w-1/2 relative bg-surface-container-high rounded-2xl p-4 border border-outline/5 overflow-hidden">
-             <div class="flex items-center gap-2 mb-3 relative z-30">
-                 <span class="material-symbols-outlined text-secondary text-base text-xs">card_giftcard</span>
-                 <h4 class="font-bold text-primary tracking-widest uppercase text-[10px]">Today's Free Gifts</h4>
-             </div>
-             
-             <div id="free-gift-gallery" class="flex gap-4 overflow-x-auto snap-x hidden-scrollbar pb-2 relative z-10 transition-all duration-500">
-                 <!-- Populated via JS -->
-                 <div class="text-[10px] text-on-surface-variant w-full pt-1">Looking for valid gift offers...</div>
-             </div>
-         </div>
+        <a href="#rewards" class="inline-flex items-center gap-2 px-5 py-3 bg-secondary text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md group">
+          <span class="material-symbols-outlined text-base group-hover:rotate-12 transition-transform">card_giftcard</span>
+          Redeem Reward
+          <span class="text-white/70 text-xs font-medium normal-case tracking-normal">600 pts</span>
+        </a>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-12" id="product-grid">
@@ -1627,7 +1606,7 @@
         </div>
 
         <!-- Gift Cards Grid -->
-        <div id="rewards-gift-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px]">
+        <div id="rewards-gift-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-[200px]">
           <div class="col-span-3 text-center p-12 text-on-surface-variant">Loading available rewards...</div>
         </div>
       </div>
@@ -3481,50 +3460,68 @@
     let rewardsUnlocked = false;
     let unlockedRewardCode = "";
 
-    // Pre-load the gift grid (blurred/locked) when page loads
+    // Pre-load the gift grid (locked) when page loads
     window.loadRewardsGallery = function() {
       const grid = document.getElementById("rewards-gift-grid");
+      grid.innerHTML = `<div class="col-span-full text-center p-10 text-on-surface-variant text-sm">Loading gifts...</div>`;
       db.collection("promoCodes").where("type", "==", "freeGift").get().then(snapshot => {
+
+        // If no gifts exist, seed sample data automatically
         if(snapshot.empty) {
-          grid.innerHTML = `<div class="col-span-3 text-center p-12 text-on-surface-variant">
-            <span class="material-symbols-outlined text-4xl mb-3 block">card_giftcard</span>
-            No free gifts available right now. Check back soon!
-          </div>`;
+          seedSampleGifts();
           return;
         }
+
         let html = "";
         let found = false;
         snapshot.forEach(doc => {
           const data = doc.data();
+          const remaining = data.limit ? data.limit - (data.uses || 0) : null;
           const available = !data.limit || (data.uses || 0) < data.limit;
           if(available) {
             found = true;
             html += `
-            <div class="glass-card rounded-3xl overflow-hidden group relative border border-outline/10 flex flex-col">
-              ${data.img
-                ? `<div class="h-48 overflow-hidden"><img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div>`
-                : `<div class="h-48 bg-secondary/10 flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-secondary/40">card_giftcard</span></div>`
-              }
-              <div class="p-5 flex flex-col flex-1">
-                <span class="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Free Gift</span>
-                <h3 class="font-black text-primary text-base leading-tight mb-2">${data.desc || "Exclusive BrewDipu Gift"}</h3>
-                <p class="text-xs text-on-surface-variant mb-4">Limited to <strong>${data.limit || "∞"}</strong> lucky customers &bull; <strong>${(data.limit || 0) - (data.uses || 0)}</strong> remaining</p>
-                <div class="mt-auto">
-                  <button onclick="openClaimModal('${doc.id}', '${(data.desc || 'Exclusive Gift').replace(/'/g, "&apos;")}')" 
-                    class="claim-btn w-full py-3 bg-secondary text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-2 opacity-40 pointer-events-none" 
-                    disabled data-gift="${doc.id}">
-                    <span class="material-symbols-outlined text-sm">lock</span> Locked
-                  </button>
+            <div class="glass-card rounded-2xl overflow-hidden group relative border border-outline/10 flex flex-row" style="min-height:140px">
+              <div class="w-40 md:w-52 shrink-0 overflow-hidden relative">
+                ${data.img
+                  ? `<img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 absolute inset-0">`
+                  : `<div class="w-full h-full bg-secondary/10 flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-secondary/40">card_giftcard</span></div>`
+                }
+              </div>
+              <div class="flex flex-col flex-1 p-5 justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-secondary">🎁 Free Gift</span>
+                  <h3 class="font-black text-primary text-lg leading-tight mt-1 mb-1">${data.desc || "Exclusive BrewDipu Gift"}</h3>
+                  <p class="text-xs text-on-surface-variant">${remaining !== null ? `<strong>${remaining}</strong> remaining out of <strong>${data.limit}</strong>` : 'Unlimited availability'}</p>
                 </div>
+                <button onclick="openClaimModal('${doc.id}', '${(data.desc || 'Exclusive Gift').replace(/'/g, "&apos;").replace(/"/g, '&quot;')}')" 
+                  class="claim-btn mt-3 w-full py-2.5 bg-surface-container text-on-surface-variant border border-outline/20 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 cursor-not-allowed transition-all duration-300" 
+                  disabled data-gift="${doc.id}">
+                  <span class="material-symbols-outlined text-sm">lock</span> Locked — Enter Code to Claim
+                </button>
               </div>
             </div>`;
           }
         });
-        grid.innerHTML = found ? html : `<div class="col-span-3 text-center p-12 text-on-surface-variant">All gifts have been claimed for now! Come back later.</div>`;
+        grid.innerHTML = found ? html : `<div class="col-span-full text-center p-12 text-on-surface-variant">
+          <span class="material-symbols-outlined text-4xl mb-3 block">card_giftcard</span>All gifts claimed! Check back soon.</div>`;
       }).catch(() => {
-        grid.innerHTML = `<div class="col-span-3 text-center p-12 text-on-surface-variant">Could not load rewards. Please refresh the page.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center p-12 text-on-surface-variant">Could not load rewards. Please refresh.</div>`;
       });
     };
+
+    function seedSampleGifts() {
+      const samples = [
+        { code: "GIFT-KEYCHAIN1", desc: "Handmade BrewDipu Resin Keychain", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBg3px03BErm9fszHgQXGvDPcbasCwngej2BR1hOvOJz-oIK-Qcv24uy-LPv5ElFxx5yMIBXk2zBpxoCthQ6USl864ekLf00Kx4HtayCXVIftcWap9plu7XwLUdVU8wM7LftQfza51WviuznGClnw0i2SCwXQqFCRKkb3Vmwci-2qgmFL3VH2KYks33BH8dCOVh9thysVhPVm9S6pPzB0tppaCuB2narmQlLTezsJsMhCD_Tt-27kwXGyEIDlSJ7_XqAEbSX-Q99LM", limit: 20 },
+        { code: "GIFT-KEYCHAIN2", desc: "Miniature Cold Brew Glass Keychain", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBg3px03BErm9fszHgQXGvDPcbasCwngej2BR1hOvOJz-oIK-Qcv24uy-LPv5ElFxx5yMIBXk2zBpxoCthQ6USl864ekLf00Kx4HtayCXVIftcWap9plu7XwLUdVU8wM7LftQfza51WviuznGClnw0i2SCwXQqFCRKkb3Vmwci-2qgmFL3VH2KYks33BH8dCOVh9thysVhPVm9S6pPzB0tppaCuB2narmQlLTezsJsMhCD_Tt-27kwXGyEIDlSJ7_XqAEbSX-Q99LM", limit: 15 },
+        { code: "GIFT-STICKER", desc: "BrewDipu Sticker Pack (5 designs)", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDIntQ-ubtNMEvijaYU5lNeNGFs8vLYNcKKN9H3CmkVMycEJRm1vfNBYI2le0aZqU682HqK-s_l-1zhg7FMcY7_HigBSIYacu36QvRKe4jMvXqPbC4HhiS-KUruCZgVS7Sdmx_ca3r6Shf2H0W_CxMaP3dHqgU4yBuEu5Q5PLFGbvpjf4acHMBJfMl8IgRZ1tWJ25ovHLS2omkedNxpNxgZ_XJsPQUS6rVwGS-ZHDmEBokWR5Xx-xKWA9ueCdtcRHsInH91b63VGJY", limit: 30 }
+      ];
+      const batch = db.batch();
+      samples.forEach(s => {
+        batch.set(db.collection("promoCodes").doc(s.code), { type: "freeGift", desc: s.desc, img: s.img, limit: s.limit, uses: 0 });
+      });
+      batch.commit().then(() => loadRewardsGallery()).catch(() => {});
+    }
 
     window.unlockRewardsGallery = async function() {
       const input = document.getElementById("rewards-unlock-input");
@@ -3532,49 +3529,56 @@
       const statusEl = document.getElementById("rewards-unlock-status");
       statusEl.classList.remove("hidden");
 
-      // Block BREW20 & generic discount-only codes
+      // Must be RWD- prefixed (generated 20% code)
       if(!code.startsWith("RWD-")) {
         statusEl.textContent = code === "BREW20"
-          ? "❌ BREW20 is a cart discount code only. Use it at checkout, not here."
-          : "❌ Only reward codes starting with RWD- can unlock gifts.";
+          ? "❌ BREW20 is a cart-only discount code. Use it at checkout."
+          : "❌ Only reward codes (starting with RWD-) unlock free gifts.";
         statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
         return;
       }
 
-      statusEl.textContent = "Verifying code...";
+      statusEl.textContent = "Verifying your reward code...";
       statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-on-surface-variant block animate-pulse";
 
       try {
         const doc = await db.collection("promoCodes").doc(code).get();
         if(!doc.exists) {
-          statusEl.textContent = "❌ Invalid code. Please check and try again.";
+          statusEl.textContent = "❌ Invalid code. Please double-check and try again.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
         const data = doc.data();
         if(data.limit && (data.uses || 0) >= data.limit) {
-          statusEl.textContent = "❌ This code has already been fully used.";
+          statusEl.textContent = "❌ This code has already been used.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        // Allow brew20 type codes (the 600-point generated codes)
+        if(data.type !== "brew20") {
+          statusEl.textContent = "❌ This code type cannot unlock the gift gallery.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
 
-        // Valid! Unlock the gallery
+        // Valid! Unlock now
         rewardsUnlocked = true;
         unlockedRewardCode = code;
 
-        // Remove lock overlay
+        // Fade out the lock overlay
         const lockEl = document.getElementById("rewards-gallery-lock");
-        lockEl.classList.add("opacity-0", "pointer-events-none");
         lockEl.style.transition = "opacity 0.5s ease";
+        lockEl.classList.add("opacity-0", "pointer-events-none");
 
-        // Enable all claim buttons
+        // Enable claim buttons — turn them green
         document.querySelectorAll(".claim-btn").forEach(btn => {
           btn.disabled = false;
-          btn.classList.remove("opacity-40", "pointer-events-none");
+          btn.classList.remove("bg-surface-container", "text-on-surface-variant", "border", "border-outline/20", "cursor-not-allowed", "opacity-40", "pointer-events-none");
+          btn.classList.add("bg-[#006e20]", "text-white", "hover:opacity-90", "cursor-pointer");
           btn.innerHTML = `<span class="material-symbols-outlined text-sm">redeem</span> Claim This Gift`;
         });
 
-        statusEl.textContent = "✅ Unlocked! You can now claim one free gift below. Choose wisely!";
+        statusEl.textContent = "✅ Unlocked! Choose one gift to claim — your reward is ready.";
         statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-[#006e20] block";
 
       } catch(e) {
