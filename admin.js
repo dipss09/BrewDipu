@@ -444,7 +444,7 @@ function loadProducts() {
       html += `
       <div class="glass-card p-6 rounded-2xl flex flex-col justify-between h-full bg-white relative group">
         <div class="relative w-full h-40 rounded-xl overflow-hidden mb-4">
-          <img src="${p.img}" class="w-full h-full object-cover">
+          <img src="${p.img}" class="w-full h-full object-contain bg-surface-container">
         </div>
         <div>
           <h4 class="font-bold text-primary mb-1">${p.name}</h4>
@@ -694,7 +694,7 @@ function loadOffers() {
         <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border self-start mb-3 ${typeBg}">${typeLabel}</span>
         <h4 class="font-mono text-lg font-black text-secondary tracking-widest mb-1">${code}</h4>
         ${data.desc ? `<p class="text-xs text-on-surface-variant mb-3 leading-relaxed">${data.desc}</p>` : ''}
-        ${data.img ? `<img src="${data.img}" class="w-full h-28 object-cover rounded-xl mb-3 border border-outline/10">` : ''}
+        ${data.img ? `<img src="${data.img}" class="w-full h-28 object-contain bg-surface-container rounded-xl mb-3 border border-outline/10">` : ''}
         <div class="flex justify-between text-xs text-on-surface-variant border-t border-outline/10 pt-3 mb-3">
           <span>Uses: <strong class="text-primary">${uses}</strong></span>
           <span>Limit: <strong class="text-primary">${limit || '∞'}</strong></span>
