@@ -3258,12 +3258,12 @@
 
     function shareRefCode() {
       const codeInput = document.getElementById("profile-ref-code").value;
-      const text = `Hey! Use my referral link to get 10% OFF your first order from BrewDipu: ${codeInput}`;
+      const text = `Hey, check out this cool startup by BrewDipu! Supporting them is super easy, just use this link. Plus, you get *10% OFF* your first order!\n\n${codeInput}`;
 
       if (navigator.share) {
         navigator.share({
           title: 'BrewDipu Referral',
-          text: `Get 10% OFF your first order!`,
+          text: `Hey, check out this cool startup by BrewDipu! Supporting them is super easy, just use this link. Plus, you get *10% OFF* your first order!`,
           url: codeInput
         }).catch((err) => console.log("Share cancelled", err));
       } else {
