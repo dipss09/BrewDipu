@@ -36,6 +36,7 @@ auth.onAuthStateChanged((user) => {
         loadOrders();
         loadUsers();
         loadProducts();
+        loadOffers();
         loadReviews();
         adminLoaded = true;
     }
@@ -67,18 +68,22 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 //  👉  TAB NAVIGATION
 // ──────────────────────────────────────────────
 function switchTab(tabId) {
-  const tabs = ['orders', 'products', 'reviews', 'users', 'settings'];
+  const tabs = ['orders', 'products', 'reviews', 'users', 'settings', 'offers'];
   tabs.forEach(t => {
     document.getElementById(`tab-${t}`).classList.add("hidden");
     const btn = document.getElementById(`tab-btn-${t}`);
-    btn.classList.remove("bg-primary", "text-white");
-    btn.classList.add("text-on-surface-variant");
+    if(btn) {
+      btn.classList.remove("bg-primary", "text-white");
+      btn.classList.add("text-on-surface-variant");
+    }
   });
   
   document.getElementById(`tab-${tabId}`).classList.remove("hidden");
   const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-  activeBtn.classList.add("bg-primary", "text-white");
-  activeBtn.classList.remove("text-on-surface-variant");
+  if(activeBtn) {
+    activeBtn.classList.add("bg-primary", "text-white");
+    activeBtn.classList.remove("text-on-surface-variant");
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -603,3 +608,199 @@ function seedInitialProducts() {
   ];
   seed.forEach(s => db.collection("products").add(s));
 }
+
+// ──────────────────────────────────────────────
+//  🎁  OFFERS & PROMO CODES MANAGEMENT
+// ──────────────────────────────────────────────
+window.toggleOfferImageField = function() {
+  const type = document.getElementById("offer-type").value;
+  const imgBlock = document.getElementById("offer-img-block");
+  const discountBlock = document.getElementById("offer-discount-block");
+  if(type === "freeGift") {
+    imgBlock.classList.remove("hidden");
+    // only require image on new entries, not edits
+    if(!document.getElementById("offer-code").getAttribute("data-editing")) {
+      document.getElementById("offer-img").required = false; // optional for freeGift too
+    }
+  } else {
+    imgBlock.classList.add("hidden");
+    document.getElementById("offer-img").required = false;
+  }
+
+  if(type === "discountCode" || type === "brew20") {
+    discountBlock.classList.remove("hidden");
+  } else {
+    discountBlock.classList.add("hidden");
+  }
+}
+
+let currentEditOfferUses = 0;
+let currentEditOfferImg = null;
+let currentEditOfferDesc = "";
+
+window.closeOfferModal = function() {
+  document.getElementById("add-offer-modal").classList.add("hidden");
+  document.getElementById("offer-form").reset();
+  document.getElementById("offer-code").disabled = false;
+  document.getElementById("offer-code").removeAttribute("data-editing");
+  document.getElementById("offer-modal-title").textContent = "Add Reward / Code";
+  document.getElementById("offer-discount-pct").value = 20;
+  currentEditOfferUses = 0;
+  currentEditOfferImg = null;
+  currentEditOfferDesc = "";
+  toggleOfferImageField();
+}
+
+// Open modal pre-filled with a fresh RWD- Reward Code
+window.openNewRewardCode = function() {
+  closeOfferModal(); // reset state
+  const code = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  document.getElementById("offer-code").value = code;
+  document.getElementById("offer-type").value = "rewardCode";
+  document.getElementById("offer-limit").value = 1;
+  document.getElementById("offer-modal-title").textContent = "Create 600pts Reward Code";
+  document.getElementById("add-offer-modal").classList.remove("hidden");
+  toggleOfferImageField();
+}
+
+function loadOffers() {
+  db.collection("promoCodes").onSnapshot(snapshot => {
+    const grid = document.getElementById("offers-grid");
+    if(snapshot.empty) {
+      grid.innerHTML = `<div class="p-8 text-center text-on-surface-variant col-span-full">No active offers. Use the buttons above to create one.</div>`;
+      return;
+    }
+
+    let html = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const code = doc.id;
+      const isGift = data.type === 'freeGift';
+      const isReward = data.type === 'rewardCode';
+      const isDiscount = data.type === 'discountCode' || data.type === 'brew20';
+      const discountPct = data.discountPct || 20;
+      const typeLabel = isGift ? '🎁 Free Gift' : isReward ? '🎟️ Reward Code' : `💎 ${discountPct}% Discount`;
+      const typeBg = isGift ? 'bg-green-50 text-green-700 border-green-200'
+                   : isReward ? 'bg-purple-50 text-purple-700 border-purple-200'
+                   : 'bg-blue-50 text-blue-700 border-blue-200';
+      const uses = data.uses || 0;
+      const limit = data.limit;
+      const remaining = limit ? limit - uses : null;
+      const isExpired = limit && uses >= limit;
+
+      html += `
+      <div class="glass-card p-5 rounded-2xl flex flex-col bg-white border ${isExpired ? 'border-red-200 opacity-60' : 'border-outline/10'} relative">
+        ${isExpired ? '<div class="absolute top-3 right-3 text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-widest">Expired</div>' : ''}
+        <span class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border self-start mb-3 ${typeBg}">${typeLabel}</span>
+        <h4 class="font-mono text-lg font-black text-secondary tracking-widest mb-1">${code}</h4>
+        ${data.desc ? `<p class="text-xs text-on-surface-variant mb-3 leading-relaxed">${data.desc}</p>` : ''}
+        ${data.img ? `<img src="${data.img}" class="w-full h-28 object-cover rounded-xl mb-3 border border-outline/10">` : ''}
+        <div class="flex justify-between text-xs text-on-surface-variant border-t border-outline/10 pt-3 mb-3">
+          <span>Uses: <strong class="text-primary">${uses}</strong></span>
+          <span>Limit: <strong class="text-primary">${limit || '∞'}</strong></span>
+          ${remaining !== null ? `<span>Left: <strong class="${remaining <= 3 ? 'text-red-600' : 'text-primary'}">${remaining}</strong></span>` : ''}
+        </div>
+        <div class="flex gap-2 mt-auto">
+          <button onclick="editOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100">✏️ Edit</button>
+          <button onclick="deleteOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors border border-red-100">🗑️ Delete</button>
+        </div>
+      </div>`;
+    });
+    grid.innerHTML = html;
+  });
+}
+
+document.getElementById("offer-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  let code = document.getElementById("offer-code").value.trim().toUpperCase();
+  const type = document.getElementById("offer-type").value;
+  const limitInput = document.getElementById("offer-limit").value;
+  // rewardCode defaults to 1 use; others default to 30
+  const limit = parseInt(limitInput) || (type === "rewardCode" ? 1 : 30);
+  const desc = document.getElementById("offer-desc").value.trim();
+  const btn = e.target.querySelector("button[type='submit']");
+  const originalCode = document.getElementById("offer-code").getAttribute("data-editing"); // set when editing
+  const isEdit = !!originalCode;
+
+  if(!code) {
+    code = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  btn.disabled = true;
+
+  const saveToDB = (imgUrl = null) => {
+    const payload = {
+      type: type,
+      limit: limit,
+      desc: desc,
+      uses: isEdit ? currentEditOfferUses : 0
+    };
+    if (type === "discountCode" || type === "brew20") {
+      payload.discountPct = parseInt(document.getElementById("offer-discount-pct").value) || 20;
+    }
+    if(imgUrl) {
+      payload.img = imgUrl;
+    } else if (isEdit && currentEditOfferImg) {
+      payload.img = currentEditOfferImg;
+    }
+
+    const doSave = () => db.collection("promoCodes").doc(code).set(payload).then(() => {
+      btn.disabled = false;
+      closeOfferModal();
+    }).catch(err => {
+      alert("Error saving offer: " + err.message);
+      btn.disabled = false;
+    });
+
+    // If code was renamed, delete old doc first
+    if(isEdit && originalCode !== code) {
+      db.collection("promoCodes").doc(originalCode).delete().then(doSave).catch(doSave);
+    } else {
+      doSave();
+    }
+  };
+
+  const fileInput = document.getElementById("offer-img");
+  if(type === "freeGift" && fileInput.files.length > 0) {
+     document.getElementById("offer-upload-progress").classList.remove("hidden");
+     compressAndGetBase64(fileInput.files[0]).then(base64Url => {
+       document.getElementById("offer-upload-progress").classList.add("hidden");
+       saveToDB(base64Url);
+     }).catch(err => {
+       console.error(err);
+       btn.disabled = false;
+       document.getElementById("offer-upload-progress").classList.add("hidden");
+       alert("Error compressing offer image.");
+     });
+  } else {
+     saveToDB();
+  }
+});
+
+window.editOffer = function(code) {
+  db.collection("promoCodes").doc(code).get().then(doc => {
+    if(!doc.exists) return;
+    const data = doc.data();
+    document.getElementById("offer-code").value = code;
+    document.getElementById("offer-code").disabled = false; // allow renaming
+    document.getElementById("offer-code").setAttribute("data-editing", code); // track original ID
+    document.getElementById("offer-type").value = data.type === "brew20" ? "discountCode" : (data.type || "discountCode");
+    document.getElementById("offer-limit").value = data.limit || 1;
+    document.getElementById("offer-desc").value = data.desc || "";
+    document.getElementById("offer-discount-pct").value = data.discountPct || 20;
+    document.getElementById("offer-modal-title").textContent = "Edit Offer: " + code;
+    currentEditOfferUses = data.uses || 0;
+    currentEditOfferImg = data.img || null;
+
+    toggleOfferImageField();
+    document.getElementById("offer-img").required = false;
+
+    document.getElementById("add-offer-modal").classList.remove("hidden");
+  });
+};
+
+window.deleteOffer = function(codeId) {
+  if(confirm("Are you sure you want to permanently delete this code and offer?")) {
+    db.collection("promoCodes").doc(codeId).delete();
+  }
+};
