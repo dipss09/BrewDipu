@@ -243,8 +243,13 @@
             </div>
             <form id="offer-form" class="space-y-4">
               <div>
-                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Promo Code <span class="text-on-surface-variant/60 normal-case font-normal">(leave blank to auto-generate)</span></label>
-                <input type="text" id="offer-code" placeholder="e.g. SUMMER20 or GIFTY" class="w-full bg-white rounded-xl p-3 border border-outline/20 font-mono uppercase font-bold text-secondary tracking-widest">
+                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 flex justify-between items-end">
+                  Promo Code 
+                  <button type="button" onclick="document.getElementById('offer-code').value = 'RWD-' + Math.random().toString(36).substring(2, 8).toUpperCase()" class="text-[10px] text-[#006e20] hover:bg-[#006e20]/20 transition-colors normal-case font-bold flex items-center gap-1 bg-[#006e20]/10 px-2 py-1 rounded">
+                    <span class="material-symbols-outlined text-[12px]">magic_button</span> Generate Reward Code
+                  </button>
+                </label>
+                <input type="text" id="offer-code" placeholder="e.g. SUMMER20 or RWD-XXXXXX" class="w-full bg-white rounded-xl p-3 border border-outline/20 font-mono uppercase font-bold text-secondary tracking-widest">
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
