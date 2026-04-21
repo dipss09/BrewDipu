@@ -1596,20 +1596,10 @@
         <p id="rewards-unlock-status" class="text-xs font-bold mt-3 ml-0 md:ml-16 hidden"></p>
       </div>
 
-      <!-- Gifts Gallery -->
-      <div id="rewards-gallery-container" class="relative">
-        <!-- Lock overlay -->
-        <div id="rewards-gallery-lock" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-sm rounded-3xl transition-all duration-500">
-          <span class="material-symbols-outlined text-5xl text-secondary mb-3">lock</span>
-          <p class="font-black text-primary text-base">Gallery Locked</p>
-          <p class="text-xs text-on-surface-variant mt-1 text-center max-w-xs">Enter a valid reward code above to see and claim your free gifts.</p>
-        </div>
-
         <!-- Gift Cards Grid -->
         <div id="rewards-gift-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-[200px]">
           <div class="col-span-3 text-center p-12 text-on-surface-variant">Loading available rewards...</div>
         </div>
-      </div>
 
     </div>
   </section>
@@ -3554,21 +3544,9 @@
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
-        // Allow brew20 type codes (the 600-point generated codes)
-        if(data.type !== "brew20") {
-          statusEl.textContent = "❌ This code type cannot unlock the gift gallery.";
-          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
-          return;
-        }
-
         // Valid! Unlock now
         rewardsUnlocked = true;
         unlockedRewardCode = code;
-
-        // Fade out the lock overlay
-        const lockEl = document.getElementById("rewards-gallery-lock");
-        lockEl.style.transition = "opacity 0.5s ease";
-        lockEl.classList.add("opacity-0", "pointer-events-none");
 
         // Enable claim buttons — turn them green
         document.querySelectorAll(".claim-btn").forEach(btn => {
