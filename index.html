@@ -965,10 +965,9 @@
         <div class="bg-surface-container-high p-4 rounded-2xl border border-outline/10 space-y-4">
 
           <div class="space-y-1" id="referral-block" style="display:none;">
-            <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Referral Code? (New
-              Users Only)</label>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Promo / Referral Code?</label>
             <div class="flex gap-2">
-              <input id="f-ref-code" type="text" placeholder="e.g. BD-ABCD1"
+              <input id="f-ref-code" type="text" placeholder="e.g. BREW20 or BD-ABCD1"
                 class="brew-input flex-1 bg-white rounded-xl p-3 text-sm font-mono font-bold uppercase"
                 style="border:1px solid rgba(0,0,0,0.05);" />
               <button type="button" id="btn-apply-ref" onclick="applyReferralCode()"
@@ -1383,7 +1382,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-12" id="product-grid">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-12" id="product-grid">
         <!-- Products rendered by JS -->
       </div>
     </div>
@@ -1770,6 +1769,8 @@
         currentDiscountAmt = total * 0.10; // 10%
       } else if (currentDiscountType === "points30") {
         currentDiscountAmt = total * 0.30; // 30%
+      } else if (currentDiscountType === "brew20") {
+        currentDiscountAmt = total * 0.20; // 20%
       }
       return Math.max(0, total - currentDiscountAmt);
     }
@@ -1794,21 +1795,21 @@
         const disabledProp = isOutOfStock || !isStoreOpen ? "disabled" : "";
 
         return `
-      <div class="glass-card p-6 rounded-[2rem] hover:-translate-y-4 transition-all duration-500 flex flex-col group">
-        <div class="relative mb-8 aspect-square rounded-2xl overflow-hidden">
+      <div class="glass-card p-4 md:p-6 rounded-2xl md:rounded-[2rem] hover:-translate-y-4 transition-all duration-500 flex flex-col group">
+        <div class="relative mb-4 md:mb-8 aspect-square rounded-xl md:rounded-2xl overflow-hidden">
           <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}"
             src="${p.img}" alt="${p.name}" loading="lazy"/>
-          <div class="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">₹${p.price}</div>
-          <div class="absolute top-4 left-4 bg-white/90 backdrop-blur text-primary px-3 py-1 rounded-full text-xs font-bold shadow">${p.badge}</div>
+          <div class="absolute top-2 right-2 md:top-4 md:right-4 bg-primary text-white px-2 py-1 md:px-3 rounded-full text-xs md:text-sm font-bold shadow-lg">₹${p.price}</div>
+          <div class="absolute top-2 left-2 md:top-4 md:left-4 bg-white/90 backdrop-blur text-primary px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold shadow">${p.badge}</div>
         </div>
-        <h3 class="text-2xl font-bold text-primary mb-2">${p.name}</h3>
-        <p class="text-on-surface-variant text-sm mb-6 flex-1">${p.desc}</p>
-        <div class="flex gap-2 mt-auto">
-          <button ${clickAction} ${disabledProp} class="flex-1 py-4 bg-surface-container-highest text-primary rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-outline-variant transition-colors group/btn">
-            + Cart <span class="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">add_shopping_cart</span>
+        <h3 class="text-lg md:text-2xl font-bold text-primary mb-1 md:mb-2 leading-tight">${p.name}</h3>
+        <p class="text-on-surface-variant text-xs md:text-sm mb-4 md:mb-6 flex-1 line-clamp-3 md:line-clamp-none">${p.desc}</p>
+        <div class="flex flex-col xl:flex-row gap-2 mt-auto">
+          <button ${clickAction} ${disabledProp} class="w-full py-2 md:py-4 bg-surface-container-highest text-primary rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-outline-variant transition-colors group/btn text-xs md:text-base">
+            + Cart <span class="material-symbols-outlined text-[10px] md:text-sm group-hover/btn:translate-x-1 transition-transform">add_shopping_cart</span>
           </button>
-          <button ${buyNowAction} ${disabledProp} class="flex-[1.5] py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-primary-container transition-colors group/btn2">
-            Buy Now <span class="material-symbols-outlined text-sm group-hover/btn2:translate-x-1 transition-transform">bolt</span>
+          <button ${buyNowAction} ${disabledProp} class="w-full py-2 md:py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-primary-container transition-colors group/btn2 text-xs md:text-base">
+            Buy Now <span class="material-symbols-outlined text-[10px] md:text-sm group-hover/btn2:translate-x-1 transition-transform">bolt</span>
           </button>
         </div>
       </div>`;
@@ -1906,18 +1907,13 @@
       document.getElementById("f-rewards").value = "";
       document.getElementById("ref-status").textContent = "";
 
-      // Toggle Referrals Block
+      // Toggle Referrals / Promo Block
+      document.getElementById("referral-block").style.display = "block";
       if (isLoggedIn) {
-        // if they already ordered, hide referral box.
-        if (profileHasOrdered) {
-          document.getElementById("referral-block").style.display = "none";
-        } else {
-          document.getElementById("referral-block").style.display = "block";
-          if (profileReferredBy) {
-            document.getElementById("f-ref-code").value = profileReferredBy;
-            // Auto-apply the referral code for the user
-            setTimeout(() => { if (isStoreOpen) applyReferralCode(); }, 100);
-          }
+        if (!profileHasOrdered && profileReferredBy) {
+          document.getElementById("f-ref-code").value = profileReferredBy;
+          // Auto-apply the referral code for the user
+          setTimeout(() => { if (isStoreOpen) applyReferralCode(); }, 100);
         }
 
         // Toggle Rewards Block
@@ -1931,8 +1927,7 @@
         }
       } else {
         // Anonymous user
-        document.getElementById("referral-block").style.display = "block";
-        document.getElementById("ref-status").textContent = "Please sign in/sign up first to use a referral code!";
+        document.getElementById("ref-status").textContent = "Sign in to use Referral Codes. Promo Codes work for guests too!";
         document.getElementById("rewards-block").classList.add("hidden");
       }
 
@@ -1959,7 +1954,11 @@
         document.getElementById("discount-amount").textContent = "Applied";
       } else if (currentDiscountAmt > 0) {
         discountRow.classList.remove("hidden");
-        document.getElementById("discount-label").textContent = currentDiscountType === "referral" ? "Referral Discount (10%)" : "Rewards Discount (30%)";
+        let lbl = "Discount";
+        if (currentDiscountType === "referral") lbl = "Referral Discount (10%)";
+        if (currentDiscountType === "points30") lbl = "Rewards Discount (30%)";
+        if (currentDiscountType === "brew20") lbl = "Promo Discount (20%)";
+        document.getElementById("discount-label").textContent = lbl;
         document.getElementById("discount-amount").textContent = `-₹${currentDiscountAmt.toFixed(2)}`;
       } else {
         discountRow.classList.add("hidden");
@@ -1999,6 +1998,40 @@
       let myCodeUrl = document.getElementById("profile-ref-code").value;
       let myCodeMatch = myCodeUrl.match(/ref=([^&]+)/i);
       let myCode = myCodeMatch ? myCodeMatch[1].toUpperCase() : null;
+
+      if (codeInput === "BREW20") {
+        try {
+          let promoDoc = await db.collection("promoCodes").doc("BREW20").get();
+          if (!promoDoc.exists) {
+            await db.collection("promoCodes").doc("BREW20").set({ uses: 0, limit: 30 });
+            promoDoc = await db.collection("promoCodes").doc("BREW20").get();
+          }
+          const promoData = promoDoc.data();
+          if (promoData.uses >= (promoData.limit || 30)) {
+            statusEl.textContent = "Promo code BREW20 has expired (usage limit reached).";
+            statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+            return;
+          }
+          
+          currentDiscountType = "brew20";
+          statusEl.textContent = "Promo code BREW20 applied! 20% Discount unlocked.";
+          statusEl.className = "text-xs font-bold mt-1 text-[#006e20] leading-tight";
+          document.getElementById("f-rewards").value = "";
+          renderOrderSummary();
+          return;
+        } catch (err) {
+          console.error("Promo Error:", err);
+          statusEl.textContent = "Error checking promo code.";
+          statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+          return;
+        }
+      }
+
+      if (profileHasOrdered && isLoggedIn) {
+        statusEl.textContent = "Referral codes are only valid for your first order. Try a promo code instead!";
+        statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+        return;
+      }
 
       if (myCode && codeInput === myCode) {
         statusEl.textContent = "You cannot use your own referral code.";
@@ -2079,6 +2112,7 @@
       if (currentDiscountType === "referral") discountString = `\n🎁 Discount: 10% Off (Referral)\n`;
       if (currentDiscountType === "points30") discountString = `\n🎁 Discount: 30% Off (Rewards)\n`;
       if (currentDiscountType === "pointsGift") discountString = `\n🎁 Bonus: FREE GIFT (Rewards)\n`;
+      if (currentDiscountType === "brew20") discountString = `\n🎁 Discount: 20% Off (Promo BREW20)\n`;
 
       const orderText = `🛍️ NEW ORDER — BrewDipu\n🔖 Confirmation Code: ${confCode}\n\n` +
         `👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email}\n` +
@@ -2166,6 +2200,16 @@
               points: firebase.firestore.FieldValue.increment(-600)
             });
             profilePoints = Math.max(0, profilePoints - 600); // update local state
+          }
+          
+          if (currentDiscountType === "brew20") {
+            try {
+              await db.collection("promoCodes").doc("BREW20").update({
+                uses: firebase.firestore.FieldValue.increment(1)
+              });
+            } catch (err) {
+              await db.collection("promoCodes").doc("BREW20").set({ uses: 1, limit: 30 }, { merge: true });
+            }
           }
         }
       } catch (err) {
