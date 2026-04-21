@@ -27,10 +27,10 @@
 
   <script id="tailwind-config">
     tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
+      "darkMode": "class",
+      "theme": {
+        "extend": {
+          "colors": {
             "tertiary-fixed": "#c3e9f3",
             "error-container": "#ffdad6",
             "on-tertiary-container": "#80a4ad",
@@ -79,16 +79,16 @@
             "on-primary": "#ffffff",
             "surface-container-high": "#f5e6d3"
           },
-          borderRadius: {
-            DEFAULT: "0.25rem",
-            lg: "0.5rem",
-            xl: "0.75rem",
-            full: "9999px"
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
           },
-          fontFamily: {
-            headline: ["Epilogue"],
-            body: ["Manrope"],
-            label: ["Manrope"]
+          "fontFamily": {
+            "headline": ["Epilogue"],
+            "body": ["Manrope"],
+            "label": ["Manrope"]
           }
         }
       }
@@ -851,7 +851,8 @@
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#products">Order</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300 flex items-center gap-1"
-          href="#rewards"><span class="material-symbols-outlined text-sm" style="font-size:1rem">redeem</span>Redeem Reward</a>
+          href="#rewards"><span class="material-symbols-outlined text-sm" style="font-size:1rem">redeem</span>Redeem
+          Reward</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#contact">Contact</a>
       </div>
@@ -967,7 +968,8 @@
         <div class="bg-surface-container-high p-4 rounded-2xl border border-outline/10 space-y-4">
 
           <div class="space-y-1" id="referral-block" style="display:none;">
-            <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Promo / Referral Code?</label>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Promo / Referral
+              Code?</label>
             <div class="flex gap-2">
               <input id="f-ref-code" type="text" placeholder="e.g. BREW20 or BD-ABCD1"
                 class="brew-input flex-1 bg-white rounded-xl p-3 text-sm font-mono font-bold uppercase"
@@ -1027,7 +1029,8 @@
         <span class="material-symbols-outlined text-5xl text-secondary">check_circle</span>
       </div>
       <h3 class="text-3xl font-black text-primary mb-3">Order Sent! 🎉</h3>
-      <p class="text-on-surface-variant leading-relaxed mb-2">Thank you for your order! We will contact you and it will be delivered within <strong class="text-primary">30 minutes</strong>. 🚀</p>
+      <p class="text-on-surface-variant leading-relaxed mb-2">Thank you for your order! We will contact you and it will
+        be delivered within <strong class="text-primary">30 minutes</strong>. 🚀</p>
 
       <div class="my-6 p-4 bg-tertiary-fixed-dim/20 border border-tertiary-fixed rounded-2xl">
         <p class="text-xs font-bold uppercase tracking-widest text-on-tertiary-fixed-variant mb-1">Your Confirmation
@@ -1051,7 +1054,8 @@
   <!-- ══════════════ AUTH MODAL ══════════════ -->
   <div id="auth-modal"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="glass-modal w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden" style="max-height:90vh;overflow-y:auto;">
+    <div class="glass-modal w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+      style="max-height:90vh;overflow-y:auto;">
       <div class="px-8 pt-8 pb-2 flex items-center justify-between">
         <h3 class="text-2xl font-black text-primary" id="auth-title">Welcome</h3>
         <button onclick="closeAuth()"
@@ -1063,13 +1067,15 @@
           <button type="button" onclick="switchAuthTab('login')" id="tab-login"
             class="flex-1 py-2 text-sm font-bold rounded-lg bg-primary text-white shadow transition-all">Log In</button>
           <button type="button" onclick="switchAuthTab('signup')" id="tab-signup"
-            class="flex-1 py-2 text-sm font-bold rounded-lg text-on-surface-variant hover:bg-outline-variant/20 transition-all">Sign Up</button>
+            class="flex-1 py-2 text-sm font-bold rounded-lg text-on-surface-variant hover:bg-outline-variant/20 transition-all">Sign
+            Up</button>
         </div>
 
         <!-- ── LOGIN FORM ── -->
         <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
           <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Username or Email *</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Username or Email
+              *</label>
             <input id="login-username" required type="text" placeholder="your_username or you@email.com"
               autocomplete="username email"
               class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
@@ -1078,8 +1084,7 @@
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Password *</label>
             <div class="relative">
-              <input id="login-password" required type="password" placeholder="••••••••"
-                autocomplete="current-password"
+              <input id="login-password" required type="password" placeholder="••••••••" autocomplete="current-password"
                 class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium pr-12"
                 style="border:none;" />
               <button type="button" onclick="togglePwd('login-password',this)"
@@ -1107,17 +1112,18 @@
           <!-- 2. Username -->
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Username *</label>
-            <input id="auth-username" required type="text" placeholder="choose_a_username"
-              autocomplete="username" pattern="[a-zA-Z0-9_]{3,20}"
-              title="3–20 characters: letters, numbers, underscores only"
+            <input id="auth-username" required type="text" placeholder="choose_a_username" autocomplete="username"
+              pattern="[a-zA-Z0-9_]{3,20}" title="3–20 characters: letters, numbers, underscores only"
               class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium font-mono"
               style="border:none;" />
-            <p class="text-[10px] text-on-surface-variant">3–20 chars · letters, numbers &amp; underscores · used to log in</p>
+            <p class="text-[10px] text-on-surface-variant">3–20 chars · letters, numbers &amp; underscores · used to log
+              in</p>
           </div>
 
           <!-- 3. Create Your Password -->
           <div class="space-y-1">
-            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Create Your Password *</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Create Your Password
+              *</label>
             <div class="relative">
               <input id="auth-password" required type="password" placeholder="Min 8 characters"
                 autocomplete="new-password" minlength="8"
@@ -1139,8 +1145,7 @@
           <!-- 5. Email Address -->
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Email Address *</label>
-            <input id="auth-email" required type="email" placeholder="you@example.com"
-              autocomplete="email"
+            <input id="auth-email" required type="email" placeholder="you@example.com" autocomplete="email"
               class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
               style="border:none;" />
           </div>
@@ -1235,9 +1240,12 @@
           </div>
         </div>
 
-        <p class="text-[11px] font-bold text-primary leading-tight mt-3 mb-3">Target clear? Get rewards like free gifts from
+        <p class="text-[11px] font-bold text-primary leading-tight mt-3 mb-3">Target clear? Get rewards like free gifts
+          from
           Brew Dipu along with a 20% discount!</p>
-        <button id="btn-redeem-points" onclick="redeemPointsForCode()" class="w-full hidden items-center justify-center gap-2 bg-secondary text-white rounded-xl py-3 text-xs uppercase tracking-widest font-black shadow-sm hover:opacity-90 transition-opacity">GENERATE 20% DISCOUNT CODE</button>
+        <button id="btn-redeem-points" onclick="redeemPointsForCode()"
+          class="w-full hidden items-center justify-center gap-2 bg-secondary text-white rounded-xl py-3 text-xs uppercase tracking-widest font-black shadow-sm hover:opacity-90 transition-opacity">GENERATE
+          20% DISCOUNT CODE</button>
         <p id="point-redeem-status" class="text-xs font-bold text-secondary text-center w-full mt-2 hidden"></p>
       </div>
 
@@ -1379,12 +1387,16 @@
           <span class="text-secondary font-bold tracking-widest uppercase text-sm">Best Sellers</span>
           <h2 class="text-4xl md:text-5xl font-black text-primary mt-2">Signature Crafts</h2>
           <div class="flex gap-2 mt-3">
-            <span class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Coffee</span>
-            <span class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Crafts</span>
+            <span
+              class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Coffee</span>
+            <span
+              class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Crafts</span>
           </div>
         </div>
-        <a href="#rewards" class="inline-flex items-center gap-2 px-5 py-3 bg-secondary text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md group">
-          <span class="material-symbols-outlined text-base group-hover:rotate-12 transition-transform">card_giftcard</span>
+        <a href="#rewards"
+          class="inline-flex items-center gap-2 px-5 py-3 bg-secondary text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md group">
+          <span
+            class="material-symbols-outlined text-base group-hover:rotate-12 transition-transform">card_giftcard</span>
           Redeem Reward
           <span class="text-white/70 text-xs font-medium normal-case tracking-normal">600 pts</span>
         </a>
@@ -1571,11 +1583,13 @@
 
       <!-- Header -->
       <div class="text-center mb-12">
-        <span class="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+        <span
+          class="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
           <span class="material-symbols-outlined text-sm">stars</span> Loyalty Rewards
         </span>
         <h2 class="text-4xl md:text-5xl font-black text-primary mb-4">Redeem Your Rewards</h2>
-        <p class="text-on-surface-variant max-w-xl mx-auto text-sm leading-relaxed">Collect 600 points from purchases and referrals to earn a unique reward code. Enter it below to unlock your exclusive free gift!</p>
+        <p class="text-on-surface-variant max-w-xl mx-auto text-sm leading-relaxed">Collect 600 points from purchases
+          and referrals to earn a unique reward code. Enter it below to unlock your exclusive free gift!</p>
       </div>
 
       <!-- Unlock Banner -->
@@ -1585,34 +1599,41 @@
             <span class="material-symbols-outlined text-secondary text-2xl">lock</span>
           </div>
           <div class="flex-1">
-            <p class="font-black text-primary text-sm uppercase tracking-widest">Enter Your Reward Code to Unlock Gifts</p>
-            <p class="text-xs text-on-surface-variant mt-1">Generate your unique code from <strong>My Profile</strong> once you reach 600 points. Codes starting with <code class="bg-surface-container px-1 rounded">RWD-</code> unlock free gifts.</p>
+            <p class="font-black text-primary text-sm uppercase tracking-widest">Enter Your Reward Code to Unlock Gifts
+            </p>
+            <p class="text-xs text-on-surface-variant mt-1">Generate your unique code from <strong>My Profile</strong>
+              once you reach 600 points. Codes starting with <code class="bg-surface-container px-1 rounded">RWD-</code>
+              unlock free gifts.</p>
           </div>
           <div class="flex gap-2 w-full md:w-auto">
-            <input id="rewards-unlock-input" type="text" placeholder="RWD-XXXXXX" class="brew-input flex-1 md:w-48 bg-white rounded-xl px-4 py-3 text-sm font-mono font-black uppercase border border-outline/10 text-secondary tracking-widest" />
-            <button onclick="unlockRewardsGallery()" class="bg-secondary text-white rounded-xl px-6 py-3 font-bold text-sm tracking-widest hover:opacity-90 transition-opacity">UNLOCK</button>
+            <input id="rewards-unlock-input" type="text" placeholder="RWD-XXXXXX"
+              class="brew-input flex-1 md:w-48 bg-white rounded-xl px-4 py-3 text-sm font-mono font-black uppercase border border-outline/10 text-secondary tracking-widest" />
+            <button onclick="unlockRewardsGallery()"
+              class="bg-secondary text-white rounded-xl px-6 py-3 font-bold text-sm tracking-widest hover:opacity-90 transition-opacity">UNLOCK</button>
           </div>
         </div>
         <p id="rewards-unlock-status" class="text-xs font-bold mt-3 ml-0 md:ml-16 hidden"></p>
       </div>
 
-        <!-- Gift Cards Grid -->
-        <div id="rewards-gift-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-[200px]">
-          <div class="col-span-3 text-center p-12 text-on-surface-variant">Loading available rewards...</div>
-        </div>
+      <!-- Gift Cards Grid -->
+      <div id="rewards-gift-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-[200px]">
+        <div class="col-span-3 text-center p-12 text-on-surface-variant">Loading available rewards...</div>
+      </div>
 
     </div>
   </section>
 
   <!-- CLAIM GIFT MODAL -->
-  <div id="claim-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <div id="claim-modal"
+    class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
     <div class="bg-surface rounded-3xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-start mb-6">
         <div>
           <h3 class="text-2xl font-black text-primary">Claim Your Gift 🎁</h3>
           <p class="text-sm text-on-surface-variant mt-1">Tell us where to send your reward!</p>
         </div>
-        <button onclick="closeClaimModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+        <button onclick="closeClaimModal()" class="text-on-surface-variant hover:text-primary"><span
+            class="material-symbols-outlined">close</span></button>
       </div>
       <div class="text-center p-4 bg-secondary/10 rounded-2xl mb-6">
         <p class="text-xs font-bold uppercase tracking-widest text-secondary mb-1">Claiming</p>
@@ -1621,18 +1642,25 @@
       <form id="claim-form" class="space-y-4" onsubmit="submitClaim(event)">
         <input type="hidden" id="claim-code-hidden">
         <div>
-          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Your Name</label>
-          <input type="text" id="claim-name" required placeholder="Full name" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Your
+            Name</label>
+          <input type="text" id="claim-name" required placeholder="Full name"
+            class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
         </div>
         <div>
-          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">WhatsApp Number</label>
-          <input type="tel" id="claim-phone" required placeholder="10-digit number" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">WhatsApp
+            Number</label>
+          <input type="tel" id="claim-phone" required placeholder="10-digit number"
+            class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
         </div>
         <div>
-          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Delivery Address</label>
-          <textarea id="claim-address" required rows="2" placeholder="Full address for delivery" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20 resize-none"></textarea>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Delivery
+            Address</label>
+          <textarea id="claim-address" required rows="2" placeholder="Full address for delivery"
+            class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20 resize-none"></textarea>
         </div>
-        <button type="submit" id="claim-submit-btn" class="w-full py-4 bg-secondary text-white rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+        <button type="submit" id="claim-submit-btn"
+          class="w-full py-4 bg-secondary text-white rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
           <span class="material-symbols-outlined">send</span> Send Claim via WhatsApp
         </button>
       </form>
@@ -2096,9 +2124,9 @@
             return;
           }
           if (pData.type === "freeGift" || pData.type === "rewardCode") {
-             statusEl.textContent = "This code unlocks a gift, not a cart checkout discount.";
-             statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
-             return;
+            statusEl.textContent = "This code unlocks a gift, not a cart checkout discount.";
+            statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+            return;
           }
           currentDiscountType = "discountCode";
           appliedPromoCode = codeInput;
@@ -2115,11 +2143,9 @@
       }
 
       // 2. Check Referrals
-        statusEl.textContent = "Referral codes are only valid for your first order. Try a promo code instead!";
-        statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
-        return;
-      }
-
+      statusEl.textContent = "Referral codes are only valid for your first order. Try a promo code instead!";
+      statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+      return;
       if (myCode && codeInput === myCode) {
         statusEl.textContent = "You cannot use your own referral code.";
         statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
@@ -2289,7 +2315,7 @@
             });
             profilePoints = Math.max(0, profilePoints - 600); // update local state
           }
-          
+
           if (appliedPromoCode) {
             try {
               await db.collection("promoCodes").doc(appliedPromoCode).update({
@@ -2416,9 +2442,9 @@
       db.collection('users').doc(user.uid).get().then(doc => {
         if (!doc.exists) return;
         const d = doc.data();
-        if (d.name)    document.getElementById('f-name').value    = d.name;
-        if (d.email)   document.getElementById('f-email').value   = d.email;
-        if (d.phone)   document.getElementById('f-phone').value   = d.phone;
+        if (d.name) document.getElementById('f-name').value = d.name;
+        if (d.email) document.getElementById('f-email').value = d.email;
+        if (d.phone) document.getElementById('f-phone').value = d.phone;
         if (d.address) document.getElementById('f-address').value = d.address;
       });
     }
@@ -2523,7 +2549,7 @@
     // ──────────────────────────────────────────────
 
     // Toggle password visibility
-    window.togglePwd = function(inputId, btn) {
+    window.togglePwd = function (inputId, btn) {
       const inp = document.getElementById(inputId);
       if (inp.type === 'password') {
         inp.type = 'text';
@@ -2535,7 +2561,7 @@
     };
 
     let authMode = 'login';
-    window.switchAuthTab = function(tab) {
+    window.switchAuthTab = function (tab) {
       authMode = tab;
       const isSignup = tab === 'signup';
       document.getElementById('tab-login').className = isSignup
@@ -2595,18 +2621,18 @@
     }
 
     // ── LOGIN: username OR email → Firebase signIn ──
-    window.handleLogin = async function(e) {
+    window.handleLogin = async function (e) {
       e.preventDefault();
       const errEl = document.getElementById('login-error');
-      const btn   = document.getElementById('login-btn');
-      const txt   = document.getElementById('login-btn-text');
+      const btn = document.getElementById('login-btn');
+      const txt = document.getElementById('login-btn-text');
       errEl.classList.add('hidden');
       btn.disabled = true;
       txt.textContent = 'Signing in…';
 
-      const input    = document.getElementById('login-username').value.trim();
+      const input = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
-      const isEmail  = input.includes('@'); // detect email vs username
+      const isEmail = input.includes('@'); // detect email vs username
 
       try {
         let email = input;
@@ -2640,22 +2666,22 @@
     };
 
     // ── SIGNUP: validate uniqueness → Firebase createUser → Firestore store ──
-    window.handleSignup = async function(e) {
+    window.handleSignup = async function (e) {
       e.preventDefault();
       const errEl = document.getElementById('signup-error');
-      const btn   = document.getElementById('signup-btn');
-      const txt   = document.getElementById('signup-btn-text');
+      const btn = document.getElementById('signup-btn');
+      const txt = document.getElementById('signup-btn-text');
       errEl.classList.add('hidden');
       btn.disabled = true;
       txt.textContent = 'Creating account…';
 
-      const name      = document.getElementById('auth-name').value.trim();
-      const email     = document.getElementById('auth-email').value.trim();
-      const phone     = document.getElementById('auth-phone').value.trim();
-      const address   = document.getElementById('auth-address').value.trim();
-      const username  = document.getElementById('auth-username').value.trim().toLowerCase();
-      const password  = document.getElementById('auth-password').value;
-      const refCode   = document.getElementById('auth-ref-code-input').value.trim().toUpperCase();
+      const name = document.getElementById('auth-name').value.trim();
+      const email = document.getElementById('auth-email').value.trim();
+      const phone = document.getElementById('auth-phone').value.trim();
+      const address = document.getElementById('auth-address').value.trim();
+      const username = document.getElementById('auth-username').value.trim().toLowerCase();
+      const password = document.getElementById('auth-password').value;
+      const refCode = document.getElementById('auth-ref-code-input').value.trim().toUpperCase();
 
       // Basic username validation
       if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
@@ -2688,18 +2714,18 @@
 
         // 5. Store full user profile in Firestore
         await db.collection('users').doc(user.uid).set({
-          name:          name,
-          email:         email,
-          phone:         phone,
-          address:       address,
-          username:      username,
+          name: name,
+          email: email,
+          phone: phone,
+          address: address,
+          username: username,
           // NOTE: password is NOT stored here — Firebase Auth manages it securely
-          referredBy:    refCode || null,
-          referralCode:  newRefCode,
-          points:        0,
+          referredBy: refCode || null,
+          referralCode: newRefCode,
+          points: 0,
           referralCount: 0,
-          hasOrdered:    false,
-          createdAt:     firebase.firestore.FieldValue.serverTimestamp()
+          hasOrdered: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         closeAuth();
@@ -2709,10 +2735,10 @@
       } catch (err) {
         console.error('Signup error:', err);
         let msg = 'Signup failed. Please try again.';
-        if (err.code === 'username-taken')              msg = err.message;
+        if (err.code === 'username-taken') msg = err.message;
         else if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered. Try logging in.';
-        else if (err.code === 'auth/weak-password')    msg = 'Password is too weak (min 8 characters).';
-        else if (err.code === 'auth/invalid-email')    msg = 'Invalid email address.';
+        else if (err.code === 'auth/weak-password') msg = 'Password is too weak (min 8 characters).';
+        else if (err.code === 'auth/invalid-email') msg = 'Invalid email address.';
         errEl.textContent = msg;
         errEl.classList.remove('hidden');
       } finally {
@@ -2771,20 +2797,20 @@
               }
 
               const redeemBtn = document.getElementById("btn-redeem-points");
-              if(redeemBtn) {
-                 if (profilePoints >= 600) {
-                     redeemBtn.classList.remove("hidden");
-                     redeemBtn.classList.add("flex");
-                 } else {
-                     redeemBtn.classList.remove("flex");
-                     redeemBtn.classList.add("hidden");
-                 }
+              if (redeemBtn) {
+                if (profilePoints >= 600) {
+                  redeemBtn.classList.remove("hidden");
+                  redeemBtn.classList.add("flex");
+                } else {
+                  redeemBtn.classList.remove("flex");
+                  redeemBtn.classList.add("hidden");
+                }
               }
 
               // One clean prefill of checkout form — no duplicates
-              document.getElementById("f-name").value    = data.name    || "";
-              document.getElementById("f-email").value   = data.email   || "";
-              document.getElementById("f-phone").value   = data.phone   || user.phoneNumber || "";
+              document.getElementById("f-name").value = data.name || "";
+              document.getElementById("f-email").value = data.email || "";
+              document.getElementById("f-phone").value = data.phone || user.phoneNumber || "";
               document.getElementById("f-address").value = data.address || "";
             } else {
               document.getElementById("profile-name").value = "Coffee Lover";
@@ -3318,10 +3344,10 @@
     // ──────────────────────────────────────────────
     //  ✨ PROMO CODE / OFFERS LOGIC
     // ──────────────────────────────────────────────
-    window.applyListingOfferCode = async function() {
+    window.applyListingOfferCode = async function () {
       const code = document.getElementById("f-redeem-list-input").value.trim().toUpperCase();
       const statusEl = document.getElementById("redeem-list-status");
-      
+
       if (!code) {
         statusEl.textContent = "Please enter a code.";
         statusEl.className = "text-xs font-bold mt-2 text-error";
@@ -3334,30 +3360,30 @@
       try {
         const doc = await db.collection("promoCodes").doc(code).get();
         if (!doc.exists) {
-           statusEl.textContent = "Invalid or expired code.";
-           statusEl.className = "text-xs font-bold mt-2 text-error";
-           return;
-        }
-        
-        const data = doc.data();
-        if (data.limit && data.uses >= data.limit) {
-           statusEl.textContent = "This code has reached its maximum usage limit.";
-           statusEl.className = "text-xs font-bold mt-2 text-error";
-           return;
+          statusEl.textContent = "Invalid or expired code.";
+          statusEl.className = "text-xs font-bold mt-2 text-error";
+          return;
         }
 
-        if(data.type === "freeGift") {
-           statusEl.textContent = "Gift Unlocked! Proceed to checkout.";
-           statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
-        } else {
-           statusEl.textContent = "Offer Unlocked! We're redirecting you to checkout...";
-           statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
+        const data = doc.data();
+        if (data.limit && data.uses >= data.limit) {
+          statusEl.textContent = "This code has reached its maximum usage limit.";
+          statusEl.className = "text-xs font-bold mt-2 text-error";
+          return;
         }
-        
+
+        if (data.type === "freeGift") {
+          statusEl.textContent = "Gift Unlocked! Proceed to checkout.";
+          statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
+        } else {
+          statusEl.textContent = "Offer Unlocked! We're redirecting you to checkout...";
+          statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
+        }
+
         document.getElementById("f-ref-code").value = code;
         setTimeout(() => {
-           statusEl.textContent = "";
-           openOrderModal();
+          statusEl.textContent = "";
+          openOrderModal();
         }, 1500);
 
       } catch (e) {
@@ -3366,22 +3392,22 @@
       }
     };
 
-    window.loadFreeGiftGallery = function() {
+    window.loadFreeGiftGallery = function () {
       db.collection("promoCodes")
         .where("type", "==", "freeGift")
         .get().then(snapshot => {
-           const gallery = document.getElementById("free-gift-gallery");
-           if(snapshot.empty) {
-             gallery.innerHTML = `<div class="text-[10px] text-on-surface-variant w-full pt-1">Check back later for exciting gifts!</div>`;
-             return;
-           }
-           let html = "";
-           let found = false;
-           snapshot.forEach(doc => {
-             const data = doc.data();
-             if(data.img && (!data.limit || data.uses < data.limit)) {
-                found = true;
-                html += `
+          const gallery = document.getElementById("free-gift-gallery");
+          if (snapshot.empty) {
+            gallery.innerHTML = `<div class="text-[10px] text-on-surface-variant w-full pt-1">Check back later for exciting gifts!</div>`;
+            return;
+          }
+          let html = "";
+          let found = false;
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.img && (!data.limit || data.uses < data.limit)) {
+              found = true;
+              html += `
                   <div class="snap-start flex-shrink-0 w-32 h-20 relative rounded-xl overflow-hidden group border border-outline/10">
                     <img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
                     <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
@@ -3391,52 +3417,52 @@
                     </div>
                   </div>
                 `;
-             }
-           });
-           gallery.innerHTML = found ? html : `<div class="text-[10px] text-on-surface-variant w-full pt-1">All free gifts have been claimed for now.</div>`;
+            }
+          });
+          gallery.innerHTML = found ? html : `<div class="text-[10px] text-on-surface-variant w-full pt-1">All free gifts have been claimed for now.</div>`;
         });
     };
 
-    window.redeemPointsForCode = async function() {
-       const statusEl = document.getElementById("point-redeem-status");
-       const btn = document.getElementById("btn-redeem-points");
+    window.redeemPointsForCode = async function () {
+      const statusEl = document.getElementById("point-redeem-status");
+      const btn = document.getElementById("btn-redeem-points");
 
-       if(!isLoggedIn || !user) return;
-       if(profilePoints < 600) return;
+      if (!isLoggedIn || !user) return;
+      if (profilePoints < 600) return;
 
-       if(!confirm("Are you sure you want to deduct 600 points for a unique 20% discount code?")) return;
+      if (!confirm("Are you sure you want to deduct 600 points for a unique 20% discount code?")) return;
 
-       btn.disabled = true;
-       statusEl.classList.remove("hidden");
-       statusEl.textContent = "Generating code...";
-       statusEl.className = "text-xs font-bold text-secondary text-center w-full mt-2 animate-pulse block";
+      btn.disabled = true;
+      statusEl.classList.remove("hidden");
+      statusEl.textContent = "Generating code...";
+      statusEl.className = "text-xs font-bold text-secondary text-center w-full mt-2 animate-pulse block";
 
-       try {
-          await db.collection("users").doc(user.uid).update({
-             points: firebase.firestore.FieldValue.increment(-600)
-          });
+      try {
+        await db.collection("users").doc(user.uid).update({
+          points: firebase.firestore.FieldValue.increment(-600)
+        });
 
-          const uniqueCode = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-          
-          await db.collection("promoCodes").doc(uniqueCode).set({
-             type: "discountCode",
-             discountPct: 20,
-             limit: 1,
-             uses: 0,
-             uid: user.uid,
-             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+        const uniqueCode = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-          statusEl.className = "text-xs font-bold text-[#006e20] text-center w-full mt-2 bg-green-50/50 p-3 border border-green-200/50 rounded-xl leading-relaxed block";
-          statusEl.innerHTML = `Your unique 20% discount code is: <br/><span class="text-xl font-mono tracking-widest text-[#006e20] font-black mt-2 mb-1 block select-all bg-white py-2 rounded-lg border border-[#006e20]/20 shadow-sm">${uniqueCode}</span><span class="text-[10px]">Copied automatically! Use it at checkout.</span>`;
-          
-          navigator.clipboard.writeText(uniqueCode).catch(()=>{});
-       } catch (e) {
-          statusEl.className = "text-xs font-bold text-error text-center w-full mt-2 block";
-          statusEl.textContent = "Error generating code. Please try again.";
-          btn.disabled = false;
-       }
-     };
+        await db.collection("promoCodes").doc(uniqueCode).set({
+          type: "discountCode",
+          discountPct: 20,
+          limit: 1,
+          uses: 0,
+          uid: user.uid,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        statusEl.className = "text-xs font-bold text-[#006e20] text-center w-full mt-2 bg-green-50/50 p-3 border border-green-200/50 rounded-xl leading-relaxed block";
+        statusEl.innerHTML = `Your unique 20% discount code is: <br/><span class="text-xl font-mono tracking-widest text-[#006e20] font-black mt-2 mb-1 block select-all bg-white py-2 rounded-lg border border-[#006e20]/20 shadow-sm">${uniqueCode}</span><span class="text-[10px]">Copied automatically! Use it at checkout.</span>`;
+
+        navigator.clipboard.writeText(uniqueCode).catch(() => { });
+      } catch (e) {
+        statusEl.className = "text-xs font-bold text-error text-center w-full mt-2 block";
+        statusEl.textContent = "Error generating code. Please try again.";
+        btn.disabled = false;
+      }
+    };
 
     // ──────────────────────────────────────────────
     //  🎁 REWARDS GALLERY & CLAIMING
@@ -3445,13 +3471,13 @@
     let unlockedRewardCode = "";
 
     // Pre-load the gift grid (locked) when page loads
-    window.loadRewardsGallery = function() {
+    window.loadRewardsGallery = function () {
       const grid = document.getElementById("rewards-gift-grid");
       grid.innerHTML = `<div class="col-span-full text-center p-10 text-on-surface-variant text-sm">Loading gifts...</div>`;
       db.collection("promoCodes").where("type", "==", "freeGift").get().then(snapshot => {
 
         // If no gifts exist, seed sample data automatically
-        if(snapshot.empty) {
+        if (snapshot.empty) {
           seedSampleGifts();
           return;
         }
@@ -3462,15 +3488,15 @@
           const data = doc.data();
           const remaining = data.limit ? data.limit - (data.uses || 0) : null;
           const available = !data.limit || (data.uses || 0) < data.limit;
-          if(available) {
+          if (available) {
             found = true;
             html += `
             <div class="glass-card rounded-2xl overflow-hidden group relative border border-outline/10 flex flex-row" style="min-height:140px">
               <div class="w-40 md:w-52 shrink-0 overflow-hidden relative">
                 ${data.img
-                  ? `<img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 absolute inset-0">`
-                  : `<div class="w-full h-full bg-secondary/10 flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-secondary/40">card_giftcard</span></div>`
-                }
+                ? `<img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 absolute inset-0">`
+                : `<div class="w-full h-full bg-secondary/10 flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-secondary/40">card_giftcard</span></div>`
+              }
               </div>
               <div class="flex flex-col flex-1 p-5 justify-between">
                 <div>
@@ -3504,17 +3530,17 @@
       samples.forEach(s => {
         batch.set(db.collection("promoCodes").doc(s.code), { type: "freeGift", desc: s.desc, img: s.img, limit: s.limit, uses: 0 });
       });
-      batch.commit().then(() => loadRewardsGallery()).catch(() => {});
+      batch.commit().then(() => loadRewardsGallery()).catch(() => { });
     }
 
-    window.unlockRewardsGallery = async function() {
+    window.unlockRewardsGallery = async function () {
       const input = document.getElementById("rewards-unlock-input");
       const code = input.value.trim().toUpperCase();
       const statusEl = document.getElementById("rewards-unlock-status");
       statusEl.classList.remove("hidden");
 
       // Must be RWD- prefixed (generated 20% code)
-      if(!code.startsWith("RWD-")) {
+      if (!code.startsWith("RWD-")) {
         statusEl.textContent = "❌ Only reward codes (starting with RWD-) unlock free gifts.";
         statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
         return;
@@ -3525,23 +3551,23 @@
 
       try {
         const doc = await db.collection("promoCodes").doc(code).get();
-        if(!doc.exists) {
+        if (!doc.exists) {
           statusEl.textContent = "❌ Invalid code. Please double-check and try again.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
         const data = doc.data();
-        if(data.limit && (data.uses || 0) >= data.limit) {
+        if (data.limit && (data.uses || 0) >= data.limit) {
           statusEl.textContent = "❌ This code has already been used.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
-        if(data.type === "freeGift") {
+        if (data.type === "freeGift") {
           statusEl.textContent = "❌ This is a free gift code, not a reward unlock code. Proceed to the gift section.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
-        if(data.type === "discountCode" || data.type === "brew20") {
+        if (data.type === "discountCode" || data.type === "brew20") {
           statusEl.textContent = "❌ This is a cart discount code. Please enter it in the checkout screen.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
@@ -3561,14 +3587,14 @@
         statusEl.textContent = "✅ Unlocked! Choose one gift to claim — your reward is ready.";
         statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-[#006e20] block";
 
-      } catch(e) {
+      } catch (e) {
         statusEl.textContent = "❌ Error verifying code. Please try again.";
         statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
       }
     };
 
-    window.openClaimModal = function(giftCode, giftName) {
-      if(!rewardsUnlocked) return;
+    window.openClaimModal = function (giftCode, giftName) {
+      if (!rewardsUnlocked) return;
       document.getElementById("claim-gift-name").textContent = giftName;
       document.getElementById("claim-code-hidden").value = giftCode;
       document.getElementById("claim-form").reset();
@@ -3576,11 +3602,11 @@
       document.getElementById("claim-gift-name").textContent = giftName; // re-set
 
       // Pre-fill if logged in
-      if(isLoggedIn && user) {
+      if (isLoggedIn && user) {
         const profile = document.getElementById("profile-name");
-        if(profile) document.getElementById("claim-name").value = profile.textContent || "";
+        if (profile) document.getElementById("claim-name").value = profile.textContent || "";
         const phone = document.getElementById("profile-phone");
-        if(phone) document.getElementById("claim-phone").value = phone.textContent || "";
+        if (phone) document.getElementById("claim-phone").value = phone.textContent || "";
       }
 
       const modal = document.getElementById("claim-modal");
@@ -3588,13 +3614,13 @@
       modal.classList.add("flex");
     };
 
-    window.closeClaimModal = function() {
+    window.closeClaimModal = function () {
       const modal = document.getElementById("claim-modal");
       modal.classList.add("hidden");
       modal.classList.remove("flex");
     };
 
-    window.submitClaim = async function(e) {
+    window.submitClaim = async function (e) {
       e.preventDefault();
       const name = document.getElementById("claim-name").value.trim();
       const phone = document.getElementById("claim-phone").value.trim();
@@ -3640,7 +3666,7 @@
         closeClaimModal();
         showToast("🎉 Claim sent! Your gift is on its way.");
 
-      } catch(err) {
+      } catch (err) {
         btn.disabled = false;
         btn.innerHTML = `<span class="material-symbols-outlined">send</span> Send Claim via WhatsApp`;
         showToast("Error sending claim. Please try again.");
