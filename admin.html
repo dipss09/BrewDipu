@@ -88,6 +88,7 @@
         <button onclick="switchTab('orders')" id="tab-btn-orders" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 bg-primary text-white transition-colors"><span class="material-symbols-outlined">receipt_long</span> Orders</button>
         <button onclick="switchTab('products')" id="tab-btn-products" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">inventory_2</span> Products</button>
         <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">reviews</span> Reviews</button>
+        <button onclick="switchTab('offers')" id="tab-btn-offers" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">redeem</span> Rewards & Promos</button>
         <button onclick="switchTab('users')" id="tab-btn-users" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">group</span> Users & Referrals</button>
         <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">settings</span> Store Settings</button>
       </nav>
@@ -172,19 +173,6 @@
           <div class="p-8 text-center text-on-surface-variant col-span-full">Loading products...</div>
         </div>
 
-        <div class="mt-16 mb-8 flex flex-col md:flex-row justify-between md:items-center border-t border-outline/20 pt-16 gap-4">
-          <div>
-            <h2 class="text-3xl font-black text-primary">Redeem Codes & Offers</h2>
-            <p class="text-sm text-on-surface-variant mt-1">Manage promotional codes, 20% discounts, and free gift offers.</p>
-          </div>
-          <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="px-6 py-3 bg-secondary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
-            <span class="material-symbols-outlined text-sm">add</span> Add Offer
-          </button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="offers-grid">
-          <div class="p-8 text-center text-on-surface-variant col-span-full">Loading offers...</div>
-        </div>
-
         <!-- Add/Edit Product Modal -->
         <div id="add-product-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-center items-center p-4">
           <div class="bg-surface rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -229,26 +217,41 @@
             </form>
           </div>
         </div>
+      </section>
+
+      <!-- REWARDS & PROMOS TAB -->
+      <section id="tab-offers" class="tab-pane hidden">
+        <div class="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
+          <div>
+            <h2 class="text-3xl font-black text-primary">Redeem Rewards & Promos</h2>
+            <p class="text-sm text-on-surface-variant mt-1">Upload gift photos & text, set usage limits on promo codes. Free Gift items appear in the frontend gallery.</p>
+          </div>
+          <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="px-6 py-3 bg-secondary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shrink-0">
+            <span class="material-symbols-outlined text-sm">add</span> Add Reward / Code
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="offers-grid">
+          <div class="p-8 text-center text-on-surface-variant col-span-full">Loading offers...</div>
+        </div>
 
         <!-- Add/Edit Offer Modal -->
         <div id="add-offer-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-center items-center p-4">
-          <div class="bg-surface rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div class="bg-surface rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-2xl font-black text-primary">Add Offer / Code</h3>
+              <h3 class="text-2xl font-black text-primary" id="offer-modal-title">Add Reward / Code</h3>
               <button onclick="closeOfferModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form id="offer-form" class="space-y-4">
               <div>
-                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Promo Code</label>
-                <input type="text" id="offer-code" required placeholder="e.g. SUMMER20 or GIFTY" class="w-full bg-white rounded-xl p-3 border border-outline/20 font-mono uppercase font-bold text-secondary tracking-widest">
-                <p class="text-[10px] text-on-surface-variant mt-1">Leave empty to auto-generate a unique code.</p>
+                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Promo Code <span class="text-on-surface-variant/60 normal-case font-normal">(leave blank to auto-generate)</span></label>
+                <input type="text" id="offer-code" placeholder="e.g. SUMMER20 or GIFTY" class="w-full bg-white rounded-xl p-3 border border-outline/20 font-mono uppercase font-bold text-secondary tracking-widest">
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Offer Type</label>
                   <select id="offer-type" required class="w-full bg-white rounded-xl p-3 border border-outline/20" onchange="toggleOfferImageField()">
-                    <option value="brew20">20% Discount</option>
-                    <option value="freeGift">Free Gift</option>
+                    <option value="brew20">20% Discount (cart)</option>
+                    <option value="freeGift">Free Gift (gallery)</option>
                   </select>
                 </div>
                 <div>
@@ -256,15 +259,20 @@
                   <input type="number" id="offer-limit" required min="1" value="30" class="w-full bg-white rounded-xl p-3 border border-outline/20">
                 </div>
               </div>
-              <div id="offer-img-block" class="hidden">
-                <label class="text-xs font-bold uppercase tracking-widest text-secondary mb-1 block pb-1">Gift Description (Text)</label>
-                <input type="text" id="offer-desc" placeholder="e.g. Handmade Brew Keychain" class="w-full bg-white rounded-xl p-3 border border-outline/20 mb-3">
-                <label class="text-xs font-bold uppercase tracking-widest text-secondary mb-1 block pb-1">Gift Image Upload (Required for Free Gift)</label>
-                <input type="file" id="offer-img" accept="image/*" class="w-full bg-white rounded-xl p-3 border border-outline/20">
-                <div id="offer-upload-progress" class="text-xs text-secondary mt-1 hidden font-bold animate-pulse">Compressing...</div>
+              <div id="offer-img-block" class="hidden space-y-3 p-4 bg-surface-container-high rounded-2xl border border-outline/10">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-secondary">Free Gift Details (shown in gallery)</p>
+                <div>
+                  <label class="text-xs font-bold text-on-surface-variant mb-1 block">Gift Name / Short Description</label>
+                  <input type="text" id="offer-desc" placeholder="e.g. Handmade BrewDipu Keychain" class="w-full bg-white rounded-xl p-3 border border-outline/20">
+                </div>
+                <div>
+                  <label class="text-xs font-bold text-on-surface-variant mb-1 block">Gift Image Upload</label>
+                  <input type="file" id="offer-img" accept="image/*" class="w-full bg-white rounded-xl p-3 border border-outline/20">
+                  <div id="offer-upload-progress" class="text-xs text-secondary mt-1 hidden font-bold animate-pulse">Compressing image...</div>
+                </div>
               </div>
-              <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 mt-4 hover:bg-primary-container transition-colors">
-                <span class="material-symbols-outlined">save</span> Save Offer
+              <button type="submit" class="w-full py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 mt-2 hover:bg-primary-container transition-colors">
+                <span class="material-symbols-outlined">save</span> Save
               </button>
             </form>
           </div>

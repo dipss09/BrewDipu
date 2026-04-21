@@ -850,6 +850,8 @@
           href="#about">About</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#order-section">Order</a>
+        <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300 flex items-center gap-1"
+          href="#rewards"><span class="material-symbols-outlined text-sm" style="font-size:1rem">redeem</span>Redeem Reward</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#contact">Contact</a>
       </div>
@@ -1583,6 +1585,90 @@
       </div>
     </div>
   </section>
+
+  <!-- ══════════════ REDEEM REWARDS SECTION ══════════════ -->
+  <section class="py-20 px-6 bg-gradient-to-b from-surface-container to-surface" id="rewards">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <span class="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+          <span class="material-symbols-outlined text-sm">stars</span> Loyalty Rewards
+        </span>
+        <h2 class="text-4xl md:text-5xl font-black text-primary mb-4">Redeem Your Rewards</h2>
+        <p class="text-on-surface-variant max-w-xl mx-auto text-sm leading-relaxed">Collect 600 points from purchases and referrals to earn a unique reward code. Enter it below to unlock your exclusive free gift!</p>
+      </div>
+
+      <!-- Unlock Banner -->
+      <div class="glass-card rounded-3xl p-6 md:p-8 mb-10 border border-outline/10">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary text-2xl">lock</span>
+          </div>
+          <div class="flex-1">
+            <p class="font-black text-primary text-sm uppercase tracking-widest">Enter Your Reward Code to Unlock Gifts</p>
+            <p class="text-xs text-on-surface-variant mt-1">Generate your unique code from <strong>My Profile</strong> once you reach 600 points. Codes starting with <code class="bg-surface-container px-1 rounded">RWD-</code> unlock free gifts.</p>
+          </div>
+          <div class="flex gap-2 w-full md:w-auto">
+            <input id="rewards-unlock-input" type="text" placeholder="RWD-XXXXXX" class="brew-input flex-1 md:w-48 bg-white rounded-xl px-4 py-3 text-sm font-mono font-black uppercase border border-outline/10 text-secondary tracking-widest" />
+            <button onclick="unlockRewardsGallery()" class="bg-secondary text-white rounded-xl px-6 py-3 font-bold text-sm tracking-widest hover:opacity-90 transition-opacity">UNLOCK</button>
+          </div>
+        </div>
+        <p id="rewards-unlock-status" class="text-xs font-bold mt-3 ml-0 md:ml-16 hidden"></p>
+      </div>
+
+      <!-- Gifts Gallery -->
+      <div id="rewards-gallery-container" class="relative">
+        <!-- Lock overlay -->
+        <div id="rewards-gallery-lock" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-surface/80 backdrop-blur-sm rounded-3xl transition-all duration-500">
+          <span class="material-symbols-outlined text-5xl text-secondary mb-3">lock</span>
+          <p class="font-black text-primary text-base">Gallery Locked</p>
+          <p class="text-xs text-on-surface-variant mt-1 text-center max-w-xs">Enter a valid reward code above to see and claim your free gifts.</p>
+        </div>
+
+        <!-- Gift Cards Grid -->
+        <div id="rewards-gift-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[200px]">
+          <div class="col-span-3 text-center p-12 text-on-surface-variant">Loading available rewards...</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CLAIM GIFT MODAL -->
+  <div id="claim-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-surface rounded-3xl p-8 max-w-md w-full shadow-2xl">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <h3 class="text-2xl font-black text-primary">Claim Your Gift 🎁</h3>
+          <p class="text-sm text-on-surface-variant mt-1">Tell us where to send your reward!</p>
+        </div>
+        <button onclick="closeClaimModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="text-center p-4 bg-secondary/10 rounded-2xl mb-6">
+        <p class="text-xs font-bold uppercase tracking-widest text-secondary mb-1">Claiming</p>
+        <p id="claim-gift-name" class="font-black text-primary text-lg">—</p>
+      </div>
+      <form id="claim-form" class="space-y-4" onsubmit="submitClaim(event)">
+        <input type="hidden" id="claim-code-hidden">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Your Name</label>
+          <input type="text" id="claim-name" required placeholder="Full name" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">WhatsApp Number</label>
+          <input type="tel" id="claim-phone" required placeholder="10-digit number" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Delivery Address</label>
+          <textarea id="claim-address" required rows="2" placeholder="Full address for delivery" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20 resize-none"></textarea>
+        </div>
+        <button type="submit" id="claim-submit-btn" class="w-full py-4 bg-secondary text-white rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">send</span> Send Claim via WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
 
   <!-- ══════════════ ORDER & CONTACT SECTION ══════════════ -->
   <section class="py-24 px-8 bg-surface-container-low" id="order-section">
@@ -3254,8 +3340,10 @@
         closeAll();
       });
 
-      // Initialize Promos Gallery
+      // Initialize Promo Banner Gallery
       loadFreeGiftGallery();
+      // Initialize dedicated Rewards section gallery
+      loadRewardsGallery();
     });
 
     // ──────────────────────────────────────────────
@@ -3385,6 +3473,194 @@
           statusEl.textContent = "Error generating code. Please try again.";
           btn.disabled = false;
        }
+     };
+
+    // ──────────────────────────────────────────────
+    //  🎁 REWARDS GALLERY & CLAIMING
+    // ──────────────────────────────────────────────
+    let rewardsUnlocked = false;
+    let unlockedRewardCode = "";
+
+    // Pre-load the gift grid (blurred/locked) when page loads
+    window.loadRewardsGallery = function() {
+      const grid = document.getElementById("rewards-gift-grid");
+      db.collection("promoCodes").where("type", "==", "freeGift").get().then(snapshot => {
+        if(snapshot.empty) {
+          grid.innerHTML = `<div class="col-span-3 text-center p-12 text-on-surface-variant">
+            <span class="material-symbols-outlined text-4xl mb-3 block">card_giftcard</span>
+            No free gifts available right now. Check back soon!
+          </div>`;
+          return;
+        }
+        let html = "";
+        let found = false;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const available = !data.limit || (data.uses || 0) < data.limit;
+          if(available) {
+            found = true;
+            html += `
+            <div class="glass-card rounded-3xl overflow-hidden group relative border border-outline/10 flex flex-col">
+              ${data.img
+                ? `<div class="h-48 overflow-hidden"><img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"></div>`
+                : `<div class="h-48 bg-secondary/10 flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-secondary/40">card_giftcard</span></div>`
+              }
+              <div class="p-5 flex flex-col flex-1">
+                <span class="text-[10px] font-black uppercase tracking-widest text-secondary mb-1">Free Gift</span>
+                <h3 class="font-black text-primary text-base leading-tight mb-2">${data.desc || "Exclusive BrewDipu Gift"}</h3>
+                <p class="text-xs text-on-surface-variant mb-4">Limited to <strong>${data.limit || "∞"}</strong> lucky customers &bull; <strong>${(data.limit || 0) - (data.uses || 0)}</strong> remaining</p>
+                <div class="mt-auto">
+                  <button onclick="openClaimModal('${doc.id}', '${(data.desc || 'Exclusive Gift').replace(/'/g, "&apos;")}')" 
+                    class="claim-btn w-full py-3 bg-secondary text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:opacity-90 transition-opacity flex items-center justify-center gap-2 opacity-40 pointer-events-none" 
+                    disabled data-gift="${doc.id}">
+                    <span class="material-symbols-outlined text-sm">lock</span> Locked
+                  </button>
+                </div>
+              </div>
+            </div>`;
+          }
+        });
+        grid.innerHTML = found ? html : `<div class="col-span-3 text-center p-12 text-on-surface-variant">All gifts have been claimed for now! Come back later.</div>`;
+      }).catch(() => {
+        grid.innerHTML = `<div class="col-span-3 text-center p-12 text-on-surface-variant">Could not load rewards. Please refresh the page.</div>`;
+      });
+    };
+
+    window.unlockRewardsGallery = async function() {
+      const input = document.getElementById("rewards-unlock-input");
+      const code = input.value.trim().toUpperCase();
+      const statusEl = document.getElementById("rewards-unlock-status");
+      statusEl.classList.remove("hidden");
+
+      // Block BREW20 & generic discount-only codes
+      if(!code.startsWith("RWD-")) {
+        statusEl.textContent = code === "BREW20"
+          ? "❌ BREW20 is a cart discount code only. Use it at checkout, not here."
+          : "❌ Only reward codes starting with RWD- can unlock gifts.";
+        statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+        return;
+      }
+
+      statusEl.textContent = "Verifying code...";
+      statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-on-surface-variant block animate-pulse";
+
+      try {
+        const doc = await db.collection("promoCodes").doc(code).get();
+        if(!doc.exists) {
+          statusEl.textContent = "❌ Invalid code. Please check and try again.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        const data = doc.data();
+        if(data.limit && (data.uses || 0) >= data.limit) {
+          statusEl.textContent = "❌ This code has already been fully used.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+
+        // Valid! Unlock the gallery
+        rewardsUnlocked = true;
+        unlockedRewardCode = code;
+
+        // Remove lock overlay
+        const lockEl = document.getElementById("rewards-gallery-lock");
+        lockEl.classList.add("opacity-0", "pointer-events-none");
+        lockEl.style.transition = "opacity 0.5s ease";
+
+        // Enable all claim buttons
+        document.querySelectorAll(".claim-btn").forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove("opacity-40", "pointer-events-none");
+          btn.innerHTML = `<span class="material-symbols-outlined text-sm">redeem</span> Claim This Gift`;
+        });
+
+        statusEl.textContent = "✅ Unlocked! You can now claim one free gift below. Choose wisely!";
+        statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-[#006e20] block";
+
+      } catch(e) {
+        statusEl.textContent = "❌ Error verifying code. Please try again.";
+        statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+      }
+    };
+
+    window.openClaimModal = function(giftCode, giftName) {
+      if(!rewardsUnlocked) return;
+      document.getElementById("claim-gift-name").textContent = giftName;
+      document.getElementById("claim-code-hidden").value = giftCode;
+      document.getElementById("claim-form").reset();
+      document.getElementById("claim-code-hidden").value = giftCode; // re-set after reset
+      document.getElementById("claim-gift-name").textContent = giftName; // re-set
+
+      // Pre-fill if logged in
+      if(isLoggedIn && user) {
+        const profile = document.getElementById("profile-name");
+        if(profile) document.getElementById("claim-name").value = profile.textContent || "";
+        const phone = document.getElementById("profile-phone");
+        if(phone) document.getElementById("claim-phone").value = phone.textContent || "";
+      }
+
+      const modal = document.getElementById("claim-modal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    window.closeClaimModal = function() {
+      const modal = document.getElementById("claim-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    window.submitClaim = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById("claim-name").value.trim();
+      const phone = document.getElementById("claim-phone").value.trim();
+      const address = document.getElementById("claim-address").value.trim();
+      const giftName = document.getElementById("claim-gift-name").textContent;
+      const giftCode = document.getElementById("claim-code-hidden").value;
+      const rewardCode = unlockedRewardCode;
+      const btn = document.getElementById("claim-submit-btn");
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span> Sending...`;
+
+      try {
+        // Increment usage of the reward code (burn it)
+        await db.collection("promoCodes").doc(rewardCode).update({
+          uses: firebase.firestore.FieldValue.increment(1)
+        });
+
+        // Build WhatsApp message
+        const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        const msg = `🎁 FREE GIFT CLAIM — BrewDipu\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📦 Gift: ${giftName}\n` +
+          `🔐 Reward Code Used: ${rewardCode}\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `👤 Name: ${name}\n` +
+          `📞 WhatsApp: ${phone}\n` +
+          `📍 Address: ${address}\n` +
+          `🕒 Time: ${timestamp}\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `Please dispatch the gift accordingly!`;
+
+        window.open(`https://wa.me/${OWNER.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+
+        // Lock gallery again — one claim per code
+        rewardsUnlocked = false;
+        document.querySelectorAll(".claim-btn").forEach(btn => {
+          btn.disabled = true;
+          btn.classList.add("opacity-40", "pointer-events-none");
+          btn.innerHTML = `<span class="material-symbols-outlined text-sm">check_circle</span> Claimed!`;
+        });
+
+        closeClaimModal();
+        showToast("🎉 Claim sent! Your gift is on its way.");
+
+      } catch(err) {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined">send</span> Send Claim via WhatsApp`;
+        showToast("Error sending claim. Please try again.");
+      }
     };
   </script>
 

@@ -68,18 +68,22 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 //  👉  TAB NAVIGATION
 // ──────────────────────────────────────────────
 function switchTab(tabId) {
-  const tabs = ['orders', 'products', 'reviews', 'users', 'settings'];
+  const tabs = ['orders', 'products', 'reviews', 'users', 'settings', 'offers'];
   tabs.forEach(t => {
     document.getElementById(`tab-${t}`).classList.add("hidden");
     const btn = document.getElementById(`tab-btn-${t}`);
-    btn.classList.remove("bg-primary", "text-white");
-    btn.classList.add("text-on-surface-variant");
+    if(btn) {
+      btn.classList.remove("bg-primary", "text-white");
+      btn.classList.add("text-on-surface-variant");
+    }
   });
   
   document.getElementById(`tab-${tabId}`).classList.remove("hidden");
   const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-  activeBtn.classList.add("bg-primary", "text-white");
-  activeBtn.classList.remove("text-on-surface-variant");
+  if(activeBtn) {
+    activeBtn.classList.add("bg-primary", "text-white");
+    activeBtn.classList.remove("text-on-surface-variant");
+  }
 }
 
 // ──────────────────────────────────────────────
