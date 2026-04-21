@@ -36,6 +36,7 @@ auth.onAuthStateChanged((user) => {
         loadOrders();
         loadUsers();
         loadProducts();
+        loadOffers();
         loadReviews();
         adminLoaded = true;
     }
@@ -603,3 +604,146 @@ function seedInitialProducts() {
   ];
   seed.forEach(s => db.collection("products").add(s));
 }
+
+// ──────────────────────────────────────────────
+//  🎁  OFFERS & PROMO CODES MANAGEMENT
+// ──────────────────────────────────────────────
+window.toggleOfferImageField = function() {
+  const type = document.getElementById("offer-type").value;
+  const imgBlock = document.getElementById("offer-img-block");
+  if(type === "freeGift") {
+    imgBlock.classList.remove("hidden");
+    document.getElementById("offer-img").required = true;
+  } else {
+    imgBlock.classList.add("hidden");
+    document.getElementById("offer-img").required = false;
+  }
+}
+
+let currentEditOfferUses = 0;
+let currentEditOfferImg = null;
+
+window.closeOfferModal = function() {
+  document.getElementById("add-offer-modal").classList.add("hidden");
+  document.getElementById("offer-form").reset();
+  document.getElementById("offer-code").disabled = false;
+  currentEditOfferUses = 0;
+  currentEditOfferImg = null;
+  toggleOfferImageField();
+}
+
+function loadOffers() {
+  db.collection("promoCodes").onSnapshot(snapshot => {
+    const grid = document.getElementById("offers-grid");
+    if(snapshot.empty) {
+      grid.innerHTML = `<div class="p-8 text-center text-on-surface-variant col-span-full">No active offers.</div>`;
+      return;
+    }
+
+    let html = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const code = doc.id;
+      const typeLabel = data.type === 'freeGift' ? '🎁 Free Gift' : '💎 20% Discount';
+      const uses = data.uses || 0;
+      const limit = data.limit || '∞';
+      
+      html += `
+      <div class="glass-card p-6 rounded-2xl flex flex-col justify-between bg-white relative group">
+        <h4 class="font-mono text-2xl font-black text-secondary tracking-widest mb-2">${code}</h4>
+        <div class="text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full inline-block self-start mb-4">${typeLabel}</div>
+        
+        <div class="flex justify-between items-center text-sm mb-6 border-t border-b border-outline/10 py-3">
+           <span class="text-on-surface-variant">Uses: <span class="font-bold text-primary">${uses}</span></span>
+           <span class="text-on-surface-variant">Total Limit: <span class="font-bold text-primary">${limit}</span></span>
+        </div>
+        
+        ${data.img ? `<img src="${data.img}" class="w-full h-32 object-cover rounded-xl mb-4 border border-outline/10">` : ''}
+        
+        <div class="mt-auto flex gap-2">
+          <button onclick="editOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100 hidden group-hover:block">Edit</button>
+          <button onclick="deleteOffer('${code}')" class="flex-1 py-2 text-xs font-bold bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors border border-red-100 hidden group-hover:block">Delete</button>
+        </div>
+      </div>`;
+    });
+    grid.innerHTML = html;
+  });
+}
+
+document.getElementById("offer-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  let code = document.getElementById("offer-code").value.trim().toUpperCase();
+  const type = document.getElementById("offer-type").value;
+  const limit = parseInt(document.getElementById("offer-limit").value) || 30;
+  const btn = e.target.querySelector("button[type='submit']");
+  
+  if(!code) {
+     code = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+
+  btn.disabled = true;
+
+  const isEdit = document.getElementById("offer-code").disabled;
+
+  const saveToDB = (imgUrl = null) => {
+    const payload = {
+      type: type,
+      limit: limit,
+      uses: isEdit ? currentEditOfferUses : 0
+    };
+    if(imgUrl) {
+       payload.img = imgUrl;
+    } else if (isEdit && currentEditOfferImg) {
+       payload.img = currentEditOfferImg;
+    }
+
+    db.collection("promoCodes").doc(code).set(payload).then(() => {
+      btn.disabled = false;
+      closeOfferModal();
+    }).catch(err => {
+      alert("Error saving offer: " + err.message);
+      btn.disabled = false;
+    });
+  };
+
+  const fileInput = document.getElementById("offer-img");
+  if(type === "freeGift" && fileInput.files.length > 0) {
+     document.getElementById("offer-upload-progress").classList.remove("hidden");
+     compressAndGetBase64(fileInput.files[0]).then(base64Url => {
+       document.getElementById("offer-upload-progress").classList.add("hidden");
+       saveToDB(base64Url);
+     }).catch(err => {
+       console.error(err);
+       btn.disabled = false;
+       document.getElementById("offer-upload-progress").classList.add("hidden");
+       alert("Error compressing offer image.");
+     });
+  } else {
+     saveToDB();
+  }
+});
+
+window.editOffer = function(code) {
+  db.collection("promoCodes").doc(code).get().then(doc => {
+    if(!doc.exists) return;
+    const data = doc.data();
+    document.getElementById("offer-code").value = code;
+    document.getElementById("offer-code").disabled = true; // cannot change code ID
+    document.getElementById("offer-type").value = data.type || "brew20";
+    document.getElementById("offer-limit").value = data.limit || 30;
+    currentEditOfferUses = data.uses || 0;
+    currentEditOfferImg = data.img || null;
+    
+    toggleOfferImageField();
+    // if editing, image is optional even if freeGift, since we might already have one
+    document.getElementById("offer-img").required = false; 
+    
+    document.getElementById("add-offer-modal").classList.remove("hidden");
+  });
+};
+
+window.deleteOffer = function(codeId) {
+  if(confirm("Are you sure you want to permanently delete this code and offer?")) {
+    db.collection("promoCodes").doc(codeId).delete();
+  }
+};
