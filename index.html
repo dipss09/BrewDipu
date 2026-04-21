@@ -1800,9 +1800,11 @@
     // ──────────────────────────────────────────────
     let cart = [];   // [{ product, qty }]
 
-    let currentDiscountType = ""; // "referral", "points30", "pointsGift", or ""
+    let currentDiscountType = ""; // "referral", "points30", "pointsGift", "discountCode", or ""
     let appliedReferrerUid = null;
+    let appliedPromoCode = "";
     let currentDiscountAmt = 0; // The numeric value discounted from cart total
+    let currentDiscountPct = 20; // Default or custom percentage from promo
     let profileHasOrdered = false;
     let profilePoints = 0;
     let profileReferredBy = null;
@@ -1849,8 +1851,10 @@
       currentDiscountAmt = 0;
       if (currentDiscountType === "referral") {
         currentDiscountAmt = total * 0.10; // 10%
-      } else if (currentDiscountType === "points20" || currentDiscountType === "brew20") {
+      } else if (currentDiscountType === "points20") {
         currentDiscountAmt = total * 0.20; // 20%
+      } else if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") {
+        currentDiscountAmt = total * (currentDiscountPct / 100);
       }
       return Math.max(0, total - currentDiscountAmt);
     }
@@ -1982,7 +1986,9 @@
       // Reset reward state on open
       currentDiscountType = "";
       appliedReferrerUid = null;
+      appliedPromoCode = "";
       currentDiscountAmt = 0;
+      currentDiscountPct = 20;
       document.getElementById("f-ref-code").value = "";
       document.getElementById("f-rewards").value = "";
       document.getElementById("ref-status").textContent = "";
@@ -2036,7 +2042,8 @@
         discountRow.classList.remove("hidden");
         let lbl = "Discount";
         if (currentDiscountType === "referral") lbl = "Referral Discount (10%)";
-        if (currentDiscountType === "points20" || currentDiscountType === "brew20") lbl = "Promo Discount (20%)";
+        if (currentDiscountType === "points20") lbl = "Promo Discount (20%)";
+        if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") lbl = `Promo Discount (${currentDiscountPct}%)`;
         document.getElementById("discount-label").textContent = lbl;
         document.getElementById("discount-amount").textContent = `-₹${currentDiscountAmt.toFixed(2)}`;
       } else {
@@ -2078,35 +2085,36 @@
       let myCodeMatch = myCodeUrl.match(/ref=([^&]+)/i);
       let myCode = myCodeMatch ? myCodeMatch[1].toUpperCase() : null;
 
-      if (codeInput === "BREW20") {
-        try {
-          let promoDoc = await db.collection("promoCodes").doc("BREW20").get();
-          if (!promoDoc.exists) {
-            await db.collection("promoCodes").doc("BREW20").set({ uses: 0, limit: 30 });
-            promoDoc = await db.collection("promoCodes").doc("BREW20").get();
-          }
-          const promoData = promoDoc.data();
-          if (promoData.uses >= (promoData.limit || 30)) {
-            statusEl.textContent = "Promo code BREW20 has expired (usage limit reached).";
+      // 1. Check Promo Codes first
+      try {
+        const promoDoc = await db.collection("promoCodes").doc(codeInput).get();
+        if (promoDoc.exists) {
+          const pData = promoDoc.data();
+          if (pData.limit && pData.uses >= pData.limit) {
+            statusEl.textContent = `Promo code ${codeInput} has expired (usage limit reached).`;
             statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
             return;
           }
-          
-          currentDiscountType = "brew20";
-          statusEl.textContent = "Promo code BREW20 applied! 20% Discount unlocked.";
+          if (pData.type === "freeGift" || pData.type === "rewardCode") {
+             statusEl.textContent = "This code unlocks a gift, not a cart checkout discount.";
+             statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+             return;
+          }
+          currentDiscountType = "discountCode";
+          appliedPromoCode = codeInput;
+          currentDiscountPct = pData.discountPct || 20;
+
+          statusEl.textContent = `Promo code applied! ${currentDiscountPct}% Discount unlocked.`;
           statusEl.className = "text-xs font-bold mt-1 text-[#006e20] leading-tight";
           document.getElementById("f-rewards").value = "";
           renderOrderSummary();
           return;
-        } catch (err) {
-          console.error("Promo Error:", err);
-          statusEl.textContent = "Error checking promo code.";
-          statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
-          return;
         }
+      } catch (err) {
+        // Fallback to checking referral codes...
       }
 
-      if (profileHasOrdered && isLoggedIn) {
+      // 2. Check Referrals
         statusEl.textContent = "Referral codes are only valid for your first order. Try a promo code instead!";
         statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
         return;
@@ -2160,6 +2168,7 @@
         document.getElementById("f-ref-code").value = "";
         document.getElementById("ref-status").textContent = "";
         appliedReferrerUid = null;
+        appliedPromoCode = "";
       }
 
       renderOrderSummary();
@@ -2191,7 +2200,7 @@
       if (currentDiscountType === "referral") discountString = `\n🎁 Discount: 10% Off (Referral)\n`;
       if (currentDiscountType === "points20") discountString = `\n🎁 Discount: 20% Off (Rewards)\n`;
       if (currentDiscountType === "pointsGift") discountString = `\n🎁 Bonus: FREE GIFT (Rewards)\n`;
-      if (currentDiscountType === "brew20") discountString = `\n🎁 Discount: 20% Off (Promo BREW20)\n`;
+      if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") discountString = `\n🎁 Discount: ${currentDiscountPct}% Off (Promo ${appliedPromoCode})\n`;
 
       const orderText = `🛍️ NEW ORDER — BrewDipu\n🔖 Confirmation Code: ${confCode}\n\n` +
         `👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email}\n` +
@@ -2281,13 +2290,13 @@
             profilePoints = Math.max(0, profilePoints - 600); // update local state
           }
           
-          if (currentDiscountType === "brew20") {
+          if (appliedPromoCode) {
             try {
-              await db.collection("promoCodes").doc("BREW20").update({
+              await db.collection("promoCodes").doc(appliedPromoCode).update({
                 uses: firebase.firestore.FieldValue.increment(1)
               });
             } catch (err) {
-              await db.collection("promoCodes").doc("BREW20").set({ uses: 1, limit: 30 }, { merge: true });
+              await db.collection("promoCodes").doc(appliedPromoCode).set({ uses: 1, limit: 30 }, { merge: true });
             }
           }
         }
@@ -3325,13 +3334,6 @@
       try {
         const doc = await db.collection("promoCodes").doc(code).get();
         if (!doc.exists) {
-           if(code === "BREW20") {
-             statusEl.textContent = "Offer found! Adding to cart will trigger it.";
-             statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
-             document.getElementById("f-ref-code").value = code;
-             setTimeout(() => openOrderModal(), 1500);
-             return;
-           }
            statusEl.textContent = "Invalid or expired code.";
            statusEl.className = "text-xs font-bold mt-2 text-error";
            return;
@@ -3417,7 +3419,8 @@
           const uniqueCode = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
           
           await db.collection("promoCodes").doc(uniqueCode).set({
-             type: "brew20",
+             type: "discountCode",
+             discountPct: 20,
              limit: 1,
              uses: 0,
              uid: user.uid,
@@ -3512,9 +3515,7 @@
 
       // Must be RWD- prefixed (generated 20% code)
       if(!code.startsWith("RWD-")) {
-        statusEl.textContent = code === "BREW20"
-          ? "❌ BREW20 is a cart-only discount code. Use it at checkout."
-          : "❌ Only reward codes (starting with RWD-) unlock free gifts.";
+        statusEl.textContent = "❌ Only reward codes (starting with RWD-) unlock free gifts.";
         statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
         return;
       }
@@ -3535,9 +3536,13 @@
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
-        // Only reward codes (brew20 = auto-generated, rewardCode = admin-created) can unlock gallery
         if(data.type === "freeGift") {
-          statusEl.textContent = "❌ This is a free gift code, not a reward unlock code.";
+          statusEl.textContent = "❌ This is a free gift code, not a reward unlock code. Proceed to the gift section.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        if(data.type === "discountCode" || data.type === "brew20") {
+          statusEl.textContent = "❌ This is a cart discount code. Please enter it in the checkout screen.";
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }

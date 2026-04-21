@@ -260,7 +260,7 @@
                 <div>
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Offer Type</label>
                   <select id="offer-type" required class="w-full bg-white rounded-xl p-3 border border-outline/20" onchange="toggleOfferImageField()">
-                    <option value="brew20">💎 20% Discount (cart checkout)</option>
+                    <option value="discountCode">💎 Custom Discount (cart checkout)</option>
                     <option value="rewardCode">🎟️ Reward Code (unlocks gift gallery)</option>
                     <option value="freeGift">🎁 Free Gift (shows in gallery)</option>
                   </select>
@@ -269,6 +269,10 @@
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Total Usage Limit</label>
                   <input type="number" id="offer-limit" required min="1" value="30" class="w-full bg-white rounded-xl p-3 border border-outline/20">
                 </div>
+              </div>
+              <div id="offer-discount-block">
+                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Discount Percentage (%)</label>
+                <input type="number" id="offer-discount-pct" required min="1" max="100" value="20" class="w-full bg-white rounded-xl p-3 border border-outline/20">
               </div>
               <div id="offer-img-block" class="hidden space-y-3 p-4 bg-surface-container-high rounded-2xl border border-outline/10">
                 <p class="text-[10px] font-bold uppercase tracking-widest text-secondary">Free Gift Details (shown in gallery)</p>

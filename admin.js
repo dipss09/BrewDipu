@@ -615,6 +615,7 @@ function seedInitialProducts() {
 window.toggleOfferImageField = function() {
   const type = document.getElementById("offer-type").value;
   const imgBlock = document.getElementById("offer-img-block");
+  const discountBlock = document.getElementById("offer-discount-block");
   if(type === "freeGift") {
     imgBlock.classList.remove("hidden");
     // only require image on new entries, not edits
@@ -624,6 +625,12 @@ window.toggleOfferImageField = function() {
   } else {
     imgBlock.classList.add("hidden");
     document.getElementById("offer-img").required = false;
+  }
+
+  if(type === "discountCode" || type === "brew20") {
+    discountBlock.classList.remove("hidden");
+  } else {
+    discountBlock.classList.add("hidden");
   }
 }
 
@@ -637,6 +644,7 @@ window.closeOfferModal = function() {
   document.getElementById("offer-code").disabled = false;
   document.getElementById("offer-code").removeAttribute("data-editing");
   document.getElementById("offer-modal-title").textContent = "Add Reward / Code";
+  document.getElementById("offer-discount-pct").value = 20;
   currentEditOfferUses = 0;
   currentEditOfferImg = null;
   currentEditOfferDesc = "";
@@ -669,7 +677,9 @@ function loadOffers() {
       const code = doc.id;
       const isGift = data.type === 'freeGift';
       const isReward = data.type === 'rewardCode';
-      const typeLabel = isGift ? '🎁 Free Gift' : isReward ? '🎟️ Reward Code' : '💎 20% Discount';
+      const isDiscount = data.type === 'discountCode' || data.type === 'brew20';
+      const discountPct = data.discountPct || 20;
+      const typeLabel = isGift ? '🎁 Free Gift' : isReward ? '🎟️ Reward Code' : `💎 ${discountPct}% Discount`;
       const typeBg = isGift ? 'bg-green-50 text-green-700 border-green-200'
                    : isReward ? 'bg-purple-50 text-purple-700 border-purple-200'
                    : 'bg-blue-50 text-blue-700 border-blue-200';
@@ -725,6 +735,9 @@ document.getElementById("offer-form").addEventListener("submit", (e) => {
       desc: desc,
       uses: isEdit ? currentEditOfferUses : 0
     };
+    if (type === "discountCode" || type === "brew20") {
+      payload.discountPct = parseInt(document.getElementById("offer-discount-pct").value) || 20;
+    }
     if(imgUrl) {
       payload.img = imgUrl;
     } else if (isEdit && currentEditOfferImg) {
@@ -771,9 +784,10 @@ window.editOffer = function(code) {
     document.getElementById("offer-code").value = code;
     document.getElementById("offer-code").disabled = false; // allow renaming
     document.getElementById("offer-code").setAttribute("data-editing", code); // track original ID
-    document.getElementById("offer-type").value = data.type || "brew20";
+    document.getElementById("offer-type").value = data.type === "brew20" ? "discountCode" : (data.type || "discountCode");
     document.getElementById("offer-limit").value = data.limit || 1;
     document.getElementById("offer-desc").value = data.desc || "";
+    document.getElementById("offer-discount-pct").value = data.discountPct || 20;
     document.getElementById("offer-modal-title").textContent = "Edit Offer: " + code;
     currentEditOfferUses = data.uses || 0;
     currentEditOfferImg = data.img || null;
