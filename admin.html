@@ -224,11 +224,16 @@
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
           <div>
             <h2 class="text-3xl font-black text-primary">Redeem Rewards & Promos</h2>
-            <p class="text-sm text-on-surface-variant mt-1">Upload gift photos & text, set usage limits on promo codes. Free Gift items appear in the frontend gallery.</p>
+            <p class="text-sm text-on-surface-variant mt-1">Manage promo codes, gift rewards, and 600pts reward codes. Free Gift items appear in the frontend gallery.</p>
           </div>
-          <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="px-6 py-3 bg-secondary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shrink-0">
-            <span class="material-symbols-outlined text-sm">add</span> Add Reward / Code
-          </button>
+          <div class="flex gap-3 flex-wrap shrink-0">
+            <button onclick="openNewRewardCode()" class="px-5 py-3 bg-[#006e20] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-sm">
+              <span class="material-symbols-outlined text-sm">magic_button</span> Create Reward Code (600pts)
+            </button>
+            <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="px-5 py-3 bg-secondary text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-sm">
+              <span class="material-symbols-outlined text-sm">add</span> Add Promo / Gift
+            </button>
+          </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="offers-grid">
           <div class="p-8 text-center text-on-surface-variant col-span-full">Loading offers...</div>
@@ -255,8 +260,9 @@
                 <div>
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Offer Type</label>
                   <select id="offer-type" required class="w-full bg-white rounded-xl p-3 border border-outline/20" onchange="toggleOfferImageField()">
-                    <option value="brew20">20% Discount (cart)</option>
-                    <option value="freeGift">Free Gift (gallery)</option>
+                    <option value="brew20">💎 20% Discount (cart checkout)</option>
+                    <option value="rewardCode">🎟️ Reward Code (unlocks gift gallery)</option>
+                    <option value="freeGift">🎁 Free Gift (shows in gallery)</option>
                   </select>
                 </div>
                 <div>

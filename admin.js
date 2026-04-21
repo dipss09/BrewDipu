@@ -617,7 +617,10 @@ window.toggleOfferImageField = function() {
   const imgBlock = document.getElementById("offer-img-block");
   if(type === "freeGift") {
     imgBlock.classList.remove("hidden");
-    document.getElementById("offer-img").required = true;
+    // only require image on new entries, not edits
+    if(!document.getElementById("offer-code").getAttribute("data-editing")) {
+      document.getElementById("offer-img").required = false; // optional for freeGift too
+    }
   } else {
     imgBlock.classList.add("hidden");
     document.getElementById("offer-img").required = false;
@@ -632,9 +635,23 @@ window.closeOfferModal = function() {
   document.getElementById("add-offer-modal").classList.add("hidden");
   document.getElementById("offer-form").reset();
   document.getElementById("offer-code").disabled = false;
+  document.getElementById("offer-code").removeAttribute("data-editing");
+  document.getElementById("offer-modal-title").textContent = "Add Reward / Code";
   currentEditOfferUses = 0;
   currentEditOfferImg = null;
   currentEditOfferDesc = "";
+  toggleOfferImageField();
+}
+
+// Open modal pre-filled with a fresh RWD- Reward Code
+window.openNewRewardCode = function() {
+  closeOfferModal(); // reset state
+  const code = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+  document.getElementById("offer-code").value = code;
+  document.getElementById("offer-type").value = "rewardCode";
+  document.getElementById("offer-limit").value = 1;
+  document.getElementById("offer-modal-title").textContent = "Create 600pts Reward Code";
+  document.getElementById("add-offer-modal").classList.remove("hidden");
   toggleOfferImageField();
 }
 
@@ -642,7 +659,7 @@ function loadOffers() {
   db.collection("promoCodes").onSnapshot(snapshot => {
     const grid = document.getElementById("offers-grid");
     if(snapshot.empty) {
-      grid.innerHTML = `<div class="p-8 text-center text-on-surface-variant col-span-full">No active offers. Click "Add Reward / Code" to create one.</div>`;
+      grid.innerHTML = `<div class="p-8 text-center text-on-surface-variant col-span-full">No active offers. Use the buttons above to create one.</div>`;
       return;
     }
 
@@ -651,13 +668,16 @@ function loadOffers() {
       const data = doc.data();
       const code = doc.id;
       const isGift = data.type === 'freeGift';
-      const typeLabel = isGift ? '🎁 Free Gift' : '💎 20% Discount';
-      const typeBg = isGift ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200';
+      const isReward = data.type === 'rewardCode';
+      const typeLabel = isGift ? '🎁 Free Gift' : isReward ? '🎟️ Reward Code' : '💎 20% Discount';
+      const typeBg = isGift ? 'bg-green-50 text-green-700 border-green-200'
+                   : isReward ? 'bg-purple-50 text-purple-700 border-purple-200'
+                   : 'bg-blue-50 text-blue-700 border-blue-200';
       const uses = data.uses || 0;
       const limit = data.limit;
       const remaining = limit ? limit - uses : null;
       const isExpired = limit && uses >= limit;
-      
+
       html += `
       <div class="glass-card p-5 rounded-2xl flex flex-col bg-white border ${isExpired ? 'border-red-200 opacity-60' : 'border-outline/10'} relative">
         ${isExpired ? '<div class="absolute top-3 right-3 text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-widest">Expired</div>' : ''}
@@ -684,17 +704,19 @@ document.getElementById("offer-form").addEventListener("submit", (e) => {
   e.preventDefault();
   let code = document.getElementById("offer-code").value.trim().toUpperCase();
   const type = document.getElementById("offer-type").value;
-  const limit = parseInt(document.getElementById("offer-limit").value) || 30;
+  const limitInput = document.getElementById("offer-limit").value;
+  // rewardCode defaults to 1 use; others default to 30
+  const limit = parseInt(limitInput) || (type === "rewardCode" ? 1 : 30);
   const desc = document.getElementById("offer-desc").value.trim();
   const btn = e.target.querySelector("button[type='submit']");
-  
+  const originalCode = document.getElementById("offer-code").getAttribute("data-editing"); // set when editing
+  const isEdit = !!originalCode;
+
   if(!code) {
-     code = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+    code = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
   btn.disabled = true;
-
-  const isEdit = document.getElementById("offer-code").disabled;
 
   const saveToDB = (imgUrl = null) => {
     const payload = {
@@ -704,18 +726,25 @@ document.getElementById("offer-form").addEventListener("submit", (e) => {
       uses: isEdit ? currentEditOfferUses : 0
     };
     if(imgUrl) {
-       payload.img = imgUrl;
+      payload.img = imgUrl;
     } else if (isEdit && currentEditOfferImg) {
-       payload.img = currentEditOfferImg;
+      payload.img = currentEditOfferImg;
     }
 
-    db.collection("promoCodes").doc(code).set(payload).then(() => {
+    const doSave = () => db.collection("promoCodes").doc(code).set(payload).then(() => {
       btn.disabled = false;
       closeOfferModal();
     }).catch(err => {
       alert("Error saving offer: " + err.message);
       btn.disabled = false;
     });
+
+    // If code was renamed, delete old doc first
+    if(isEdit && originalCode !== code) {
+      db.collection("promoCodes").doc(originalCode).delete().then(doSave).catch(doSave);
+    } else {
+      doSave();
+    }
   };
 
   const fileInput = document.getElementById("offer-img");
@@ -740,17 +769,18 @@ window.editOffer = function(code) {
     if(!doc.exists) return;
     const data = doc.data();
     document.getElementById("offer-code").value = code;
-    document.getElementById("offer-code").disabled = true; // cannot change code ID
+    document.getElementById("offer-code").disabled = false; // allow renaming
+    document.getElementById("offer-code").setAttribute("data-editing", code); // track original ID
     document.getElementById("offer-type").value = data.type || "brew20";
-    document.getElementById("offer-limit").value = data.limit || 30;
+    document.getElementById("offer-limit").value = data.limit || 1;
     document.getElementById("offer-desc").value = data.desc || "";
+    document.getElementById("offer-modal-title").textContent = "Edit Offer: " + code;
     currentEditOfferUses = data.uses || 0;
     currentEditOfferImg = data.img || null;
-    
+
     toggleOfferImageField();
-    // if editing, image is optional even if freeGift, since we might already have one
-    document.getElementById("offer-img").required = false; 
-    
+    document.getElementById("offer-img").required = false;
+
     document.getElementById("add-offer-modal").classList.remove("hidden");
   });
 };

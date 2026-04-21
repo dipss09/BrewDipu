@@ -3535,6 +3535,12 @@
           statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
           return;
         }
+        // Only reward codes (brew20 = auto-generated, rewardCode = admin-created) can unlock gallery
+        if(data.type === "freeGift") {
+          statusEl.textContent = "❌ This is a free gift code, not a reward unlock code.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
         // Valid! Unlock now
         rewardsUnlocked = true;
         unlockedRewardCode = code;
