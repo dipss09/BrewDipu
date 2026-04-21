@@ -622,6 +622,7 @@ window.toggleOfferImageField = function() {
 
 let currentEditOfferUses = 0;
 let currentEditOfferImg = null;
+let currentEditOfferDesc = "";
 
 window.closeOfferModal = function() {
   document.getElementById("add-offer-modal").classList.add("hidden");
@@ -629,6 +630,7 @@ window.closeOfferModal = function() {
   document.getElementById("offer-code").disabled = false;
   currentEditOfferUses = 0;
   currentEditOfferImg = null;
+  currentEditOfferDesc = "";
   toggleOfferImageField();
 }
 
@@ -675,6 +677,7 @@ document.getElementById("offer-form").addEventListener("submit", (e) => {
   let code = document.getElementById("offer-code").value.trim().toUpperCase();
   const type = document.getElementById("offer-type").value;
   const limit = parseInt(document.getElementById("offer-limit").value) || 30;
+  const desc = document.getElementById("offer-desc").value.trim();
   const btn = e.target.querySelector("button[type='submit']");
   
   if(!code) {
@@ -689,6 +692,7 @@ document.getElementById("offer-form").addEventListener("submit", (e) => {
     const payload = {
       type: type,
       limit: limit,
+      desc: desc,
       uses: isEdit ? currentEditOfferUses : 0
     };
     if(imgUrl) {
@@ -731,6 +735,7 @@ window.editOffer = function(code) {
     document.getElementById("offer-code").disabled = true; // cannot change code ID
     document.getElementById("offer-type").value = data.type || "brew20";
     document.getElementById("offer-limit").value = data.limit || 30;
+    document.getElementById("offer-desc").value = data.desc || "";
     currentEditOfferUses = data.uses || 0;
     currentEditOfferImg = data.img || null;
     

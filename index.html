@@ -1402,14 +1402,7 @@
                  <h4 class="font-bold text-primary tracking-widest uppercase text-[10px]">Today's Free Gifts</h4>
              </div>
              
-             <!-- LOCK OVERLAY -->
-             <div id="free-gift-lock" class="absolute inset-0 bg-surface-container-high/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center transition-opacity duration-500 rounded-2xl">
-                <span class="material-symbols-outlined text-3xl text-secondary mb-1">lock</span>
-                <p class="text-[10px] font-bold text-primary max-w-[200px] text-center">Locked Gallery</p>
-                <p class="text-[9px] text-on-surface-variant max-w-[200px] text-center mt-1">Enter a valid Free Gift code to reveal.</p>
-             </div>
-
-             <div id="free-gift-gallery" class="flex gap-4 overflow-x-auto snap-x hidden-scrollbar pb-2 relative z-10 transition-all duration-500 blur-sm">
+             <div id="free-gift-gallery" class="flex gap-4 overflow-x-auto snap-x hidden-scrollbar pb-2 relative z-10 transition-all duration-500">
                  <!-- Populated via JS -->
                  <div class="text-[10px] text-on-surface-variant w-full pt-1">Looking for valid gift offers...</div>
              </div>
@@ -3304,11 +3297,6 @@
         }
 
         if(data.type === "freeGift") {
-           const lock = document.getElementById("free-gift-lock");
-           if(lock) lock.classList.add("opacity-0", "pointer-events-none");
-           const gallery = document.getElementById("free-gift-gallery");
-           if(gallery) gallery.classList.remove("blur-sm");
-           
            statusEl.textContent = "Gift Unlocked! Proceed to checkout.";
            statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
         } else {
@@ -3346,8 +3334,11 @@
                 html += `
                   <div class="snap-start flex-shrink-0 w-32 h-20 relative rounded-xl overflow-hidden group border border-outline/10">
                     <img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
-                    <div class="absolute bottom-1 left-2 text-[10px] font-bold text-white leading-tight uppercase font-mono tracking-widest">${doc.id}</div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
+                    <div class="absolute bottom-1 left-2">
+                       <p class="text-[9px] font-bold text-white leading-tight uppercase font-mono tracking-widest mb-0.5">${doc.id}</p>
+                       ${data.desc ? `<p class="text-[8px] text-white/80 leading-tight">${data.desc}</p>` : ''}
+                    </div>
                   </div>
                 `;
              }
