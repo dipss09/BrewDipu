@@ -849,7 +849,9 @@
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#about">About</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
-          href="#order-section">Order</a>
+          href="#products">Order</a>
+        <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300 flex items-center gap-1"
+          href="#rewards"><span class="material-symbols-outlined text-sm" style="font-size:1rem">redeem</span>Redeem Reward</a>
         <a class="text-stone-600 font-medium hover:text-stone-900 hover:scale-105 transition-transform duration-300"
           href="#contact">Contact</a>
       </div>
@@ -965,10 +967,9 @@
         <div class="bg-surface-container-high p-4 rounded-2xl border border-outline/10 space-y-4">
 
           <div class="space-y-1" id="referral-block" style="display:none;">
-            <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Referral Code? (New
-              Users Only)</label>
+            <label class="text-[10px] font-bold uppercase tracking-widest text-secondary">Have a Promo / Referral Code?</label>
             <div class="flex gap-2">
-              <input id="f-ref-code" type="text" placeholder="e.g. BD-ABCD1"
+              <input id="f-ref-code" type="text" placeholder="e.g. BREW20 or BD-ABCD1"
                 class="brew-input flex-1 bg-white rounded-xl p-3 text-sm font-mono font-bold uppercase"
                 style="border:1px solid rgba(0,0,0,0.05);" />
               <button type="button" id="btn-apply-ref" onclick="applyReferralCode()"
@@ -987,7 +988,7 @@
               class="brew-input w-full bg-white rounded-xl p-3 text-sm font-bold text-primary shadow-sm"
               style="border:1px solid rgba(0,0,0,0.05);" onchange="applyRewardPoints()">
               <option value="">Save my points for later</option>
-              <option value="discount" id="opt-discount" disabled>Redeem 600 pts for 30% Discount</option>
+              <option value="discount" id="opt-discount" disabled>Redeem 600 pts for 20% Discount</option>
               <option value="gift" id="opt-gift" disabled>Redeem 600 pts for Free Gift</option>
             </select>
           </div>
@@ -1234,8 +1235,10 @@
           </div>
         </div>
 
-        <p class="text-[11px] font-bold text-primary leading-tight mt-3">Target clear? Get rewards like free gifts from
-          Brew Dipu along with a 30% discount!</p>
+        <p class="text-[11px] font-bold text-primary leading-tight mt-3 mb-3">Target clear? Get rewards like free gifts from
+          Brew Dipu along with a 20% discount!</p>
+        <button id="btn-redeem-points" onclick="redeemPointsForCode()" class="w-full hidden items-center justify-center gap-2 bg-secondary text-white rounded-xl py-3 text-xs uppercase tracking-widest font-black shadow-sm hover:opacity-90 transition-opacity">GENERATE 20% DISCOUNT CODE</button>
+        <p id="point-redeem-status" class="text-xs font-bold text-secondary text-center w-full mt-2 hidden"></p>
       </div>
 
       <div>
@@ -1370,20 +1373,24 @@
   <!-- ══════════════ PRODUCT SECTION ══════════════ -->
   <section class="py-24 bg-surface-container-low" id="products">
     <div class="max-w-7xl mx-auto px-8">
-      <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+      <!-- REDEEM REWARD CTA -->
+      <div class="mb-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <span class="text-secondary font-bold tracking-widest uppercase text-sm">Best Sellers</span>
           <h2 class="text-4xl md:text-5xl font-black text-primary mt-2">Signature Crafts</h2>
+          <div class="flex gap-2 mt-3">
+            <span class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Coffee</span>
+            <span class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Crafts</span>
+          </div>
         </div>
-        <div class="flex gap-2">
-          <span
-            class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Coffee</span>
-          <span
-            class="px-4 py-1 bg-tertiary-fixed-dim/40 backdrop-blur-md rounded-full text-xs font-bold text-on-tertiary-fixed-variant uppercase tracking-wider">Crafts</span>
-        </div>
+        <a href="#rewards" class="inline-flex items-center gap-2 px-5 py-3 bg-secondary text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md group">
+          <span class="material-symbols-outlined text-base group-hover:rotate-12 transition-transform">card_giftcard</span>
+          Redeem Reward
+          <span class="text-white/70 text-xs font-medium normal-case tracking-normal">600 pts</span>
+        </a>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-12" id="product-grid">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-12" id="product-grid">
         <!-- Products rendered by JS -->
       </div>
     </div>
@@ -1558,6 +1565,80 @@
     </div>
   </section>
 
+  <!-- ══════════════ REDEEM REWARDS SECTION ══════════════ -->
+  <section class="py-20 px-6 bg-gradient-to-b from-surface-container to-surface" id="rewards">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <span class="inline-flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-4">
+          <span class="material-symbols-outlined text-sm">stars</span> Loyalty Rewards
+        </span>
+        <h2 class="text-4xl md:text-5xl font-black text-primary mb-4">Redeem Your Rewards</h2>
+        <p class="text-on-surface-variant max-w-xl mx-auto text-sm leading-relaxed">Collect 600 points from purchases and referrals to earn a unique reward code. Enter it below to unlock your exclusive free gift!</p>
+      </div>
+
+      <!-- Unlock Banner -->
+      <div class="glass-card rounded-3xl p-6 md:p-8 mb-10 border border-outline/10">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-secondary text-2xl">lock</span>
+          </div>
+          <div class="flex-1">
+            <p class="font-black text-primary text-sm uppercase tracking-widest">Enter Your Reward Code to Unlock Gifts</p>
+            <p class="text-xs text-on-surface-variant mt-1">Generate your unique code from <strong>My Profile</strong> once you reach 600 points. Codes starting with <code class="bg-surface-container px-1 rounded">RWD-</code> unlock free gifts.</p>
+          </div>
+          <div class="flex gap-2 w-full md:w-auto">
+            <input id="rewards-unlock-input" type="text" placeholder="RWD-XXXXXX" class="brew-input flex-1 md:w-48 bg-white rounded-xl px-4 py-3 text-sm font-mono font-black uppercase border border-outline/10 text-secondary tracking-widest" />
+            <button onclick="unlockRewardsGallery()" class="bg-secondary text-white rounded-xl px-6 py-3 font-bold text-sm tracking-widest hover:opacity-90 transition-opacity">UNLOCK</button>
+          </div>
+        </div>
+        <p id="rewards-unlock-status" class="text-xs font-bold mt-3 ml-0 md:ml-16 hidden"></p>
+      </div>
+
+        <!-- Gift Cards Grid -->
+        <div id="rewards-gift-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-[200px]">
+          <div class="col-span-3 text-center p-12 text-on-surface-variant">Loading available rewards...</div>
+        </div>
+
+    </div>
+  </section>
+
+  <!-- CLAIM GIFT MODAL -->
+  <div id="claim-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-surface rounded-3xl p-8 max-w-md w-full shadow-2xl">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <h3 class="text-2xl font-black text-primary">Claim Your Gift 🎁</h3>
+          <p class="text-sm text-on-surface-variant mt-1">Tell us where to send your reward!</p>
+        </div>
+        <button onclick="closeClaimModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="text-center p-4 bg-secondary/10 rounded-2xl mb-6">
+        <p class="text-xs font-bold uppercase tracking-widest text-secondary mb-1">Claiming</p>
+        <p id="claim-gift-name" class="font-black text-primary text-lg">—</p>
+      </div>
+      <form id="claim-form" class="space-y-4" onsubmit="submitClaim(event)">
+        <input type="hidden" id="claim-code-hidden">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Your Name</label>
+          <input type="text" id="claim-name" required placeholder="Full name" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">WhatsApp Number</label>
+          <input type="tel" id="claim-phone" required placeholder="10-digit number" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20">
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Delivery Address</label>
+          <textarea id="claim-address" required rows="2" placeholder="Full address for delivery" class="brew-input w-full bg-white rounded-xl p-3 border border-outline/20 resize-none"></textarea>
+        </div>
+        <button type="submit" id="claim-submit-btn" class="w-full py-4 bg-secondary text-white rounded-xl font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined">send</span> Send Claim via WhatsApp
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- ══════════════ ORDER & CONTACT SECTION ══════════════ -->
   <section class="py-24 px-8 bg-surface-container-low" id="order-section">
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -1719,9 +1800,11 @@
     // ──────────────────────────────────────────────
     let cart = [];   // [{ product, qty }]
 
-    let currentDiscountType = ""; // "referral", "points30", "pointsGift", or ""
+    let currentDiscountType = ""; // "referral", "points30", "pointsGift", "discountCode", or ""
     let appliedReferrerUid = null;
+    let appliedPromoCode = "";
     let currentDiscountAmt = 0; // The numeric value discounted from cart total
+    let currentDiscountPct = 20; // Default or custom percentage from promo
     let profileHasOrdered = false;
     let profilePoints = 0;
     let profileReferredBy = null;
@@ -1768,8 +1851,10 @@
       currentDiscountAmt = 0;
       if (currentDiscountType === "referral") {
         currentDiscountAmt = total * 0.10; // 10%
-      } else if (currentDiscountType === "points30") {
-        currentDiscountAmt = total * 0.30; // 30%
+      } else if (currentDiscountType === "points20") {
+        currentDiscountAmt = total * 0.20; // 20%
+      } else if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") {
+        currentDiscountAmt = total * (currentDiscountPct / 100);
       }
       return Math.max(0, total - currentDiscountAmt);
     }
@@ -1794,21 +1879,21 @@
         const disabledProp = isOutOfStock || !isStoreOpen ? "disabled" : "";
 
         return `
-      <div class="glass-card p-6 rounded-[2rem] hover:-translate-y-4 transition-all duration-500 flex flex-col group">
-        <div class="relative mb-8 aspect-square rounded-2xl overflow-hidden">
+      <div class="glass-card p-4 md:p-6 rounded-2xl md:rounded-[2rem] hover:-translate-y-4 transition-all duration-500 flex flex-col group">
+        <div class="relative mb-4 md:mb-8 aspect-square rounded-xl md:rounded-2xl overflow-hidden">
           <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}"
             src="${p.img}" alt="${p.name}" loading="lazy"/>
-          <div class="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">₹${p.price}</div>
-          <div class="absolute top-4 left-4 bg-white/90 backdrop-blur text-primary px-3 py-1 rounded-full text-xs font-bold shadow">${p.badge}</div>
+          <div class="absolute top-2 right-2 md:top-4 md:right-4 bg-primary text-white px-2 py-1 md:px-3 rounded-full text-xs md:text-sm font-bold shadow-lg">₹${p.price}</div>
+          <div class="absolute top-2 left-2 md:top-4 md:left-4 bg-white/90 backdrop-blur text-primary px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-bold shadow">${p.badge}</div>
         </div>
-        <h3 class="text-2xl font-bold text-primary mb-2">${p.name}</h3>
-        <p class="text-on-surface-variant text-sm mb-6 flex-1">${p.desc}</p>
-        <div class="flex gap-2 mt-auto">
-          <button ${clickAction} ${disabledProp} class="flex-1 py-4 bg-surface-container-highest text-primary rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-outline-variant transition-colors group/btn">
-            + Cart <span class="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">add_shopping_cart</span>
+        <h3 class="text-lg md:text-2xl font-bold text-primary mb-1 md:mb-2 leading-tight">${p.name}</h3>
+        <p class="text-on-surface-variant text-xs md:text-sm mb-4 md:mb-6 flex-1 line-clamp-3 md:line-clamp-none">${p.desc}</p>
+        <div class="flex flex-col xl:flex-row gap-2 mt-auto">
+          <button ${clickAction} ${disabledProp} class="w-full py-2 md:py-4 bg-surface-container-highest text-primary rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-outline-variant transition-colors group/btn text-xs md:text-base">
+            + Cart <span class="material-symbols-outlined text-[10px] md:text-sm group-hover/btn:translate-x-1 transition-transform">add_shopping_cart</span>
           </button>
-          <button ${buyNowAction} ${disabledProp} class="flex-[1.5] py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-primary-container transition-colors group/btn2">
-            Buy Now <span class="material-symbols-outlined text-sm group-hover/btn2:translate-x-1 transition-transform">bolt</span>
+          <button ${buyNowAction} ${disabledProp} class="w-full py-2 md:py-4 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-1 hover:bg-primary-container transition-colors group/btn2 text-xs md:text-base">
+            Buy Now <span class="material-symbols-outlined text-[10px] md:text-sm group-hover/btn2:translate-x-1 transition-transform">bolt</span>
           </button>
         </div>
       </div>`;
@@ -1901,23 +1986,20 @@
       // Reset reward state on open
       currentDiscountType = "";
       appliedReferrerUid = null;
+      appliedPromoCode = "";
       currentDiscountAmt = 0;
+      currentDiscountPct = 20;
       document.getElementById("f-ref-code").value = "";
       document.getElementById("f-rewards").value = "";
       document.getElementById("ref-status").textContent = "";
 
-      // Toggle Referrals Block
+      // Toggle Referrals / Promo Block
+      document.getElementById("referral-block").style.display = "block";
       if (isLoggedIn) {
-        // if they already ordered, hide referral box.
-        if (profileHasOrdered) {
-          document.getElementById("referral-block").style.display = "none";
-        } else {
-          document.getElementById("referral-block").style.display = "block";
-          if (profileReferredBy) {
-            document.getElementById("f-ref-code").value = profileReferredBy;
-            // Auto-apply the referral code for the user
-            setTimeout(() => { if (isStoreOpen) applyReferralCode(); }, 100);
-          }
+        if (!profileHasOrdered && profileReferredBy) {
+          document.getElementById("f-ref-code").value = profileReferredBy;
+          // Auto-apply the referral code for the user
+          setTimeout(() => { if (isStoreOpen) applyReferralCode(); }, 100);
         }
 
         // Toggle Rewards Block
@@ -1931,8 +2013,7 @@
         }
       } else {
         // Anonymous user
-        document.getElementById("referral-block").style.display = "block";
-        document.getElementById("ref-status").textContent = "Please sign in/sign up first to use a referral code!";
+        document.getElementById("ref-status").textContent = "Sign in to use Referral Codes. Promo Codes work for guests too!";
         document.getElementById("rewards-block").classList.add("hidden");
       }
 
@@ -1959,7 +2040,11 @@
         document.getElementById("discount-amount").textContent = "Applied";
       } else if (currentDiscountAmt > 0) {
         discountRow.classList.remove("hidden");
-        document.getElementById("discount-label").textContent = currentDiscountType === "referral" ? "Referral Discount (10%)" : "Rewards Discount (30%)";
+        let lbl = "Discount";
+        if (currentDiscountType === "referral") lbl = "Referral Discount (10%)";
+        if (currentDiscountType === "points20") lbl = "Promo Discount (20%)";
+        if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") lbl = `Promo Discount (${currentDiscountPct}%)`;
+        document.getElementById("discount-label").textContent = lbl;
         document.getElementById("discount-amount").textContent = `-₹${currentDiscountAmt.toFixed(2)}`;
       } else {
         discountRow.classList.add("hidden");
@@ -2000,6 +2085,41 @@
       let myCodeMatch = myCodeUrl.match(/ref=([^&]+)/i);
       let myCode = myCodeMatch ? myCodeMatch[1].toUpperCase() : null;
 
+      // 1. Check Promo Codes first
+      try {
+        const promoDoc = await db.collection("promoCodes").doc(codeInput).get();
+        if (promoDoc.exists) {
+          const pData = promoDoc.data();
+          if (pData.limit && pData.uses >= pData.limit) {
+            statusEl.textContent = `Promo code ${codeInput} has expired (usage limit reached).`;
+            statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+            return;
+          }
+          if (pData.type === "freeGift" || pData.type === "rewardCode") {
+             statusEl.textContent = "This code unlocks a gift, not a cart checkout discount.";
+             statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+             return;
+          }
+          currentDiscountType = "discountCode";
+          appliedPromoCode = codeInput;
+          currentDiscountPct = pData.discountPct || 20;
+
+          statusEl.textContent = `Promo code applied! ${currentDiscountPct}% Discount unlocked.`;
+          statusEl.className = "text-xs font-bold mt-1 text-[#006e20] leading-tight";
+          document.getElementById("f-rewards").value = "";
+          renderOrderSummary();
+          return;
+        }
+      } catch (err) {
+        // Fallback to checking referral codes...
+      }
+
+      // 2. Check Referrals
+        statusEl.textContent = "Referral codes are only valid for your first order. Try a promo code instead!";
+        statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
+        return;
+      }
+
       if (myCode && codeInput === myCode) {
         statusEl.textContent = "You cannot use your own referral code.";
         statusEl.className = "text-xs font-bold mt-1 text-error leading-tight";
@@ -2036,7 +2156,7 @@
       const val = document.getElementById("f-rewards").value;
 
       if (val === "discount") {
-        currentDiscountType = "points30";
+        currentDiscountType = "points20";
       } else if (val === "gift") {
         currentDiscountType = "pointsGift";
       } else {
@@ -2048,6 +2168,7 @@
         document.getElementById("f-ref-code").value = "";
         document.getElementById("ref-status").textContent = "";
         appliedReferrerUid = null;
+        appliedPromoCode = "";
       }
 
       renderOrderSummary();
@@ -2077,8 +2198,9 @@
 
       let discountString = "";
       if (currentDiscountType === "referral") discountString = `\n🎁 Discount: 10% Off (Referral)\n`;
-      if (currentDiscountType === "points30") discountString = `\n🎁 Discount: 30% Off (Rewards)\n`;
+      if (currentDiscountType === "points20") discountString = `\n🎁 Discount: 20% Off (Rewards)\n`;
       if (currentDiscountType === "pointsGift") discountString = `\n🎁 Bonus: FREE GIFT (Rewards)\n`;
+      if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") discountString = `\n🎁 Discount: ${currentDiscountPct}% Off (Promo ${appliedPromoCode})\n`;
 
       const orderText = `🛍️ NEW ORDER — BrewDipu\n🔖 Confirmation Code: ${confCode}\n\n` +
         `👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email}\n` +
@@ -2160,12 +2282,22 @@
             });
           }
 
-          if ((currentDiscountType === "points30" || currentDiscountType === "pointsGift") && user) {
+          if ((currentDiscountType === "points20" || currentDiscountType === "pointsGift") && user) {
             // Deduct Points
             db.collection("users").doc(user.uid).update({
               points: firebase.firestore.FieldValue.increment(-600)
             });
             profilePoints = Math.max(0, profilePoints - 600); // update local state
+          }
+          
+          if (appliedPromoCode) {
+            try {
+              await db.collection("promoCodes").doc(appliedPromoCode).update({
+                uses: firebase.firestore.FieldValue.increment(1)
+              });
+            } catch (err) {
+              await db.collection("promoCodes").doc(appliedPromoCode).set({ uses: 1, limit: 30 }, { merge: true });
+            }
           }
         }
       } catch (err) {
@@ -2636,6 +2768,17 @@
                 profileReferredBy = data.referredBy || null;
                 document.getElementById("profile-ref-code").value = baseUrl + "/?ref=" + data.referralCode;
                 document.getElementById("profile-points").textContent = profilePoints;
+              }
+
+              const redeemBtn = document.getElementById("btn-redeem-points");
+              if(redeemBtn) {
+                 if (profilePoints >= 600) {
+                     redeemBtn.classList.remove("hidden");
+                     redeemBtn.classList.add("flex");
+                 } else {
+                     redeemBtn.classList.remove("flex");
+                     redeemBtn.classList.add("hidden");
+                 }
               }
 
               // One clean prefill of checkout form — no duplicates
@@ -3123,19 +3266,10 @@
     }
 
     function shareRefCode() {
-      const codeInput = document.getElementById("profile-ref-code").value;
-      const text = `Hey! Use my referral link to get 10% OFF your first order from BrewDipu: ${codeInput}`;
-
-      if (navigator.share) {
-        navigator.share({
-          title: 'BrewDipu Referral',
-          text: `Get 10% OFF your first order!`,
-          url: codeInput
-        }).catch((err) => console.log("Share cancelled", err));
-      } else {
-        const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        window.open(waUrl, "_blank");
-      }
+      const link = document.getElementById("profile-ref-code").value;
+      const msg = `Hey, check out this cool startup by BrewDipu! Supporting them is super easy, just use this link. Plus, you get *10% OFF* your first order!\n\n${link}`;
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, "_blank");
     }
 
     // Fix Scroll Position on load
@@ -3174,7 +3308,344 @@
       document.getElementById("overlay").addEventListener("click", () => {
         closeAll();
       });
+
+      // Initialize Promo Banner Gallery
+      loadFreeGiftGallery();
+      // Initialize dedicated Rewards section gallery
+      loadRewardsGallery();
     });
+
+    // ──────────────────────────────────────────────
+    //  ✨ PROMO CODE / OFFERS LOGIC
+    // ──────────────────────────────────────────────
+    window.applyListingOfferCode = async function() {
+      const code = document.getElementById("f-redeem-list-input").value.trim().toUpperCase();
+      const statusEl = document.getElementById("redeem-list-status");
+      
+      if (!code) {
+        statusEl.textContent = "Please enter a code.";
+        statusEl.className = "text-xs font-bold mt-2 text-error";
+        return;
+      }
+
+      statusEl.textContent = "Checking code...";
+      statusEl.className = "text-xs font-bold mt-2 text-on-surface-variant";
+
+      try {
+        const doc = await db.collection("promoCodes").doc(code).get();
+        if (!doc.exists) {
+           statusEl.textContent = "Invalid or expired code.";
+           statusEl.className = "text-xs font-bold mt-2 text-error";
+           return;
+        }
+        
+        const data = doc.data();
+        if (data.limit && data.uses >= data.limit) {
+           statusEl.textContent = "This code has reached its maximum usage limit.";
+           statusEl.className = "text-xs font-bold mt-2 text-error";
+           return;
+        }
+
+        if(data.type === "freeGift") {
+           statusEl.textContent = "Gift Unlocked! Proceed to checkout.";
+           statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
+        } else {
+           statusEl.textContent = "Offer Unlocked! We're redirecting you to checkout...";
+           statusEl.className = "text-xs font-bold mt-2 text-[#006e20]";
+        }
+        
+        document.getElementById("f-ref-code").value = code;
+        setTimeout(() => {
+           statusEl.textContent = "";
+           openOrderModal();
+        }, 1500);
+
+      } catch (e) {
+        statusEl.textContent = "Error verifying code. Try again.";
+        statusEl.className = "text-xs font-bold mt-2 text-error";
+      }
+    };
+
+    window.loadFreeGiftGallery = function() {
+      db.collection("promoCodes")
+        .where("type", "==", "freeGift")
+        .get().then(snapshot => {
+           const gallery = document.getElementById("free-gift-gallery");
+           if(snapshot.empty) {
+             gallery.innerHTML = `<div class="text-[10px] text-on-surface-variant w-full pt-1">Check back later for exciting gifts!</div>`;
+             return;
+           }
+           let html = "";
+           let found = false;
+           snapshot.forEach(doc => {
+             const data = doc.data();
+             if(data.img && (!data.limit || data.uses < data.limit)) {
+                found = true;
+                html += `
+                  <div class="snap-start flex-shrink-0 w-32 h-20 relative rounded-xl overflow-hidden group border border-outline/10">
+                    <img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent"></div>
+                    <div class="absolute bottom-1 left-2">
+                       <p class="text-[9px] font-bold text-white leading-tight uppercase font-mono tracking-widest mb-0.5">${doc.id}</p>
+                       ${data.desc ? `<p class="text-[8px] text-white/80 leading-tight">${data.desc}</p>` : ''}
+                    </div>
+                  </div>
+                `;
+             }
+           });
+           gallery.innerHTML = found ? html : `<div class="text-[10px] text-on-surface-variant w-full pt-1">All free gifts have been claimed for now.</div>`;
+        });
+    };
+
+    window.redeemPointsForCode = async function() {
+       const statusEl = document.getElementById("point-redeem-status");
+       const btn = document.getElementById("btn-redeem-points");
+
+       if(!isLoggedIn || !user) return;
+       if(profilePoints < 600) return;
+
+       if(!confirm("Are you sure you want to deduct 600 points for a unique 20% discount code?")) return;
+
+       btn.disabled = true;
+       statusEl.classList.remove("hidden");
+       statusEl.textContent = "Generating code...";
+       statusEl.className = "text-xs font-bold text-secondary text-center w-full mt-2 animate-pulse block";
+
+       try {
+          await db.collection("users").doc(user.uid).update({
+             points: firebase.firestore.FieldValue.increment(-600)
+          });
+
+          const uniqueCode = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+          
+          await db.collection("promoCodes").doc(uniqueCode).set({
+             type: "discountCode",
+             discountPct: 20,
+             limit: 1,
+             uses: 0,
+             uid: user.uid,
+             createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          statusEl.className = "text-xs font-bold text-[#006e20] text-center w-full mt-2 bg-green-50/50 p-3 border border-green-200/50 rounded-xl leading-relaxed block";
+          statusEl.innerHTML = `Your unique 20% discount code is: <br/><span class="text-xl font-mono tracking-widest text-[#006e20] font-black mt-2 mb-1 block select-all bg-white py-2 rounded-lg border border-[#006e20]/20 shadow-sm">${uniqueCode}</span><span class="text-[10px]">Copied automatically! Use it at checkout.</span>`;
+          
+          navigator.clipboard.writeText(uniqueCode).catch(()=>{});
+       } catch (e) {
+          statusEl.className = "text-xs font-bold text-error text-center w-full mt-2 block";
+          statusEl.textContent = "Error generating code. Please try again.";
+          btn.disabled = false;
+       }
+     };
+
+    // ──────────────────────────────────────────────
+    //  🎁 REWARDS GALLERY & CLAIMING
+    // ──────────────────────────────────────────────
+    let rewardsUnlocked = false;
+    let unlockedRewardCode = "";
+
+    // Pre-load the gift grid (locked) when page loads
+    window.loadRewardsGallery = function() {
+      const grid = document.getElementById("rewards-gift-grid");
+      grid.innerHTML = `<div class="col-span-full text-center p-10 text-on-surface-variant text-sm">Loading gifts...</div>`;
+      db.collection("promoCodes").where("type", "==", "freeGift").get().then(snapshot => {
+
+        // If no gifts exist, seed sample data automatically
+        if(snapshot.empty) {
+          seedSampleGifts();
+          return;
+        }
+
+        let html = "";
+        let found = false;
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const remaining = data.limit ? data.limit - (data.uses || 0) : null;
+          const available = !data.limit || (data.uses || 0) < data.limit;
+          if(available) {
+            found = true;
+            html += `
+            <div class="glass-card rounded-2xl overflow-hidden group relative border border-outline/10 flex flex-row" style="min-height:140px">
+              <div class="w-40 md:w-52 shrink-0 overflow-hidden relative">
+                ${data.img
+                  ? `<img src="${data.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 absolute inset-0">`
+                  : `<div class="w-full h-full bg-secondary/10 flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-secondary/40">card_giftcard</span></div>`
+                }
+              </div>
+              <div class="flex flex-col flex-1 p-5 justify-between">
+                <div>
+                  <span class="text-[10px] font-black uppercase tracking-widest text-secondary">🎁 Free Gift</span>
+                  <h3 class="font-black text-primary text-lg leading-tight mt-1 mb-1">${data.desc || "Exclusive BrewDipu Gift"}</h3>
+                  <p class="text-xs text-on-surface-variant">${remaining !== null ? `<strong>${remaining}</strong> remaining out of <strong>${data.limit}</strong>` : 'Unlimited availability'}</p>
+                </div>
+                <button onclick="openClaimModal('${doc.id}', '${(data.desc || 'Exclusive Gift').replace(/'/g, "&apos;").replace(/"/g, '&quot;')}')" 
+                  class="claim-btn mt-3 w-full py-2.5 bg-surface-container text-on-surface-variant border border-outline/20 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 cursor-not-allowed transition-all duration-300" 
+                  disabled data-gift="${doc.id}">
+                  <span class="material-symbols-outlined text-sm">lock</span> Locked — Enter Code to Claim
+                </button>
+              </div>
+            </div>`;
+          }
+        });
+        grid.innerHTML = found ? html : `<div class="col-span-full text-center p-12 text-on-surface-variant">
+          <span class="material-symbols-outlined text-4xl mb-3 block">card_giftcard</span>All gifts claimed! Check back soon.</div>`;
+      }).catch(() => {
+        grid.innerHTML = `<div class="col-span-full text-center p-12 text-on-surface-variant">Could not load rewards. Please refresh.</div>`;
+      });
+    };
+
+    function seedSampleGifts() {
+      const samples = [
+        { code: "GIFT-KEYCHAIN1", desc: "Handmade BrewDipu Resin Keychain", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBg3px03BErm9fszHgQXGvDPcbasCwngej2BR1hOvOJz-oIK-Qcv24uy-LPv5ElFxx5yMIBXk2zBpxoCthQ6USl864ekLf00Kx4HtayCXVIftcWap9plu7XwLUdVU8wM7LftQfza51WviuznGClnw0i2SCwXQqFCRKkb3Vmwci-2qgmFL3VH2KYks33BH8dCOVh9thysVhPVm9S6pPzB0tppaCuB2narmQlLTezsJsMhCD_Tt-27kwXGyEIDlSJ7_XqAEbSX-Q99LM", limit: 20 },
+        { code: "GIFT-KEYCHAIN2", desc: "Miniature Cold Brew Glass Keychain", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBg3px03BErm9fszHgQXGvDPcbasCwngej2BR1hOvOJz-oIK-Qcv24uy-LPv5ElFxx5yMIBXk2zBpxoCthQ6USl864ekLf00Kx4HtayCXVIftcWap9plu7XwLUdVU8wM7LftQfza51WviuznGClnw0i2SCwXQqFCRKkb3Vmwci-2qgmFL3VH2KYks33BH8dCOVh9thysVhPVm9S6pPzB0tppaCuB2narmQlLTezsJsMhCD_Tt-27kwXGyEIDlSJ7_XqAEbSX-Q99LM", limit: 15 },
+        { code: "GIFT-STICKER", desc: "BrewDipu Sticker Pack (5 designs)", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDIntQ-ubtNMEvijaYU5lNeNGFs8vLYNcKKN9H3CmkVMycEJRm1vfNBYI2le0aZqU682HqK-s_l-1zhg7FMcY7_HigBSIYacu36QvRKe4jMvXqPbC4HhiS-KUruCZgVS7Sdmx_ca3r6Shf2H0W_CxMaP3dHqgU4yBuEu5Q5PLFGbvpjf4acHMBJfMl8IgRZ1tWJ25ovHLS2omkedNxpNxgZ_XJsPQUS6rVwGS-ZHDmEBokWR5Xx-xKWA9ueCdtcRHsInH91b63VGJY", limit: 30 }
+      ];
+      const batch = db.batch();
+      samples.forEach(s => {
+        batch.set(db.collection("promoCodes").doc(s.code), { type: "freeGift", desc: s.desc, img: s.img, limit: s.limit, uses: 0 });
+      });
+      batch.commit().then(() => loadRewardsGallery()).catch(() => {});
+    }
+
+    window.unlockRewardsGallery = async function() {
+      const input = document.getElementById("rewards-unlock-input");
+      const code = input.value.trim().toUpperCase();
+      const statusEl = document.getElementById("rewards-unlock-status");
+      statusEl.classList.remove("hidden");
+
+      // Must be RWD- prefixed (generated 20% code)
+      if(!code.startsWith("RWD-")) {
+        statusEl.textContent = "❌ Only reward codes (starting with RWD-) unlock free gifts.";
+        statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+        return;
+      }
+
+      statusEl.textContent = "Verifying your reward code...";
+      statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-on-surface-variant block animate-pulse";
+
+      try {
+        const doc = await db.collection("promoCodes").doc(code).get();
+        if(!doc.exists) {
+          statusEl.textContent = "❌ Invalid code. Please double-check and try again.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        const data = doc.data();
+        if(data.limit && (data.uses || 0) >= data.limit) {
+          statusEl.textContent = "❌ This code has already been used.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        if(data.type === "freeGift") {
+          statusEl.textContent = "❌ This is a free gift code, not a reward unlock code. Proceed to the gift section.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        if(data.type === "discountCode" || data.type === "brew20") {
+          statusEl.textContent = "❌ This is a cart discount code. Please enter it in the checkout screen.";
+          statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+          return;
+        }
+        // Valid! Unlock now
+        rewardsUnlocked = true;
+        unlockedRewardCode = code;
+
+        // Enable claim buttons — turn them green
+        document.querySelectorAll(".claim-btn").forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove("bg-surface-container", "text-on-surface-variant", "border", "border-outline/20", "cursor-not-allowed", "opacity-40", "pointer-events-none");
+          btn.classList.add("bg-[#006e20]", "text-white", "hover:opacity-90", "cursor-pointer");
+          btn.innerHTML = `<span class="material-symbols-outlined text-sm">redeem</span> Claim This Gift`;
+        });
+
+        statusEl.textContent = "✅ Unlocked! Choose one gift to claim — your reward is ready.";
+        statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-[#006e20] block";
+
+      } catch(e) {
+        statusEl.textContent = "❌ Error verifying code. Please try again.";
+        statusEl.className = "text-xs font-bold mt-3 ml-0 md:ml-16 text-error block";
+      }
+    };
+
+    window.openClaimModal = function(giftCode, giftName) {
+      if(!rewardsUnlocked) return;
+      document.getElementById("claim-gift-name").textContent = giftName;
+      document.getElementById("claim-code-hidden").value = giftCode;
+      document.getElementById("claim-form").reset();
+      document.getElementById("claim-code-hidden").value = giftCode; // re-set after reset
+      document.getElementById("claim-gift-name").textContent = giftName; // re-set
+
+      // Pre-fill if logged in
+      if(isLoggedIn && user) {
+        const profile = document.getElementById("profile-name");
+        if(profile) document.getElementById("claim-name").value = profile.textContent || "";
+        const phone = document.getElementById("profile-phone");
+        if(phone) document.getElementById("claim-phone").value = phone.textContent || "";
+      }
+
+      const modal = document.getElementById("claim-modal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    };
+
+    window.closeClaimModal = function() {
+      const modal = document.getElementById("claim-modal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    };
+
+    window.submitClaim = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById("claim-name").value.trim();
+      const phone = document.getElementById("claim-phone").value.trim();
+      const address = document.getElementById("claim-address").value.trim();
+      const giftName = document.getElementById("claim-gift-name").textContent;
+      const giftCode = document.getElementById("claim-code-hidden").value;
+      const rewardCode = unlockedRewardCode;
+      const btn = document.getElementById("claim-submit-btn");
+
+      btn.disabled = true;
+      btn.innerHTML = `<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span> Sending...`;
+
+      try {
+        // Increment usage of the reward code (burn it)
+        await db.collection("promoCodes").doc(rewardCode).update({
+          uses: firebase.firestore.FieldValue.increment(1)
+        });
+
+        // Build WhatsApp message
+        const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        const msg = `🎁 FREE GIFT CLAIM — BrewDipu\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `📦 Gift: ${giftName}\n` +
+          `🔐 Reward Code Used: ${rewardCode}\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `👤 Name: ${name}\n` +
+          `📞 WhatsApp: ${phone}\n` +
+          `📍 Address: ${address}\n` +
+          `🕒 Time: ${timestamp}\n` +
+          `━━━━━━━━━━━━━━━━━━━━\n` +
+          `Please dispatch the gift accordingly!`;
+
+        window.open(`https://wa.me/${OWNER.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+
+        // Lock gallery again — one claim per code
+        rewardsUnlocked = false;
+        document.querySelectorAll(".claim-btn").forEach(btn => {
+          btn.disabled = true;
+          btn.classList.add("opacity-40", "pointer-events-none");
+          btn.innerHTML = `<span class="material-symbols-outlined text-sm">check_circle</span> Claimed!`;
+        });
+
+        closeClaimModal();
+        showToast("🎉 Claim sent! Your gift is on its way.");
+
+      } catch(err) {
+        btn.disabled = false;
+        btn.innerHTML = `<span class="material-symbols-outlined">send</span> Send Claim via WhatsApp`;
+        showToast("Error sending claim. Please try again.");
+      }
+    };
   </script>
 
   <!-- STORE CLOSED MODAL -->
