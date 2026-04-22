@@ -236,14 +236,21 @@ function loadSettings() {
         document.getElementById("set-f4-desc").value = data.features.f4Desc || "Every order supports a local artisan and a dream of crafting better coffee for everyone.";
       }
 
-      // Collections
-      if (data.collections) {
-        for(let i=1; i<=4; i++) {
-           const tEl = document.getElementById("set-collec-"+i+"-title");
-           const sEl = document.getElementById("set-collec-"+i+"-sub");
-           if(tEl && data.collections["c"+i+"Title"]) tEl.value = data.collections["c"+i+"Title"];
-           if(sEl && data.collections["c"+i+"Sub"]) sEl.value = data.collections["c"+i+"Sub"];
+      // Collections — dynamic array
+      if (data.collectionsData && data.collectionsData.length) {
+        renderCollectionRows(data.collectionsData);
+      } else if (data.collections) {
+        // Backward compat: convert old c1..c4 keys to array
+        const legacyArr = [];
+        for (let i = 1; i <= 4; i++) {
+          const t = data.collections['c'+i+'Title'];
+          const s = data.collections['c'+i+'Sub'];
+          const img = data.collectionsImg ? (data.collectionsImg[i-1] || '') : '';
+          if (t) legacyArr.push({ title: t, sub: s || '', img: img });
         }
+        renderCollectionRows(legacyArr);
+      } else {
+        renderCollectionRows([]);
       }
 
       if(data.schedule) {
@@ -309,14 +316,21 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
      }
   }
 
-  // Process Collection Images
-  let finalCollectionsImg = currentSettings.collectionsImg ? [...currentSettings.collectionsImg] : Array(4).fill("");
-  for(let i=1; i<=4; i++) {
-     const f = document.getElementById(`set-collec-${i}-img`).files[0];
-     if(f) {
-        filePromises.push(compressAndGetBase64(f).then(url => finalCollectionsImg[i-1] = url));
-     }
-  }
+  // Process Collection Images (dynamic)
+  const collectionRows = document.querySelectorAll('#collections-list .collec-row');
+  let finalCollectionsData = currentSettings.collectionsData ? JSON.parse(JSON.stringify(currentSettings.collectionsData)) : [];
+  // Resize array to match current rows
+  while (finalCollectionsData.length < collectionRows.length) finalCollectionsData.push({ title: '', sub: '', img: '' });
+  finalCollectionsData = finalCollectionsData.slice(0, collectionRows.length);
+
+  collectionRows.forEach((row, idx) => {
+    finalCollectionsData[idx].title = row.querySelector('.collec-title').value;
+    finalCollectionsData[idx].sub   = row.querySelector('.collec-sub').value;
+    const imgFile = row.querySelector('.collec-img-file').files[0];
+    if (imgFile) {
+      filePromises.push(compressAndGetBase64(imgFile).then(url => finalCollectionsData[idx].img = url));
+    }
+  });
 
   if(filePromises.length > 0) {
      progressText.classList.remove("hidden");
@@ -356,17 +370,7 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
        f4Title: document.getElementById("set-f4-title").value,
        f4Desc: document.getElementById("set-f4-desc").value,
     },
-    collections: {
-       c1Title: document.getElementById("set-collec-1-title").value,
-       c1Sub: document.getElementById("set-collec-1-sub").value,
-       c2Title: document.getElementById("set-collec-2-title").value,
-       c2Sub: document.getElementById("set-collec-2-sub").value,
-       c3Title: document.getElementById("set-collec-3-title").value,
-       c3Sub: document.getElementById("set-collec-3-sub").value,
-       c4Title: document.getElementById("set-collec-4-title").value,
-       c4Sub: document.getElementById("set-collec-4-sub").value,
-    },
-    collectionsImg: finalCollectionsImg,
+    collectionsData: finalCollectionsData,
     schedule: schedule,
     autoLive: document.getElementById("set-autolive").checked,
     isOpen: document.getElementById("set-isopen").checked,
@@ -380,10 +384,49 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
       // Clear file inputs after success
       document.getElementById("set-story-file").value = "";
       for(let i=1; i<=6; i++) document.getElementById(`set-ig-${i}`).value = "";
-      for(let i=1; i<=4; i++) document.getElementById(`set-collec-${i}-img`).value = "";
+      document.querySelectorAll('#collections-list .collec-img-file').forEach(f => f.value = '');
       setTimeout(() => msg.classList.add("hidden"), 3000);
     });
 });
+
+// ── Dynamic Collections Helpers ──────────────────────────────────
+window.addCollectionRow = function(data = {}) {
+  const list = document.getElementById('collections-list');
+  const idx = list.querySelectorAll('.collec-row').length + 1;
+  const div = document.createElement('div');
+  div.className = 'collec-row p-4 bg-surface-container-low rounded-2xl border border-outline/10 flex flex-col gap-2 relative';
+  div.innerHTML = `
+    <div class="flex justify-between items-center mb-1">
+      <span class="text-xs text-primary font-bold">Collection ${idx}</span>
+      <button type="button" onclick="this.closest('.collec-row').remove(); renumberCollectionRows()" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">delete</span> Remove
+      </button>
+    </div>
+    <input type="text" class="collec-title w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Cold Coffee" value="${data.title||''}">
+    <input type="text" class="collec-sub w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Brewed for 18 hours" value="${data.sub||''}">
+    ${data.img ? `<img src="${data.img}" class="w-16 h-16 object-cover rounded-lg border border-outline/20 mb-1">` : ''}
+    <input type="file" class="collec-img-file w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs" accept="image/*">
+  `;
+  list.appendChild(div);
+};
+
+window.renumberCollectionRows = function() {
+  document.querySelectorAll('#collections-list .collec-row').forEach((row, i) => {
+    const label = row.querySelector('span.text-primary');
+    if (label) label.textContent = 'Collection ' + (i + 1);
+  });
+};
+
+function renderCollectionRows(dataArr) {
+  const list = document.getElementById('collections-list');
+  list.innerHTML = '';
+  if (!dataArr || dataArr.length === 0) {
+    // Default 4 empty rows
+    for (let i = 0; i < 4; i++) addCollectionRow();
+    return;
+  }
+  dataArr.forEach(item => addCollectionRow(item));
+}
 
 // ──────────────────────────────────────────────
 //  🚀  BASE64 IMAGE COMPRESSOR Helper
@@ -476,9 +519,11 @@ function closeProductModal() {
   document.getElementById('product-form').reset();
   document.getElementById('prod-id').value = '';
   document.getElementById('product-modal-title').innerText = 'Add Product';
+  const preview = document.getElementById('prod-img-preview');
+  if (preview) preview.innerHTML = '';
 }
 
-document.getElementById("product-form").addEventListener("submit", (e) => {
+document.getElementById("product-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const id = document.getElementById("prod-id").value;
   const fileInput = document.getElementById("prod-img");
@@ -486,44 +531,46 @@ document.getElementById("product-form").addEventListener("submit", (e) => {
   const btn = e.target.querySelector("button[type='submit']");
   btn.disabled = true;
 
-  const saveProductToDB = (imgUrl) => {
+  // Gather existing images from preview (kept ones)
+  let existingImages = [];
+  document.querySelectorAll('#prod-img-preview img').forEach(img => existingImages.push(img.dataset.url));
+
+  const saveProductToDB = (newImageUrls) => {
+    const allImages = [...existingImages, ...newImageUrls];
+    if (allImages.length === 0) allImages.push(oldUrl || 'https://placehold.co/400');
     const payload = {
       name: document.getElementById("prod-name").value,
       price: document.getElementById("prod-price").value,
       badge: document.getElementById("prod-badge").value,
-      img: imgUrl,
+      img: allImages[0],        // keep backward compat
+      images: allImages,
       desc: document.getElementById("prod-desc").value,
       outOfStock: document.getElementById("prod-outofstock").checked
     };
-
     const task = id ? db.collection("products").doc(id).update(payload) : db.collection("products").add(payload);
-    task.then(() => {
-      btn.disabled = false;
-      closeProductModal();
-    });
+    task.then(() => { btn.disabled = false; closeProductModal(); });
   };
 
-  if(fileInput.files.length > 0) {
-    const file = fileInput.files[0];
+  if (fileInput.files.length > 0) {
     document.getElementById("upload-progress").classList.remove("hidden");
-    
-    // Bypass Firebase Storage buggy hang -> use Client-side Compression straight into Firestore
-    compressAndGetBase64(file).then(base64Url => {
-       document.getElementById("upload-progress").classList.add("hidden");
-       saveProductToDB(base64Url);
-    }).catch(err => {
-       console.error(err);
-       document.getElementById("upload-progress").classList.add("hidden");
-       alert("Image compression failed. Ensure it is a valid image.");
-       btn.disabled = false;
-    });
+    const compressionPromises = Array.from(fileInput.files).map(f => compressAndGetBase64(f));
+    try {
+      const newUrls = await Promise.all(compressionPromises);
+      document.getElementById("upload-progress").classList.add("hidden");
+      saveProductToDB(newUrls);
+    } catch (err) {
+      console.error(err);
+      document.getElementById("upload-progress").classList.add("hidden");
+      alert("Image compression failed.");
+      btn.disabled = false;
+    }
   } else {
-    // If they typed a URL into the URL input, use that over oldUrl
     const newUrlField = document.getElementById("prod-img-newurl");
-    if(newUrlField && newUrlField.value.trim() !== "") {
-      saveProductToDB(newUrlField.value.trim());
+    if (newUrlField && newUrlField.value.trim() !== "") {
+      const urlLines = newUrlField.value.split('\n').map(u => u.trim()).filter(Boolean);
+      saveProductToDB(urlLines);
     } else {
-      saveProductToDB(oldUrl || "https://placehold.co/400");
+      saveProductToDB([]);
     }
   }
 });
@@ -536,13 +583,28 @@ window.editProduct = function(id) {
   document.getElementById("prod-price").value = p.price;
   document.getElementById("prod-badge").value = p.badge || "";
   document.getElementById("prod-img").value = "";
+  document.getElementById("prod-img-newurl").value = "";
   document.getElementById("prod-img-url").value = p.img;
   document.getElementById("prod-desc").value = p.desc;
   document.getElementById("prod-outofstock").checked = p.outOfStock;
-  
+
+  // Render image previews
+  const preview = document.getElementById('prod-img-preview');
+  const imgs = p.images && p.images.length ? p.images : (p.img ? [p.img] : []);
+  preview.innerHTML = imgs.map((url, i) => `
+    <div class="relative" id="img-preview-${i}">
+      <img src="${url}" data-url="${url}" class="w-16 h-16 object-cover rounded-lg border border-outline/20" title="Image ${i+1}">
+      <button type="button" onclick="removePreviewImg(${i})" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center font-black hover:bg-red-700">×</button>
+    </div>`).join('');
+
   document.getElementById('product-modal-title').innerText = 'Edit Product';
   document.getElementById('add-product-modal').classList.remove('hidden');
-}
+};
+
+window.removePreviewImg = function(i) {
+  const el = document.getElementById('img-preview-'+i);
+  if (el) el.remove();
+};
 
 window.deleteProduct = function(id) {
   if(confirm("Are you sure you want to delete this product?")) {

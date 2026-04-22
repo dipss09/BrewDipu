@@ -197,11 +197,13 @@
                 </div>
               </div>
               <div>
-                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Product Image Upload</label>
-                <input type="file" id="prod-img" accept="image/*" class="w-full bg-white rounded-xl p-3 border border-outline/20">
-                <input type="text" id="prod-img-newurl" placeholder="Or paste image URL" class="w-full bg-white rounded-xl p-3 border border-outline/20 mt-2 text-sm">
+                <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Product Images (Multiple)</label>
+                <input type="file" id="prod-img" accept="image/*" multiple class="w-full bg-white rounded-xl p-3 border border-outline/20">
+                <input type="text" id="prod-img-newurl" placeholder="Or paste image URL (one per line)" class="w-full bg-white rounded-xl p-3 border border-outline/20 mt-2 text-sm">
                 <input type="hidden" id="prod-img-url">
                 <div id="upload-progress" class="text-xs text-secondary mt-1 hidden font-bold animate-pulse">Uploading...</div>
+                <!-- Existing images preview -->
+                <div id="prod-img-preview" class="flex flex-wrap gap-2 mt-3"></div>
               </div>
               <div>
                 <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Description</label>
@@ -565,38 +567,14 @@
           <div class="space-y-4 text-sm">
             <div>
                <h4 class="font-bold text-primary">Curated Selection (The Collection)</h4>
-               <p class="text-xs text-on-surface-variant mb-4">Edit the 4 collection categories shown on the homepage.</p>
+               <p class="text-xs text-on-surface-variant mb-4">Add, edit or remove collection categories shown on the homepage.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <!-- Collection 1 -->
-               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
-                 <label class="text-xs text-primary font-bold block mb-1">Collection 1</label>
-                 <input type="text" id="set-collec-1-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Cold Coffee">
-                 <input type="text" id="set-collec-1-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Brewed for 18 hours">
-                 <input type="file" id="set-collec-1-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
-               </div>
-               <!-- Collection 2 -->
-               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
-                 <label class="text-xs text-primary font-bold block mb-1">Collection 2</label>
-                 <input type="text" id="set-collec-2-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Mojito">
-                 <input type="text" id="set-collec-2-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Minty Freshness">
-                 <input type="file" id="set-collec-2-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
-               </div>
-               <!-- Collection 3 -->
-               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
-                 <label class="text-xs text-primary font-bold block mb-1">Collection 3</label>
-                 <input type="text" id="set-collec-3-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Juices">
-                 <input type="text" id="set-collec-3-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Purely Organic">
-                 <input type="file" id="set-collec-3-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
-               </div>
-               <!-- Collection 4 -->
-               <div class="p-4 bg-surface-container-low rounded-2xl border border-outline/10">
-                 <label class="text-xs text-primary font-bold block mb-1">Collection 4</label>
-                 <input type="text" id="set-collec-4-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Keychains">
-                 <input type="text" id="set-collec-4-sub" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 mb-2" placeholder="Handmade with Love">
-                 <input type="file" id="set-collec-4-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
-               </div>
+            <div id="collections-list" class="space-y-3">
+               <!-- Populated by JS -->
             </div>
+            <button type="button" onclick="addCollectionRow()" class="mt-2 w-full py-2 border-2 border-dashed border-outline/30 rounded-2xl text-sm font-bold text-on-surface-variant hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-sm">add</span> Add Collection
+            </button>
           </div>
           
           <hr class="border-outline/20">
