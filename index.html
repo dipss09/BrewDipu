@@ -1965,8 +1965,8 @@
             <div class="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 z-10">
               ${p.images.map((_,i) => `<button onclick="carouselGo('${p.id}',${i})" class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-white/60 transition-colors ${i===0?'bg-white':'bg-white/30'}" data-dot-${p.id}></button>`).join('')}
             </div>
-            <button onclick="carouselPrev('${p.id}')" class="absolute left-0.5 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center text-xs z-10">&lsaquo;</button>
-            <button onclick="carouselNext('${p.id}')" class="absolute right-0.5 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center text-xs z-10">&rsaquo;</button>
+            <button onclick="carouselPrev('${p.id}')" class="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 shadow"><span class="material-symbols-outlined text-[14px] md:text-base">chevron_left</span></button>
+            <button onclick="carouselNext('${p.id}')" class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 shadow"><span class="material-symbols-outlined text-[14px] md:text-base">chevron_right</span></button>
           </div>` : `
           <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}"
             src="${p.img}" alt="${p.name}" loading="lazy"/>`}
