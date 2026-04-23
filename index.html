@@ -1000,7 +1000,7 @@
         </div>
         <div class="space-y-1">
           <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Phone Number *</label>
-          <input id="f-phone" required type="tel" placeholder="+91 98765 43210"
+          <input id="f-phone" required type="tel" placeholder="+91XXXXXX4865"
             class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
             style="border:none;" />
         </div>
@@ -1190,7 +1190,7 @@
           <!-- 4. Phone Number -->
           <div class="space-y-1">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Phone Number *</label>
-            <input id="auth-phone" required type="tel" placeholder="+91 9876543210"
+            <input id="auth-phone" required type="tel" placeholder="+91XXXXXX4865"
               class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium"
               style="border:none;" />
           </div>
@@ -2918,7 +2918,10 @@
                       <span class="text-xs text-on-surface-variant font-bold">${timeStr}</span>
                     </div>
                     <div class="text-sm font-medium text-primary mb-1 leading-tight">${itemsStr}</div>
-                    <div class="text-xs text-on-surface-variant font-black tracking-widest uppercase mt-2">Total: ₹${od.total}</div>
+                    <div class="text-xs text-on-surface-variant font-black tracking-widest uppercase mt-2 flex justify-between items-center">
+                      <span>Total: ₹${od.total}</span>
+                      ${od.confCode ? `<span class="text-secondary tracking-widest font-mono text-[10px] lowercase">${od.confCode}</span>` : ''}
+                    </div>
                   </div>`;
             });
             listEl.innerHTML = html;
