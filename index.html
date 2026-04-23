@@ -3274,8 +3274,10 @@
             name: data.name,
             desc: data.desc,
             price: parseFloat(data.price),
+            originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : null,
             badge: data.badge,
             img: data.img,
+            images: data.images || [],
             outOfStock: data.outOfStock
           });
         });
