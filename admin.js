@@ -518,6 +518,7 @@ function closeProductModal() {
   document.getElementById('add-product-modal').classList.add('hidden');
   document.getElementById('product-form').reset();
   document.getElementById('prod-id').value = '';
+  document.getElementById('prod-original-price').value = '';
   document.getElementById('product-modal-title').innerText = 'Add Product';
   const preview = document.getElementById('prod-img-preview');
   if (preview) preview.innerHTML = '';
@@ -541,6 +542,7 @@ document.getElementById("product-form").addEventListener("submit", async (e) => 
     const payload = {
       name: document.getElementById("prod-name").value,
       price: document.getElementById("prod-price").value,
+      originalPrice: document.getElementById("prod-original-price").value ? Number(document.getElementById("prod-original-price").value) : null,
       badge: document.getElementById("prod-badge").value,
       img: allImages[0],        // keep backward compat
       images: allImages,
@@ -581,6 +583,7 @@ window.editProduct = function(id) {
   document.getElementById("prod-id").value = p.id;
   document.getElementById("prod-name").value = p.name;
   document.getElementById("prod-price").value = p.price;
+  document.getElementById("prod-original-price").value = p.originalPrice || "";
   document.getElementById("prod-badge").value = p.badge || "";
   document.getElementById("prod-img").value = "";
   document.getElementById("prod-img-newurl").value = "";

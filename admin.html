@@ -79,18 +79,18 @@
   <div id="app-screen" class="hidden flex-1 flex flex-col md:flex-row">
     
     <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-surface-container-high border-r border-outline/20 flex flex-col">
-      <div class="p-6 border-b border-outline/20">
-        <h1 class="text-2xl font-black text-primary">BrewDipu</h1>
-        <span class="text-xs font-bold text-secondary uppercase tracking-widest">Admin Panel</span>
+    <aside class="w-full md:w-64 bg-surface-container-high border-r border-outline/20 flex flex-col shrink-0">
+      <div class="p-4 md:p-6 border-b border-outline/20">
+        <h1 class="text-xl md:text-2xl font-black text-primary">BrewDipu</h1>
+        <span class="text-[10px] md:text-xs font-bold text-secondary uppercase tracking-widest">Admin Panel</span>
       </div>
-      <nav class="flex-1 p-4 space-y-2">
-        <button onclick="switchTab('orders')" id="tab-btn-orders" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 bg-primary text-white transition-colors"><span class="material-symbols-outlined">receipt_long</span> Orders</button>
-        <button onclick="switchTab('products')" id="tab-btn-products" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">inventory_2</span> Products</button>
-        <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">reviews</span> Reviews</button>
-        <button onclick="switchTab('offers')" id="tab-btn-offers" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">redeem</span> Rewards & Promos</button>
-        <button onclick="switchTab('users')" id="tab-btn-users" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">group</span> Users & Referrals</button>
-        <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined">settings</span> Store Settings</button>
+      <nav class="flex-1 p-2 md:p-4 space-y-1 md:space-y-2 overflow-x-auto md:overflow-x-visible flex md:flex-col gap-2 md:gap-0">
+        <button onclick="switchTab('orders')" id="tab-btn-orders" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 bg-primary text-white transition-colors"><span class="material-symbols-outlined text-sm md:text-base">receipt_long</span> Orders</button>
+        <button onclick="switchTab('products')" id="tab-btn-products" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">inventory_2</span> Products</button>
+        <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">reviews</span> Reviews</button>
+        <button onclick="switchTab('offers')" id="tab-btn-offers" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">redeem</span> Rewards & Promos</button>
+        <button onclick="switchTab('users')" id="tab-btn-users" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">group</span> Users</button>
+        <button onclick="switchTab('settings')" id="tab-btn-settings" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">settings</span> Settings</button>
       </nav>
       <div class="p-4 border-t border-outline/20">
         <button id="logout-btn" class="w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 text-red-600 hover:bg-red-50 transition-colors"><span class="material-symbols-outlined">logout</span> Log Out</button>
@@ -98,24 +98,24 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+    <main class="flex-1 p-4 md:p-10 overflow-y-auto w-full">
       
       <!-- ORDERS TAB -->
       <section id="tab-orders" class="tab-pane">
-        <div class="flex justify-between items-center mb-8">
-          <h2 class="text-3xl font-black text-primary">Recent Orders</h2>
+        <div class="flex justify-between items-center mb-4 md:mb-8">
+          <h2 class="text-2xl md:text-3xl font-black text-primary">Recent Orders</h2>
         </div>
-        <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="glass-card rounded-2xl overflow-hidden text-sm md:text-base">
           <div class="overflow-x-auto">
             <table class="w-full text-left">
-              <thead class="bg-surface-container-highest text-on-surface-variant text-xs uppercase tracking-widest">
+              <thead class="bg-surface-container-highest text-on-surface-variant text-[10px] md:text-xs uppercase tracking-widest">
                 <tr>
-                  <th class="p-4 rounded-tl-2xl">Time</th>
-                  <th class="p-4">Customer</th>
-                  <th class="p-4">Contact</th>
-                  <th class="p-4">Items & Total</th>
-                  <th class="p-4">Status</th>
-                  <th class="p-4 rounded-tr-2xl">Action</th>
+                  <th class="p-2 md:p-4 rounded-tl-2xl whitespace-nowrap">Time</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Customer</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Contact</th>
+                  <th class="p-2 md:p-4 min-w-[150px]">Items & Total</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Status</th>
+                  <th class="p-2 md:p-4 rounded-tr-2xl whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody id="orders-tbody" class="divide-y divide-outline/10">
@@ -129,23 +129,23 @@
 
       <!-- USERS TAB -->
       <section id="tab-users" class="tab-pane hidden">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-4 md:mb-8">
           <div>
-              <h2 class="text-3xl font-black text-primary">Users & Referrals</h2>
-              <p class="text-sm text-on-surface-variant mt-1">Manage user reward points and view referral tracking.</p>
+              <h2 class="text-2xl md:text-3xl font-black text-primary">Users & Referrals</h2>
+              <p class="text-xs md:text-sm text-on-surface-variant mt-1">Manage user reward points and view referral tracking.</p>
           </div>
         </div>
-        <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="glass-card rounded-2xl overflow-hidden text-sm md:text-base">
           <div class="overflow-x-auto">
             <table class="w-full text-left">
-              <thead class="bg-surface-container-highest text-on-surface-variant text-xs uppercase tracking-widest">
+              <thead class="bg-surface-container-highest text-on-surface-variant text-[10px] md:text-xs uppercase tracking-widest">
                 <tr>
-                  <th class="p-4 rounded-tl-2xl">User</th>
-                  <th class="p-4">Contact</th>
-                  <th class="p-4">Code</th>
-                  <th class="p-4">Referrals</th>
-                  <th class="p-4">Points</th>
-                  <th class="p-4 rounded-tr-2xl">Action</th>
+                  <th class="p-2 md:p-4 rounded-tl-2xl whitespace-nowrap">User</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Contact</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Code</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Referrals</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Points</th>
+                  <th class="p-2 md:p-4 rounded-tr-2xl whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody id="users-tbody" class="divide-y divide-outline/10">
@@ -159,12 +159,12 @@
 
       <!-- PRODUCTS TAB -->
       <section id="tab-products" class="tab-pane hidden">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 md:mb-8 gap-4">
           <div>
-            <h2 class="text-3xl font-black text-primary">Products Management</h2>
-            <p class="text-sm text-on-surface-variant">Add, edit, or remove products from your website.</p>
+            <h2 class="text-2xl md:text-3xl font-black text-primary">Products Management</h2>
+            <p class="text-xs md:text-sm text-on-surface-variant">Add, edit, or remove products from your website.</p>
           </div>
-          <button onclick="document.getElementById('add-product-modal').classList.remove('hidden')" class="px-6 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 hover:bg-primary-container transition-colors">
+          <button onclick="document.getElementById('add-product-modal').classList.remove('hidden')" class="px-4 md:px-6 py-2 md:py-3 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors text-sm md:text-base">
             <span class="material-symbols-outlined text-sm">add</span> Add Product
           </button>
         </div>
@@ -174,11 +174,11 @@
         </div>
 
         <!-- Add/Edit Product Modal -->
-        <div id="add-product-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-center items-center p-4">
-          <div class="bg-surface rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-2xl font-black text-primary" id="product-modal-title">Add Product</h3>
-              <button onclick="closeProductModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+        <div id="add-product-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-center items-center p-2 md:p-4">
+          <div class="bg-surface rounded-2xl md:rounded-3xl p-5 md:p-8 max-w-lg w-full max-h-[95vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 md:mb-6">
+              <h3 class="text-xl md:text-2xl font-black text-primary" id="product-modal-title">Add Product</h3>
+              <button onclick="closeProductModal()" class="text-on-surface-variant hover:text-primary p-2"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form id="product-form" class="space-y-4">
               <input type="hidden" id="prod-id" />
@@ -186,12 +186,16 @@
                 <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Product Name</label>
                 <input type="text" id="prod-name" required class="w-full bg-white rounded-xl p-3 border border-outline/20">
               </div>
-              <div class="grid grid-cols-2 gap-4">
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Price (₹)</label>
                   <input type="number" id="prod-price" required class="w-full bg-white rounded-xl p-3 border border-outline/20">
                 </div>
                 <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Orig. Price (₹)</label>
+                  <input type="number" id="prod-original-price" placeholder="Optional" class="w-full bg-white rounded-xl p-3 border border-outline/20">
+                </div>
+                <div class="col-span-2 md:col-span-1">
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Badge (e.g. ⭐ Best Seller)</label>
                   <input type="text" id="prod-badge" class="w-full bg-white rounded-xl p-3 border border-outline/20">
                 </div>
@@ -223,17 +227,17 @@
 
       <!-- REWARDS & PROMOS TAB -->
       <section id="tab-offers" class="tab-pane hidden">
-        <div class="flex flex-col md:flex-row justify-between md:items-center mb-8 gap-4">
+        <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 md:mb-8 gap-4">
           <div>
-            <h2 class="text-3xl font-black text-primary">Redeem Rewards & Promos</h2>
-            <p class="text-sm text-on-surface-variant mt-1">Manage promo codes, gift rewards, and 600pts reward codes. Free Gift items appear in the frontend gallery.</p>
+            <h2 class="text-2xl md:text-3xl font-black text-primary">Redeem Rewards & Promos</h2>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Manage promo codes, gift rewards, and 600pts reward codes.</p>
           </div>
-          <div class="flex gap-3 flex-wrap shrink-0">
-            <button onclick="openNewRewardCode()" class="px-5 py-3 bg-[#006e20] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-sm">
-              <span class="material-symbols-outlined text-sm">magic_button</span> Create Reward Code (600pts)
+          <div class="flex gap-2 flex-wrap shrink-0">
+            <button onclick="openNewRewardCode()" class="flex-1 md:flex-none justify-center px-3 py-2 md:px-5 md:py-3 bg-[#006e20] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-xs md:text-sm">
+              <span class="material-symbols-outlined text-sm">magic_button</span> Create Reward (600pts)
             </button>
-            <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="px-5 py-3 bg-secondary text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-sm">
-              <span class="material-symbols-outlined text-sm">add</span> Add Promo / Gift
+            <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="flex-1 md:flex-none justify-center px-3 py-2 md:px-5 md:py-3 bg-secondary text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-xs md:text-sm">
+              <span class="material-symbols-outlined text-sm">add</span> Add Promo
             </button>
           </div>
         </div>
@@ -242,11 +246,11 @@
         </div>
 
         <!-- Add/Edit Offer Modal -->
-        <div id="add-offer-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-center items-center p-4">
-          <div class="bg-surface rounded-3xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="text-2xl font-black text-primary" id="offer-modal-title">Add Reward / Code</h3>
-              <button onclick="closeOfferModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+        <div id="add-offer-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex justify-center items-center p-2 md:p-4">
+          <div class="bg-surface rounded-2xl md:rounded-3xl p-5 md:p-8 max-w-lg w-full max-h-[95vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center mb-4 md:mb-6">
+              <h3 class="text-xl md:text-2xl font-black text-primary" id="offer-modal-title">Add Reward / Code</h3>
+              <button onclick="closeOfferModal()" class="text-on-surface-variant hover:text-primary p-2"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form id="offer-form" class="space-y-4">
               <div>
@@ -298,10 +302,10 @@
 
       <!-- REVIEWS TAB -->
       <section id="tab-reviews" class="tab-pane hidden">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-4 md:mb-8">
           <div>
-            <h2 class="text-3xl font-black text-primary">Customer Reviews</h2>
-            <p class="text-sm text-on-surface-variant">Approve reviews to display them on the website.</p>
+            <h2 class="text-2xl md:text-3xl font-black text-primary">Customer Reviews</h2>
+            <p class="text-xs md:text-sm text-on-surface-variant">Approve reviews to display them on the website.</p>
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="reviews-grid">
@@ -312,12 +316,12 @@
 
       <!-- SETTINGS TAB -->
       <section id="tab-settings" class="tab-pane hidden max-w-3xl">
-        <div class="mb-8">
-          <h2 class="text-3xl font-black text-primary">Store Settings</h2>
-          <p class="text-sm text-on-surface-variant">Manage your hours of operation and website text.</p>
+        <div class="mb-4 md:mb-8">
+          <h2 class="text-2xl md:text-3xl font-black text-primary">Store Settings</h2>
+          <p class="text-xs md:text-sm text-on-surface-variant">Manage your hours of operation and website text.</p>
         </div>
         
-        <form id="settings-form" class="space-y-8 glass-card p-8 rounded-3xl">
+        <form id="settings-form" class="space-y-6 md:space-y-8 glass-card p-4 md:p-8 rounded-2xl md:rounded-3xl">
           <!-- Auto Live Toggle -->
           <div class="flex items-center justify-between p-4 bg-surface rounded-2xl border border-outline/10">
             <div>
