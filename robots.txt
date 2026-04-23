@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Block admin pages from indexing
+Disallow: /admin.html
+Disallow: /admin.js
+
+Sitemap: https://www.brewdipu.shop/sitemap.xml

@@ -1,0 +1,16 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "brewdipu.shop"
+        }
+      ],
+      "destination": "https://www.brewdipu.shop/$1",
+      "permanent": true
+    }
+  ]
+}
