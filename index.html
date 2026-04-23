@@ -1375,7 +1375,7 @@
       <!-- Default 4 collections shown; backend updates title/sub/img dynamically -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-8" id="collections-grid">
         <!-- Collection 1 -->
-        <a href="#products"
+        <a href="#" onclick="scrollToCategory(1); return false;"
           class="group relative overflow-hidden rounded-xl aspect-[3/4] md:aspect-auto md:h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-md">
           <img id="collec-1-img"
             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -1388,7 +1388,7 @@
           </div>
         </a>
         <!-- Collection 2 -->
-        <a href="#products"
+        <a href="#" onclick="scrollToCategory(2); return false;"
           class="group relative overflow-hidden rounded-xl aspect-[3/4] md:aspect-auto md:h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-md">
           <img id="collec-2-img"
             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -1401,7 +1401,7 @@
           </div>
         </a>
         <!-- Collection 3 -->
-        <a href="#products"
+        <a href="#" onclick="scrollToCategory(3); return false;"
           class="group relative overflow-hidden rounded-xl aspect-[3/4] md:aspect-auto md:h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-md">
           <img id="collec-3-img"
             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -1414,7 +1414,7 @@
           </div>
         </a>
         <!-- Collection 4 -->
-        <a href="#products"
+        <a href="#" onclick="scrollToCategory(4); return false;"
           class="group relative overflow-hidden rounded-xl aspect-[3/4] md:aspect-auto md:h-[400px] cursor-pointer hover:-translate-y-2 transition-transform duration-500 shadow-md">
           <img id="collec-4-img"
             class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -1485,14 +1485,10 @@
             same precision we apply to our coffee. We believe high-end luxury shouldn't be distant—it should be
             available at your doorstep.</p>
         </div>
-        <div class="mt-6 md:mt-12 grid grid-cols-2 gap-4 md:gap-8">
+        <div class="mt-6 md:mt-12">
           <div>
             <div class="text-3xl md:text-4xl font-black text-primary">100%</div>
             <div class="text-sm uppercase tracking-widest font-bold text-on-surface-variant">Homemade</div>
-          </div>
-          <div>
-            <div class="text-3xl md:text-4xl font-black text-primary">2k+</div>
-            <div class="text-sm uppercase tracking-widest font-bold text-on-surface-variant">Happy Sippers</div>
           </div>
         </div>
       </div>
@@ -1938,11 +1934,49 @@
     function getCartCount() { return cart.reduce((s, i) => s + i.qty, 0); }
 
     // ──────────────────────────────────────────────
+    //  🔗  SCROLL TO CATEGORY
+    // ──────────────────────────────────────────────
+    window.scrollToCategory = function(num) {
+      const titleEl = document.getElementById('collec-' + num + '-title');
+      if (!titleEl) return;
+      const cat = titleEl.innerText || titleEl.textContent;
+      const catSlug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const target = document.getElementById('cat-' + catSlug);
+      
+      if (target) {
+        // Add a slight delay to ensure rendering is complete, plus an offset for header
+        setTimeout(() => {
+          const y = target.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }, 100);
+      } else {
+        // Fallback to general products section
+        document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+
+    // ──────────────────────────────────────────────
     //  🎨  RENDER PRODUCTS
     // ──────────────────────────────────────────────
     function renderProducts() {
       const grid = document.getElementById("product-grid");
-      grid.innerHTML = PRODUCTS.map(p => {
+      if (!grid) return;
+
+      const categories = {};
+      PRODUCTS.forEach(p => {
+        const cat = p.category && p.category.trim() !== '' ? p.category.trim() : 'Other';
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(p);
+      });
+
+      let html = "";
+      for (const cat in categories) {
+        const catSlug = cat.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        html += `<div class="col-span-full mt-6 md:mt-12 pt-6 md:pt-12 border-t-2 border-outline/10 first:border-0 first:mt-0 first:pt-0" id="cat-${catSlug}">
+                   <h3 class="text-xl md:text-4xl font-black text-primary mb-2 md:mb-6 uppercase tracking-widest">${cat}</h3>
+                 </div>`;
+        
+        html += categories[cat].map(p => {
         // Determine if out of stock
         const isOutOfStock = p.outOfStock === true;
         const btnText = isOutOfStock ? "Out of Stock" : "Add to Cart";
@@ -1987,7 +2021,9 @@
           </button>
         </div>
       </div>`;
-      }).join("");
+        }).join("");
+      }
+      grid.innerHTML = html;
     }
 
     // ──────────────────────────────────────────────
@@ -3273,6 +3309,7 @@
             id: doc.id,
             name: data.name,
             desc: data.desc,
+            category: data.category || 'Other',
             price: parseFloat(data.price),
             originalPrice: data.originalPrice ? parseFloat(data.originalPrice) : null,
             badge: data.badge,

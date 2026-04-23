@@ -518,6 +518,7 @@ function closeProductModal() {
   document.getElementById('add-product-modal').classList.add('hidden');
   document.getElementById('product-form').reset();
   document.getElementById('prod-id').value = '';
+  document.getElementById('prod-category').value = '';
   document.getElementById('prod-original-price').value = '';
   document.getElementById('product-modal-title').innerText = 'Add Product';
   const preview = document.getElementById('prod-img-preview');
@@ -541,6 +542,7 @@ document.getElementById("product-form").addEventListener("submit", async (e) => 
     if (allImages.length === 0) allImages.push(oldUrl || 'https://placehold.co/400');
     const payload = {
       name: document.getElementById("prod-name").value,
+      category: document.getElementById("prod-category").value,
       price: document.getElementById("prod-price").value,
       originalPrice: document.getElementById("prod-original-price").value ? Number(document.getElementById("prod-original-price").value) : null,
       badge: document.getElementById("prod-badge").value,
@@ -582,6 +584,7 @@ window.editProduct = function(id) {
   if(!p) return;
   document.getElementById("prod-id").value = p.id;
   document.getElementById("prod-name").value = p.name;
+  document.getElementById("prod-category").value = p.category || "";
   document.getElementById("prod-price").value = p.price;
   document.getElementById("prod-original-price").value = p.originalPrice || "";
   document.getElementById("prod-badge").value = p.badge || "";
