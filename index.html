@@ -1069,6 +1069,25 @@
 
         </div>
 
+        <!-- ── What Extra? Accordion ── -->
+        <div id="extras-accordion-block" class="hidden">
+          <button type="button" onclick="toggleExtrasAccordion()"
+            class="w-full flex items-center justify-between p-4 bg-surface-container-low rounded-2xl border border-outline/10 hover:bg-surface-container transition-colors text-left">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary text-xl">tune</span>
+              <div>
+                <span class="font-bold text-sm text-primary">What Extra?</span>
+                <span id="extras-selected-count" class="text-xs text-secondary font-bold ml-2"></span>
+                <p class="text-[10px] text-on-surface-variant mt-0.5">Customize your items before ordering</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-primary transition-transform duration-300" id="extras-accordion-arrow">expand_more</span>
+          </button>
+          <div id="extras-accordion-panel" class="hidden mt-2 space-y-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+            <!-- Populated by renderExtrasInOrderModal() -->
+          </div>
+        </div>
+
         <!-- Notification info -->
         <div class="rounded-2xl bg-secondary-container/30 p-4 flex gap-3 items-start">
           <span class="material-symbols-outlined text-secondary text-xl mt-0.5">info</span>
@@ -2001,25 +2020,11 @@
     }
 
     function addToCart(id) {
-      const product = PRODUCTS.find(p => p.id === id);
-      const hasExtras = (product && product.extras && product.extras.length > 0)
-        || (window.globalCustomizations && window.globalCustomizations.length > 0);
-      if (hasExtras) {
-        openCustomizationModal(id, false);
-      } else {
-        processAddToCart(id, []);
-      }
+      processAddToCart(id, []);
     }
 
     function buyNow(id) {
-      const product = PRODUCTS.find(p => p.id === id);
-      const hasExtras = (product && product.extras && product.extras.length > 0)
-        || (window.globalCustomizations && window.globalCustomizations.length > 0);
-      if (hasExtras) {
-        openCustomizationModal(id, true);
-      } else {
-        processBuyNow(id, []);
-      }
+      processBuyNow(id, []);
     }
 
     function getItemPrice(item) {
@@ -2042,6 +2047,10 @@
     }
 
     function getCartSubtotal() { return cart.reduce((s, i) => s + getItemPrice(i) * i.qty, 0); }
+    function getOrderExtrasTotal() {
+      if (!window.orderExtras) return 0;
+      return Object.values(window.orderExtras).reduce((sum, arr) => sum + arr.reduce((s, e) => s + (e.price || 0), 0), 0);
+    }
     function getCartTotal() {
       let total = getCartSubtotal();
       currentDiscountAmt = 0;
@@ -2287,6 +2296,7 @@
       }
 
       renderOrderSummary();
+      renderExtrasInOrderModal();
 
       // Auto-fill form with the logged-in user's stored details
       prefillCheckoutForm();
@@ -2306,7 +2316,8 @@
         return `<div class="flex justify-between"><span class="text-on-surface-variant">${p.name} × ${qty}</span><span class="font-bold text-primary">₹${itemPrice * qty}</span></div>${custHtml}`;
       }).join("");
 
-      const grandTotal = getCartTotal();
+      const extrasTotal = getOrderExtrasTotal();
+      const grandTotal = getCartTotal() + extrasTotal;
       const discountRow = document.getElementById("discount-breakdown");
       if (currentDiscountType === "pointsGift") {
         discountRow.classList.remove("hidden");
@@ -2326,6 +2337,87 @@
 
       document.getElementById("order-total-display").textContent = `₹${grandTotal.toFixed(2)}`;
     }
+
+    // ── Extras In Order Modal ──────────────────────────────────
+    window.orderExtras = {};
+
+    function renderExtrasInOrderModal() {
+      const block = document.getElementById('extras-accordion-block');
+      const panel = document.getElementById('extras-accordion-panel');
+      const arrow = document.getElementById('extras-accordion-arrow');
+      if (!block || !panel) return;
+
+      window.orderExtras = {};
+
+      // Reset accordion state
+      panel.classList.add('hidden');
+      if (arrow) { arrow.style.transform = ''; }
+      document.getElementById('extras-selected-count').textContent = '';
+
+      // Collect cart items that have extras on their product
+      const itemsWithExtras = cart.filter(item =>
+        item.product.extras && item.product.extras.length > 0
+      );
+
+      if (itemsWithExtras.length === 0) {
+        block.classList.add('hidden');
+        return;
+      }
+
+      block.classList.remove('hidden');
+      panel.innerHTML = itemsWithExtras.map(item => {
+        const extras = item.product.extras;
+        return `
+          <div class="bg-surface-container-low rounded-2xl p-4">
+            <p class="text-[10px] font-black text-secondary uppercase tracking-wider mb-3 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">coffee</span> ${item.product.name}
+            </p>
+            <div class="space-y-2">
+              ${extras.map((ex, i) => `
+                <label class="flex items-center justify-between gap-3 cursor-pointer group p-2 rounded-xl hover:bg-surface-container transition-colors">
+                  <div class="flex items-center gap-3">
+                    <input type="checkbox" class="w-4 h-4 accent-primary flex-shrink-0"
+                      onchange="toggleOrderExtra('${item.cartItemId}', ${i}, this.checked, '${item.product.id}')">
+                    <span class="text-sm font-medium text-primary">${ex.name}</span>
+                  </div>
+                  <span class="text-xs font-bold text-on-surface-variant shrink-0">${ex.price > 0 ? '+₹' + ex.price : 'Free'}</span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.toggleExtrasAccordion = function() {
+      const panel = document.getElementById('extras-accordion-panel');
+      const arrow = document.getElementById('extras-accordion-arrow');
+      const isHidden = panel.classList.contains('hidden');
+      panel.classList.toggle('hidden', !isHidden);
+      if (arrow) arrow.style.transform = isHidden ? 'rotate(180deg)' : '';
+    };
+
+    window.toggleOrderExtra = function(cartItemId, idx, isChecked, productId) {
+      const product = PRODUCTS.find(p => p.id === productId);
+      if (!product || !product.extras) return;
+      const extra = product.extras[idx];
+      if (!extra) return;
+
+      if (!window.orderExtras[cartItemId]) window.orderExtras[cartItemId] = [];
+      if (isChecked) {
+        window.orderExtras[cartItemId].push({ name: extra.name, price: extra.price });
+      } else {
+        window.orderExtras[cartItemId] = window.orderExtras[cartItemId].filter(e => e.name !== extra.name);
+      }
+
+      // Update badge count
+      const total = Object.values(window.orderExtras).reduce((sum, arr) => sum + arr.length, 0);
+      const countEl = document.getElementById('extras-selected-count');
+      if (countEl) countEl.textContent = total > 0 ? `(₹${getOrderExtrasTotal()} added)` : '';
+
+      // Refresh order summary total
+      renderOrderSummary();
+    };
     function closeOrderModal() {
       document.getElementById("order-modal").classList.remove("open");
       document.getElementById("overlay").classList.remove("open");
@@ -2469,9 +2561,15 @@
         const custStr = (customizations && customizations.length > 0)
           ? ` [${customizations.map(c => c.name + (c.price > 0 ? ' +₹'+c.price : '')).join(', ')}]`
           : '';
-        return `• ${p.name}${custStr} × ${qty} = ₹${itemTotal}`;
+        // Include in-modal extras for this item
+        const itemExtras = (window.orderExtras && window.orderExtras[item.cartItemId]) || [];
+        const extrasStr = itemExtras.length > 0
+          ? ` + Extras: ${itemExtras.map(e => e.name + (e.price > 0 ? ' (+₹'+e.price+')' : '')).join(', ')}`
+          : '';
+        return `• ${p.name}${custStr}${extrasStr} × ${qty} = ₹${itemTotal}`;
       }).join("\n");
-      const total = getCartTotal();
+      const extrasTotal = getOrderExtrasTotal();
+      const total = getCartTotal() + extrasTotal;
       const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
       const confCode = "#BD-" + Math.random().toString(36).substr(2, 4).toUpperCase();
 
