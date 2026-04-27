@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
@@ -155,6 +156,29 @@
             </table>
           </div>
         </div>
+        <div class="mt-8 mb-4">
+            <h3 class="text-xl md:text-2xl font-black text-primary">Automated Referral Tracking</h3>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Pending points are automatically awarded when order status is changed to Delivered.</p>
+        </div>
+        <div class="glass-card rounded-2xl overflow-hidden text-sm md:text-base">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left">
+              <thead class="bg-surface-container-highest text-on-surface-variant text-[10px] md:text-xs uppercase tracking-widest">
+                <tr>
+                  <th class="p-2 md:p-4 rounded-tl-2xl whitespace-nowrap">Referrer Code / ID</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Referred User</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Order ID</th>
+                  <th class="p-2 md:p-4 whitespace-nowrap">Points</th>
+                  <th class="p-2 md:p-4 rounded-tr-2xl whitespace-nowrap">Status</th>
+                </tr>
+              </thead>
+              <tbody id="referrals-tbody" class="divide-y divide-outline/10">
+                <!-- Populated by JS -->
+                <tr><td colspan="5" class="p-8 text-center text-on-surface-variant">Loading referrals...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- PRODUCTS TAB -->
@@ -236,11 +260,11 @@
         <div class="flex flex-col md:flex-row justify-between md:items-center mb-4 md:mb-8 gap-4">
           <div>
             <h2 class="text-2xl md:text-3xl font-black text-primary">Redeem Rewards & Promos</h2>
-            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Manage promo codes, gift rewards, and 600pts reward codes.</p>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Manage promo codes, gift rewards, and reward codes.</p>
           </div>
           <div class="flex gap-2 flex-wrap shrink-0">
             <button onclick="openNewRewardCode()" class="flex-1 md:flex-none justify-center px-3 py-2 md:px-5 md:py-3 bg-[#006e20] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-xs md:text-sm">
-              <span class="material-symbols-outlined text-sm">magic_button</span> Create Reward (600pts)
+              <span class="material-symbols-outlined text-sm">magic_button</span> Create Reward Code
             </button>
             <button onclick="document.getElementById('add-offer-modal').classList.remove('hidden')" class="flex-1 md:flex-none justify-center px-3 py-2 md:px-5 md:py-3 bg-secondary text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity text-xs md:text-sm">
               <span class="material-symbols-outlined text-sm">add</span> Add Promo
@@ -328,6 +352,14 @@
         </div>
         
         <form id="settings-form" class="space-y-6 md:space-y-8 glass-card p-4 md:p-8 rounded-2xl md:rounded-3xl">
+          <!-- Reward Points Config -->
+          <div class="flex items-center justify-between p-4 bg-surface rounded-2xl border border-outline/10">
+            <div>
+              <h4 class="font-bold text-primary">Points Required for Rewards</h4>
+              <p class="text-xs text-on-surface-variant">Points deducted when a user claims a reward code.</p>
+            </div>
+            <input type="number" id="set-reward-points" min="1" class="w-24 bg-white rounded-xl p-2 border border-outline/20 text-center font-bold" value="600">
+          </div>
           <!-- Auto Live Toggle -->
           <div class="flex items-center justify-between p-4 bg-surface rounded-2xl border border-outline/10">
             <div>
@@ -587,6 +619,22 @@
             </button>
           </div>
           
+          <hr class="border-outline/20">
+
+          <!-- Global Product Customizations -->
+          <div class="space-y-4 text-sm">
+            <div>
+               <h4 class="font-bold text-primary">Product Customizations (Global)</h4>
+               <p class="text-xs text-on-surface-variant mb-4">Add options like Extra Ice, Oat Milk, or Sugar-Free for customers to select when adding to cart. Leave price 0 for free options.</p>
+            </div>
+            <div id="customizations-list" class="space-y-3">
+               <!-- Populated by JS -->
+            </div>
+            <button type="button" onclick="addCustomizationRow()" class="mt-2 w-full py-2 border-2 border-dashed border-outline/30 rounded-2xl text-sm font-bold text-on-surface-variant hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-sm">add</span> Add Customization Option
+            </button>
+          </div>
+
           <hr class="border-outline/20">
 
           <!-- Why BrewDipu Feature Content -->

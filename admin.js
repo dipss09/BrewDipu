@@ -35,6 +35,7 @@ auth.onAuthStateChanged((user) => {
         loadSettings();
         loadOrders();
         loadUsers();
+        loadReferrals();
         loadProducts();
         loadOffers();
         loadReviews();
@@ -126,7 +127,22 @@ function loadOrders() {
 }
 
 window.updateOrderStatus = function(id, newStatus) {
-  db.collection("orders").doc(id).update({ status: newStatus });
+  db.collection("orders").doc(id).update({ status: newStatus }).then(() => {
+    if (newStatus === "Delivered") {
+      db.collection("referrals").where("orderId", "==", id).get().then(snap => {
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data.status === "Pending") {
+            doc.ref.update({ status: "Earned" });
+            db.collection("users").doc(data.referrerUid).update({
+              points: firebase.firestore.FieldValue.increment(data.points),
+              referralCount: firebase.firestore.FieldValue.increment(1)
+            });
+          }
+        });
+      });
+    }
+  });
 };
 
 // ──────────────────────────────────────────────
@@ -161,6 +177,34 @@ function loadUsers() {
             <button onclick="updateUserPoints('${doc.id}', 'reset')" class="p-2 bg-surface-container-high rounded border hover:bg-red-50 text-error items-center justify-center flex" title="Reset to 0"><span class="material-symbols-outlined text-sm">restart_alt</span></button>
           </div>
         </td>
+      </tr>`;
+    });
+    tbody.innerHTML = html;
+  });
+}
+
+function loadReferrals() {
+  db.collection("referrals").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+    const tbody = document.getElementById("referrals-tbody");
+    if(!tbody) return;
+    if(snapshot.empty) {
+      tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-on-surface-variant">No referrals found.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const st = data.status || "Pending";
+      const badgeColor = st === "Pending" ? "bg-orange-100 text-orange-800" : "bg-green-100 text-green-800";
+      
+      html += `
+      <tr class="hover:bg-surface-container transition-colors">
+        <td class="p-4 text-sm font-bold font-mono tracking-widest">${data.referrerUid}</td>
+        <td class="p-4 text-sm">${data.refereeName}</td>
+        <td class="p-4 text-sm font-mono text-on-surface-variant">${data.orderId}</td>
+        <td class="p-4 font-black text-secondary">${data.points}</td>
+        <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${badgeColor}">${st}</span></td>
       </tr>`;
     });
     tbody.innerHTML = html;
@@ -205,6 +249,7 @@ function loadSettings() {
     if (doc.exists) {
       currentSettings = doc.data();
       const data = currentSettings;
+      document.getElementById("set-reward-points").value = data.rewardPointsRequired || 600;
       document.getElementById("set-about").value = data.aboutText || "";
       document.getElementById("set-hero-title").value = data.heroTitle || "BrewDipu";
       document.getElementById("set-hero-sub").value = data.heroSub || "Chilled Sips, Crafted by Dipu.";
@@ -252,6 +297,8 @@ function loadSettings() {
       } else {
         renderCollectionRows([]);
       }
+
+      renderCustomizationRows(data.customizationsData || []);
 
       if(data.schedule) {
         const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -332,6 +379,17 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
     }
   });
 
+  // Process Customizations Data
+  const customizationRows = document.querySelectorAll('#customizations-list .customization-row');
+  let finalCustomizationsData = [];
+  customizationRows.forEach((row) => {
+    const name = row.querySelector('.cust-name').value.trim();
+    const price = row.querySelector('.cust-price').value.trim();
+    if (name) {
+      finalCustomizationsData.push({ name: name, price: price ? Number(price) : 0 });
+    }
+  });
+
   if(filePromises.length > 0) {
      progressText.classList.remove("hidden");
      try {
@@ -360,6 +418,7 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
        serviceId: document.getElementById("set-emailjs-service").value,
        templateId: document.getElementById("set-emailjs-template").value,
     },
+    rewardPointsRequired: parseInt(document.getElementById("set-reward-points").value) || 600,
     features: {
        f1Title: document.getElementById("set-f1-title").value,
        f1Desc: document.getElementById("set-f1-desc").value,
@@ -371,6 +430,7 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
        f4Desc: document.getElementById("set-f4-desc").value,
     },
     collectionsData: finalCollectionsData,
+    customizationsData: finalCustomizationsData,
     schedule: schedule,
     autoLive: document.getElementById("set-autolive").checked,
     isOpen: document.getElementById("set-isopen").checked,
@@ -428,6 +488,45 @@ function renderCollectionRows(dataArr) {
   dataArr.forEach(item => addCollectionRow(item));
 }
 
+// ── Dynamic Customizations Helpers ──────────────────────────────────
+window.addCustomizationRow = function(data = {}) {
+  const list = document.getElementById('customizations-list');
+  const idx = list.querySelectorAll('.customization-row').length + 1;
+  const div = document.createElement('div');
+  div.className = 'customization-row p-4 bg-surface-container-low rounded-2xl border border-outline/10 flex flex-col gap-2 relative';
+  div.innerHTML = `
+    <div class="flex justify-between items-center mb-1">
+      <span class="text-xs text-primary font-bold">Option ${idx}</span>
+      <button type="button" onclick="this.closest('.customization-row').remove(); renumberCustomizationRows()" class="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">delete</span> Remove
+      </button>
+    </div>
+    <div class="flex gap-2">
+      <input type="text" class="cust-name flex-1 bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Extra Ice" value="${data.name||''}">
+      <input type="number" class="cust-price w-24 bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Price (₹)" value="${data.price !== undefined ? data.price : ''}">
+    </div>
+  `;
+  list.appendChild(div);
+};
+
+window.renumberCustomizationRows = function() {
+  document.querySelectorAll('#customizations-list .customization-row').forEach((row, i) => {
+    const label = row.querySelector('span.text-primary');
+    if (label) label.textContent = 'Option ' + (i + 1);
+  });
+};
+
+function renderCustomizationRows(dataArr) {
+  const list = document.getElementById('customizations-list');
+  list.innerHTML = '';
+  if (!dataArr || dataArr.length === 0) {
+    // Default 1 empty row
+    addCustomizationRow();
+    return;
+  }
+  dataArr.forEach(item => addCustomizationRow(item));
+}
+
 // ──────────────────────────────────────────────
 //  🚀  BASE64 IMAGE COMPRESSOR Helper
 // ──────────────────────────────────────────────
@@ -469,12 +568,6 @@ let currentProducts = [];
 
 function loadProducts() {
   db.collection("products").onSnapshot(snapshot => {
-    // Optional Seeder trigger if completely empty
-    if(snapshot.empty && !window.seededOnce) {
-      window.seededOnce = true;
-      seedInitialProducts();
-    }
-
     const grid = document.getElementById("products-grid");
     currentProducts = [];
     let html = "";
@@ -726,7 +819,7 @@ window.openNewRewardCode = function() {
   document.getElementById("offer-code").value = code;
   document.getElementById("offer-type").value = "rewardCode";
   document.getElementById("offer-limit").value = 1;
-  document.getElementById("offer-modal-title").textContent = "Create 600pts Reward Code";
+  document.getElementById("offer-modal-title").textContent = `Create Reward Code (${currentSettings.rewardPointsRequired || 600}pts)`;
   document.getElementById("add-offer-modal").classList.remove("hidden");
   toggleOfferImageField();
 }

@@ -7,6 +7,7 @@
   <title>BrewDipu | Artisanal Cold Brews & Handcrafted Sips – brewdipu.shop</title>
   <meta name="description" content="BrewDipu – Order premium artisanal cold brews, mojitos, fresh juices and handmade keychains. Crafted by Dipu, delivered to your door. Shop at brewdipu.shop." />
   <meta name="robots" content="index, follow" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <meta name="theme-color" content="#331917" />
   <meta name="keywords" content="brewdipu, brewdipu.shop, www.brewdipu.shop, BrewDipu, artisanal cold brew, cold coffee, mojito, handcrafted sips, homemade beverages, Dipu, fresh juice, keychains" />
   <meta name="author" content="BrewDipu" />
@@ -882,6 +883,24 @@
   <!-- ══════════════ DARK OVERLAY ══════════════ -->
   <div id="overlay" class="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm cursor-pointer" onclick="closeAll()"></div>
 
+  <!-- 🎛️ CUSTOMIZATION MODAL -->
+  <div id="customization-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="glass-card w-full max-w-md p-6 md:p-8 rounded-3xl shadow-2xl bg-white max-h-[90vh] flex flex-col relative">
+      <button onclick="closeCustomizationModal()" class="absolute top-4 right-4 text-on-surface-variant hover:text-primary p-2 bg-surface-container rounded-full transition-colors"><span class="material-symbols-outlined">close</span></button>
+      <div class="mb-4 md:mb-6 pr-10">
+        <h3 class="text-xl md:text-2xl font-black text-primary truncate" id="cust-product-name">Product Name</h3>
+        <p class="text-xs md:text-sm text-on-surface-variant mt-1">Personalize your drink</p>
+      </div>
+      <div id="cust-options-container" class="space-y-3 mb-6 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+        <!-- Options populated by JS -->
+      </div>
+      <button id="cust-confirm-btn" onclick="confirmCustomizationAndAdd()" class="w-full py-4 bg-primary text-white rounded-xl font-bold hover:bg-primary-container transition-colors shadow-lg flex items-center justify-between px-6">
+        <span>Add to Cart</span>
+        <span id="cust-total-price" class="font-black text-lg">₹0</span>
+      </button>
+    </div>
+  </div>
+
   <!-- ══════════════ TOAST ══════════════ -->
   <div id="toast"
     class="bg-primary text-white px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-2 text-sm">
@@ -1043,8 +1062,8 @@
               class="brew-input w-full bg-white rounded-xl p-3 text-sm font-bold text-primary shadow-sm"
               style="border:1px solid rgba(0,0,0,0.05);" onchange="applyRewardPoints()">
               <option value="">Save my points for later</option>
-              <option value="discount" id="opt-discount" disabled>Redeem 600 pts for 20% Discount</option>
-              <option value="gift" id="opt-gift" disabled>Redeem 600 pts for Free Gift</option>
+              <option value="discount" id="opt-discount" disabled>Redeem <span class="dyn-points">600</span> pts for 20% Discount</option>
+              <option value="gift" id="opt-gift" disabled>Redeem <span class="dyn-points">600</span> pts for Free Gift</option>
             </select>
           </div>
 
@@ -1289,7 +1308,17 @@
             <span class="text-xs font-bold text-on-surface-variant">My Reward Points</span>
             <span class="text-lg font-black text-secondary flex items-center gap-1"><span
                 class="material-symbols-outlined text-base">stars</span> <span><span id="profile-points">0</span> /
-                600</span></span>
+                <span class="dyn-points">600</span></span></span>
+          </div>
+
+          <!-- Referral History -->
+          <div class="mt-2">
+            <h4 class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Referral History</h4>
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-outline/5">
+              <div id="profile-referrals-list" class="divide-y divide-outline/5 max-h-40 overflow-y-auto">
+                <div class="p-3 text-center text-xs text-on-surface-variant">No referrals yet. Share your code to earn points!</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1447,7 +1476,7 @@
           class="inline-flex items-center gap-1 md:gap-2 px-3 md:px-5 py-2 md:py-3 bg-secondary text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm uppercase tracking-widest hover:opacity-90 transition-opacity shadow-md group">
           <span class="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">card_giftcard</span>
           <span class="hidden sm:inline">Redeem</span> Reward
-          <span class="text-white/70 text-[9px] md:text-xs font-medium normal-case tracking-normal">600 pts</span>
+          <span class="text-white/70 text-[9px] md:text-xs font-medium normal-case tracking-normal"><span class="dyn-points">600</span> pts</span>
         </a>
       </div>
 
@@ -1633,7 +1662,7 @@
           <span class="material-symbols-outlined text-sm">stars</span> Loyalty Rewards
         </span>
         <h2 class="text-3xl md:text-5xl font-black text-primary mb-3 md:mb-4">Redeem Your Rewards</h2>
-        <p class="text-on-surface-variant max-w-xl mx-auto text-sm leading-relaxed">Collect 600 points from purchases
+        <p class="text-on-surface-variant max-w-xl mx-auto text-sm leading-relaxed">Collect <span class="dyn-points">600</span> points from purchases
           and referrals to earn a unique reward code. Enter it below to unlock your exclusive free gift!</p>
       </div>
 
@@ -1647,7 +1676,7 @@
             <p class="font-black text-primary text-sm uppercase tracking-widest">Enter Your Reward Code to Unlock Gifts
             </p>
             <p class="text-xs text-on-surface-variant mt-1">Generate your unique code from <strong>My Profile</strong>
-              once you reach 600 points. Codes starting with <code class="bg-surface-container px-1 rounded">RWD-</code>
+              once you reach <span class="dyn-points">600</span> points. Codes starting with <code class="bg-surface-container px-1 rounded">RWD-</code>
               unlock free gifts.</p>
           </div>
           <div class="flex gap-2 w-full md:w-auto">
@@ -1871,7 +1900,11 @@
     // ──────────────────────────────────────────────
     //  🛒  CART & REWARD STATE
     // ──────────────────────────────────────────────
-    let cart = [];   // [{ product, qty }]
+    let cart = [];   // [{ cartItemId, product, qty, customizations: [{name, price}] }]
+    window.globalCustomizations = []; // Dynamically populated
+    let currentCustomizationProductId = null;
+    let currentCustomizationIsBuyNow = false;
+    let selectedCustomizations = []; // temp list while modal is open
 
     let currentDiscountType = ""; // "referral", "points30", "pointsGift", "discountCode", or ""
     let appliedReferrerUid = null;
@@ -1882,50 +1915,125 @@
     let profilePoints = 0;
     let profileReferredBy = null;
 
-    function getCartItem(id) { return cart.find(i => i.product.id === id); }
+    function getCartItem(cartItemId) { return cart.find(i => i.cartItemId === cartItemId); }
 
-    function addToCart(id) {
+    // ── Customization Modal ───────────────────────
+    function openCustomizationModal(productId, isBuyNow) {
+      currentCustomizationProductId = productId;
+      currentCustomizationIsBuyNow = isBuyNow;
+      selectedCustomizations = [];
+      const product = PRODUCTS.find(p => p.id === productId);
+      if (!product) return;
+      document.getElementById("cust-product-name").textContent = product.name;
+      document.getElementById("cust-total-price").textContent = `₹${product.price}`;
+      const container = document.getElementById("cust-options-container");
+      container.innerHTML = window.globalCustomizations.map((c, i) => `
+        <label class="flex items-center justify-between p-3 rounded-xl border border-outline/20 cursor-pointer hover:bg-surface-container-low transition-colors gap-3">
+          <div class="flex items-center gap-3 flex-1">
+            <input type="checkbox" class="w-5 h-5 accent-primary flex-shrink-0" onchange="toggleCustomization(${i}, this.checked)">
+            <span class="font-bold text-sm text-primary">${c.name}</span>
+          </div>
+          <span class="text-xs text-on-surface-variant font-bold whitespace-nowrap">${c.price > 0 ? '+₹' + c.price : 'Free'}</span>
+        </label>
+      `).join("");
+      const modal = document.getElementById("customization-modal");
+      modal.classList.remove("opacity-0", "pointer-events-none");
+    }
+
+    function closeCustomizationModal() {
+      const modal = document.getElementById("customization-modal");
+      modal.classList.add("opacity-0", "pointer-events-none");
+    }
+
+    function toggleCustomization(idx, isChecked) {
+      const cust = window.globalCustomizations[idx];
+      if (isChecked) {
+        selectedCustomizations.push({ name: cust.name, price: cust.price });
+      } else {
+        selectedCustomizations = selectedCustomizations.filter(c => c.name !== cust.name);
+      }
+      const product = PRODUCTS.find(p => p.id === currentCustomizationProductId);
+      const extraPrice = selectedCustomizations.reduce((s, c) => s + c.price, 0);
+      document.getElementById("cust-total-price").textContent = `₹${product.price + extraPrice}`;
+    }
+
+    function confirmCustomizationAndAdd() {
+      const custsSnap = [...selectedCustomizations];
+      if (currentCustomizationIsBuyNow) {
+        processBuyNow(currentCustomizationProductId, custsSnap);
+      } else {
+        processAddToCart(currentCustomizationProductId, custsSnap);
+      }
+      closeCustomizationModal();
+    }
+
+    function processAddToCart(id, customizationsArr) {
       const product = PRODUCTS.find(p => p.id === id);
-      const existing = getCartItem(id);
+      const customKey = customizationsArr.map(c => c.name).sort().join("|");
+      const cartItemId = id + (customKey ? "-" + customKey : "");
+      const existing = getCartItem(cartItemId);
       if (existing) {
         existing.qty++;
       } else {
-        cart.push({ product, qty: 1 });
+        cart.push({ cartItemId, product, qty: 1, customizations: customizationsArr });
       }
       updateCartUI();
       showToast(`${product.name} added to cart!`);
     }
 
-    function buyNow(id) {
+    function processBuyNow(id, customizationsArr) {
       const product = PRODUCTS.find(p => p.id === id);
       if (!product) return;
-      cart = [{ product, qty: 1 }];
+      const customKey = customizationsArr.map(c => c.name).sort().join("|");
+      const cartItemId = id + (customKey ? "-" + customKey : "");
+      cart = [{ cartItemId, product, qty: 1, customizations: customizationsArr }];
       updateCartUI();
       openOrderModal();
     }
 
-    function removeFromCart(id) {
-      cart = cart.filter(i => i.product.id !== id);
+    function addToCart(id) {
+      if (window.globalCustomizations && window.globalCustomizations.length > 0) {
+        openCustomizationModal(id, false);
+      } else {
+        processAddToCart(id, []);
+      }
+    }
+
+    function buyNow(id) {
+      if (window.globalCustomizations && window.globalCustomizations.length > 0) {
+        openCustomizationModal(id, true);
+      } else {
+        processBuyNow(id, []);
+      }
+    }
+
+    function getItemPrice(item) {
+      const custExtra = (item.customizations || []).reduce((s, c) => s + (c.price || 0), 0);
+      return item.product.price + custExtra;
+    }
+
+    function removeFromCart(cartItemId) {
+      cart = cart.filter(i => i.cartItemId !== cartItemId);
       updateCartUI();
       renderCartDrawer();
     }
 
-    function changeQty(id, delta) {
-      const item = getCartItem(id);
+    function changeQty(cartItemId, delta) {
+      const item = getCartItem(cartItemId);
       if (!item) return;
       item.qty += delta;
-      if (item.qty <= 0) removeFromCart(id);
+      if (item.qty <= 0) removeFromCart(cartItemId);
       else { updateCartUI(); renderCartDrawer(); }
     }
 
-    function getCartSubtotal() { return cart.reduce((s, i) => s + i.product.price * i.qty, 0); }
+    function getCartSubtotal() { return cart.reduce((s, i) => s + getItemPrice(i) * i.qty, 0); }
     function getCartTotal() {
       let total = getCartSubtotal();
       currentDiscountAmt = 0;
       if (currentDiscountType === "referral") {
-        currentDiscountAmt = total * 0.10; // 10%
+        currentDiscountAmt = total * 0.10;
       } else if (currentDiscountType === "points20") {
-        currentDiscountAmt = total * 0.20; // 20%
+        currentDiscountAmt = total * 0.20;
       } else if (currentDiscountType === "discountCode" || currentDiscountType === "brew20") {
         currentDiscountAmt = total * (currentDiscountPct / 100);
       }
@@ -2066,24 +2174,32 @@
       empty.classList.add("hidden");
       footer.classList.remove("hidden");
 
-      container.innerHTML = cart.map(({ product: p, qty }) => `
+      container.innerHTML = cart.map((item) => {
+        const { cartItemId, product: p, qty, customizations } = item;
+        const itemPrice = getItemPrice(item);
+        const custHtml = (customizations && customizations.length > 0)
+          ? `<p class="text-xs text-on-surface-variant mt-0.5">${customizations.map(c => c.name + (c.price > 0 ? ' (+₹'+c.price+')' : '')).join(', ')}</p>`
+          : '';
+        return `
       <div class="flex gap-4 items-center p-4 rounded-2xl bg-surface-container group hover:bg-surface-container-high transition-colors">
         <img src="${p.img}" alt="${p.name}" class="w-16 h-16 rounded-xl object-contain bg-surface-container flex-shrink-0"/>
         <div class="flex-1 min-w-0">
           <p class="font-bold text-primary text-sm truncate">${p.name}</p>
-          <p class="text-xs text-on-surface-variant">₹${p.price} each</p>
+          ${custHtml}
+          <p class="text-xs text-on-surface-variant">₹${itemPrice} each</p>
           <div class="flex items-center gap-3 mt-2">
-            <button class="qty-btn" onclick="changeQty('${p.id}', -1)">−</button>
+            <button class="qty-btn" onclick="changeQty('${cartItemId}', -1)">−</button>
             <span class="font-black text-primary w-4 text-center">${qty}</span>
-            <button class="qty-btn" onclick="changeQty('${p.id}', 1)">+</button>
+            <button class="qty-btn" onclick="changeQty('${cartItemId}', 1)">+</button>
           </div>
         </div>
         <div class="text-right flex-shrink-0">
-          <p class="font-black text-primary">₹${p.price * qty}</p>
-          <button onclick="removeFromCart('${p.id}')" class="material-symbols-outlined text-base text-outline mt-1 hover:text-error transition-colors">delete</button>
+          <p class="font-black text-primary">₹${itemPrice * qty}</p>
+          <button onclick="removeFromCart('${cartItemId}')" class="material-symbols-outlined text-base text-outline mt-1 hover:text-error transition-colors">delete</button>
         </div>
       </div>
-    `).join("");
+      `;
+      }).join("");
 
       document.getElementById("cart-subtotal").textContent = `₹${getCartTotal()}`;
     }
@@ -2129,7 +2245,7 @@
         }
 
         // Toggle Rewards Block
-        if (profilePoints >= 600) {
+        if (profilePoints >= (window.storeRewardPoints || 600)) {
           document.getElementById("rewards-block").classList.remove("hidden");
           document.getElementById("avail-pts-badge").textContent = profilePoints + " pts";
           document.getElementById("opt-discount").disabled = false;
@@ -2154,9 +2270,14 @@
 
     function renderOrderSummary() {
       const summaryEl = document.getElementById("order-summary-items");
-      summaryEl.innerHTML = cart.map(({ product: p, qty }) =>
-        `<div class="flex justify-between"><span class="text-on-surface-variant">${p.name} × ${qty}</span><span class="font-bold text-primary">₹${p.price * qty}</span></div>`
-      ).join("");
+      summaryEl.innerHTML = cart.map((item) => {
+        const { product: p, qty, customizations } = item;
+        const itemPrice = getItemPrice(item);
+        const custHtml = (customizations && customizations.length > 0)
+          ? `<div class="text-xs text-on-surface-variant pl-2">${customizations.map(c => c.name + (c.price > 0 ? ' (+₹'+c.price+')' : '')).join(', ')}</div>`
+          : '';
+        return `<div class="flex justify-between"><span class="text-on-surface-variant">${p.name} × ${qty}</span><span class="font-bold text-primary">₹${itemPrice * qty}</span></div>${custHtml}`;
+      }).join("");
 
       const grandTotal = getCartTotal();
       const discountRow = document.getElementById("discount-breakdown");
@@ -2315,7 +2436,14 @@
       }
 
       // Build order text
-      const itemLines = cart.map(({ product: p, qty }) => `• ${p.name} × ${qty} = ₹${p.price * qty}`).join("\n");
+      const itemLines = cart.map((item) => {
+        const { product: p, qty, customizations } = item;
+        const itemTotal = getItemPrice(item) * qty;
+        const custStr = (customizations && customizations.length > 0)
+          ? ` [${customizations.map(c => c.name + (c.price > 0 ? ' +₹'+c.price : '')).join(', ')}]`
+          : '';
+        return `• ${p.name}${custStr} × ${qty} = ₹${itemTotal}`;
+      }).join("\n");
       const total = getCartTotal();
       const timestamp = new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
       const confCode = "#BD-" + Math.random().toString(36).substr(2, 4).toUpperCase();
@@ -2364,20 +2492,44 @@
       // ── 2. Firebase Firestore ──
       try {
         if (db) {
-          // Save address to user profile if logged in
+          // Identify user or create guest ID using phone number
           const user = firebase.auth().currentUser;
-          if (user) {
-            db.collection("users").doc(user.uid).set({ address: address, name: name, email: email }, { merge: true });
+          const phoneClean = phone.replace(/[^0-9]/g, '');
+          const docId = user ? user.uid : `guest_${phoneClean}`;
+
+          // Always save user profile (creates auto-account for guests)
+          const profileData = { 
+            name: name, 
+            phone: phone, 
+            email: email, 
+            address: address,
+            isGuest: !user
+          };
+          
+          if (!user) {
+            // For new guests, also initialize points if it doesn't exist
+            profileData.points = firebase.firestore.FieldValue.increment(0);
+            profileData.referralCount = firebase.firestore.FieldValue.increment(0);
+            profileData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
           }
 
-          await db.collection("orders").add({
+          await db.collection("users").doc(docId).set(profileData, { merge: true });
+
+          // Save the order
+          const orderRef = await db.collection("orders").add({
             name: name,
-            uid: user ? user.uid : "guest",
+            uid: docId,
             phone: phone,
             email: email,
             address: address,
             notes: notes,
-            items: cart.map(i => ({ id: i.product.id, name: i.product.name, qty: i.qty, price: i.product.price })),
+            items: cart.map(i => ({
+              id: i.product.id,
+              name: i.product.name,
+              qty: i.qty,
+              price: getItemPrice(i),
+              customizations: i.customizations || []
+            })),
             subtotal: getCartSubtotal(),
             discountType: currentDiscountType,
             discountAmt: currentDiscountAmt,
@@ -2396,11 +2548,16 @@
 
           // ── 4. Process Rewards & Referrals ──
           if (currentDiscountType === "referral" && appliedReferrerUid) {
-            // Reward Referrer only when the referred user's purchase is ≥ ₹100
-            if (total >= 100) {
-              db.collection("users").doc(appliedReferrerUid).update({
-                points: firebase.firestore.FieldValue.increment(100),
-                referralCount: firebase.firestore.FieldValue.increment(1)
+            // Log pending referral only when the referred user's purchase is > ₹50
+            if (total > 50) {
+              await db.collection("referrals").add({
+                referrerUid: appliedReferrerUid,
+                refereeUid: docId,
+                refereeName: name,
+                orderId: orderRef.id,
+                status: "Pending",
+                points: 100,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
               });
             }
           }
@@ -2408,9 +2565,9 @@
           if ((currentDiscountType === "points20" || currentDiscountType === "pointsGift") && user) {
             // Deduct Points
             db.collection("users").doc(user.uid).update({
-              points: firebase.firestore.FieldValue.increment(-600)
+              points: firebase.firestore.FieldValue.increment(-(window.storeRewardPoints || 600))
             });
-            profilePoints = Math.max(0, profilePoints - 600); // update local state
+            profilePoints = Math.max(0, profilePoints - (window.storeRewardPoints || 600)); // update local state
           }
 
           if (appliedPromoCode) {
@@ -2899,7 +3056,7 @@
 
               const redeemBtn = document.getElementById("btn-redeem-points");
               if (redeemBtn) {
-                if (profilePoints >= 600) {
+                if (profilePoints >= (window.storeRewardPoints || 600)) {
                   redeemBtn.classList.remove("hidden");
                   redeemBtn.classList.add("flex");
                 } else {
@@ -2913,6 +3070,8 @@
               document.getElementById("f-email").value = data.email || "";
               document.getElementById("f-phone").value = data.phone || user.phoneNumber || "";
               document.getElementById("f-address").value = data.address || "";
+              
+              loadReferralHistory(user.uid);
             } else {
               document.getElementById("profile-name").value = "Coffee Lover";
               document.getElementById("profile-initial").textContent = "C";
@@ -2988,6 +3147,42 @@
         showToast("Profile saved!");
       });
     };
+
+    let referralListener = null;
+    function loadReferralHistory(uid) {
+      if (!db) return;
+      if (referralListener) referralListener();
+      
+      referralListener = db.collection("referrals").where("referrerUid", "==", uid).orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        const list = document.getElementById("profile-referrals-list");
+        if (!list) return;
+        
+        if (snapshot.empty) {
+          list.innerHTML = `<div class="p-3 text-center text-xs text-on-surface-variant">No referrals yet. Share your code to earn points!</div>`;
+          return;
+        }
+
+        let html = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const isEarned = data.status === "Earned";
+          const colorClass = isEarned ? "text-green-600 bg-green-50" : "text-orange-600 bg-orange-50";
+          const icon = isEarned ? "check_circle" : "pending";
+          html += `
+            <div class="p-3 flex justify-between items-center">
+              <div>
+                <p class="text-xs font-bold text-primary">${data.refereeName}</p>
+                <p class="text-[10px] text-on-surface-variant">Reward: ${data.points} pts</p>
+              </div>
+              <div class="px-2 py-1 rounded flex items-center gap-1 ${colorClass}">
+                <span class="material-symbols-outlined text-[12px]">${icon}</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider">${data.status}</span>
+              </div>
+            </div>`;
+        });
+        list.innerHTML = html;
+      });
+    }
 
     function handleLogout() {
       firebase.auth().signOut().then(() => {
@@ -3126,6 +3321,14 @@
       db.collection("settings").doc("storeConfig").onSnapshot((doc) => {
         if (doc.exists) {
           const data = doc.data();
+
+          if (data.rewardPointsRequired) {
+            window.storeRewardPoints = data.rewardPointsRequired;
+            document.querySelectorAll(".dyn-points").forEach(el => el.textContent = window.storeRewardPoints);
+          }
+
+          // Store global customizations for the cart modal
+          window.globalCustomizations = data.customizationsData || [];
 
           // Update Text strings if available
           if (data.aboutText) {
@@ -3540,9 +3743,9 @@
       const btn = document.getElementById("btn-redeem-points");
 
       if (!isLoggedIn || !user) return;
-      if (profilePoints < 600) return;
+      if (profilePoints < (window.storeRewardPoints || 600)) return;
 
-      if (!confirm("Are you sure you want to deduct 600 points for a unique 20% discount code?")) return;
+      if (!confirm(`Are you sure you want to deduct ${window.storeRewardPoints || 600} points for a unique 20% discount code?`)) return;
 
       btn.disabled = true;
       statusEl.classList.remove("hidden");
@@ -3551,7 +3754,7 @@
 
       try {
         await db.collection("users").doc(user.uid).update({
-          points: firebase.firestore.FieldValue.increment(-600)
+          points: firebase.firestore.FieldValue.increment(-(window.storeRewardPoints || 600))
         });
 
         const uniqueCode = "RWD-" + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -3588,9 +3791,10 @@
       grid.innerHTML = `<div class="col-span-full text-center p-10 text-on-surface-variant text-sm">Loading gifts...</div>`;
       db.collection("promoCodes").where("type", "==", "freeGift").get().then(snapshot => {
 
-        // If no gifts exist, seed sample data automatically
+        // If no gifts exist, show empty state instead of seeding
         if (snapshot.empty) {
-          seedSampleGifts();
+          grid.innerHTML = `<div class="col-span-full text-center p-12 text-on-surface-variant">
+            <span class="material-symbols-outlined text-4xl mb-3 block">card_giftcard</span>No gifts currently available. Check back soon!</div>`;
           return;
         }
 
