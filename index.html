@@ -1068,13 +1068,6 @@
           </div>
 
         </div>
-        <div class="space-y-1">
-          <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Special
-            Instructions</label>
-          <textarea id="f-notes" rows="2" placeholder="Any dietary requirements, preferences..."
-            class="brew-input w-full bg-surface-container-lowest rounded-2xl p-4 transition-all font-medium resize-none"
-            style="border:none;"></textarea>
-        </div>
 
         <!-- Notification info -->
         <div class="rounded-2xl bg-secondary-container/30 p-4 flex gap-3 items-start">
@@ -1924,18 +1917,34 @@
       selectedCustomizations = [];
       const product = PRODUCTS.find(p => p.id === productId);
       if (!product) return;
+
+      // Use per-product extras; fall back to global if none
+      const extrasToShow = (product.extras && product.extras.length > 0)
+        ? product.extras
+        : window.globalCustomizations;
+
       document.getElementById("cust-product-name").textContent = product.name;
       document.getElementById("cust-total-price").textContent = `₹${product.price}`;
+
+      // Update confirm button label
+      const confirmBtn = document.getElementById("cust-confirm-btn");
+      const confirmLabel = confirmBtn.querySelector('span:first-child');
+      if (confirmLabel) confirmLabel.textContent = isBuyNow ? 'Buy Now' : 'Add to Cart';
+
       const container = document.getElementById("cust-options-container");
-      container.innerHTML = window.globalCustomizations.map((c, i) => `
-        <label class="flex items-center justify-between p-3 rounded-xl border border-outline/20 cursor-pointer hover:bg-surface-container-low transition-colors gap-3">
-          <div class="flex items-center gap-3 flex-1">
-            <input type="checkbox" class="w-5 h-5 accent-primary flex-shrink-0" onchange="toggleCustomization(${i}, this.checked)">
-            <span class="font-bold text-sm text-primary">${c.name}</span>
-          </div>
-          <span class="text-xs text-on-surface-variant font-bold whitespace-nowrap">${c.price > 0 ? '+₹' + c.price : 'Free'}</span>
-        </label>
-      `).join("");
+      if (extrasToShow.length === 0) {
+        container.innerHTML = `<p class="text-sm text-on-surface-variant text-center py-4">No extras available for this item.</p>`;
+      } else {
+        container.innerHTML = extrasToShow.map((c, i) => `
+          <label class="flex items-center justify-between p-3 rounded-xl border border-outline/20 cursor-pointer hover:bg-surface-container-low transition-colors gap-3">
+            <div class="flex items-center gap-3 flex-1">
+              <input type="checkbox" class="w-5 h-5 accent-primary flex-shrink-0" onchange="toggleCustomization(${i}, this.checked, ${JSON.stringify(extrasToShow).replace(/"/g, '&quot;')})">
+              <span class="font-bold text-sm text-primary">${c.name}</span>
+            </div>
+            <span class="text-xs text-on-surface-variant font-bold whitespace-nowrap">${c.price > 0 ? '+₹' + c.price : 'Free'}</span>
+          </label>
+        `).join("");
+      }
       const modal = document.getElementById("customization-modal");
       modal.classList.remove("opacity-0", "pointer-events-none");
     }
@@ -1945,8 +1954,8 @@
       modal.classList.add("opacity-0", "pointer-events-none");
     }
 
-    function toggleCustomization(idx, isChecked) {
-      const cust = window.globalCustomizations[idx];
+    function toggleCustomization(idx, isChecked, extrasArr) {
+      const cust = extrasArr[idx];
       if (isChecked) {
         selectedCustomizations.push({ name: cust.name, price: cust.price });
       } else {
@@ -1992,7 +2001,10 @@
     }
 
     function addToCart(id) {
-      if (window.globalCustomizations && window.globalCustomizations.length > 0) {
+      const product = PRODUCTS.find(p => p.id === id);
+      const hasExtras = (product && product.extras && product.extras.length > 0)
+        || (window.globalCustomizations && window.globalCustomizations.length > 0);
+      if (hasExtras) {
         openCustomizationModal(id, false);
       } else {
         processAddToCart(id, []);
@@ -2000,7 +2012,10 @@
     }
 
     function buyNow(id) {
-      if (window.globalCustomizations && window.globalCustomizations.length > 0) {
+      const product = PRODUCTS.find(p => p.id === id);
+      const hasExtras = (product && product.extras && product.extras.length > 0)
+        || (window.globalCustomizations && window.globalCustomizations.length > 0);
+      if (hasExtras) {
         openCustomizationModal(id, true);
       } else {
         processBuyNow(id, []);
@@ -2441,7 +2456,7 @@
       const phone = document.getElementById("f-phone").value.trim();
       const email = document.getElementById("f-email").value.trim();
       const address = document.getElementById("f-address").value.trim();
-      const notes = document.getElementById("f-notes").value.trim();
+      const notes = ""; // Special instructions removed
 
       if (!name || !phone || !email || !address) {
         showToast("Please fill all required fields"); return;
@@ -3530,7 +3545,8 @@
             badge: data.badge,
             img: data.img,
             images: data.images || [],
-            outOfStock: data.outOfStock
+            outOfStock: data.outOfStock,
+            extras: data.extras || []
           });
         });
         renderProducts();

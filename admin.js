@@ -616,6 +616,52 @@ function closeProductModal() {
   document.getElementById('product-modal-title').innerText = 'Add Product';
   const preview = document.getElementById('prod-img-preview');
   if (preview) preview.innerHTML = '';
+  // Reset extras panel
+  const extrasList = document.getElementById('prod-extras-list');
+  if (extrasList) extrasList.innerHTML = '';
+  const panel = document.getElementById('prod-extras-panel');
+  const arrow = document.getElementById('prod-extras-arrow');
+  if (panel) panel.classList.add('hidden');
+  if (arrow) { arrow.textContent = 'expand_more'; arrow.style.transform = ''; }
+}
+
+// ── Per-Product Extras Helpers ──────────────────────────────────
+window.toggleProdExtras = function() {
+  const panel = document.getElementById('prod-extras-panel');
+  const arrow = document.getElementById('prod-extras-arrow');
+  const isHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !isHidden);
+  arrow.style.transform = isHidden ? 'rotate(180deg)' : '';
+};
+
+window.addProdExtraRow = function(data = {}) {
+  const list = document.getElementById('prod-extras-list');
+  const idx = list.querySelectorAll('.prod-extra-row').length;
+  const div = document.createElement('div');
+  div.className = 'prod-extra-row flex gap-2 items-center';
+  div.innerHTML = `
+    <input type="text" class="extra-name flex-1 bg-surface-container-lowest rounded-xl p-2.5 text-sm border border-outline/20" placeholder="e.g. Extra Ice" value="${data.name || ''}">
+    <input type="number" class="extra-price w-20 bg-surface-container-lowest rounded-xl p-2.5 text-sm border border-outline/20" placeholder="₹" min="0" value="${data.price !== undefined ? data.price : ''}">
+    <button type="button" onclick="this.closest('.prod-extra-row').remove()" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
+      <span class="material-symbols-outlined text-base">delete</span>
+    </button>
+  `;
+  list.appendChild(div);
+  // Auto-open panel when first row added
+  const panel = document.getElementById('prod-extras-panel');
+  const arrow = document.getElementById('prod-extras-arrow');
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    arrow.style.transform = 'rotate(180deg)';
+  }
+};
+
+function renderProdExtraRows(dataArr) {
+  const list = document.getElementById('prod-extras-list');
+  list.innerHTML = '';
+  if (dataArr && dataArr.length > 0) {
+    dataArr.forEach(item => addProdExtraRow(item));
+  }
 }
 
 document.getElementById("product-form").addEventListener("submit", async (e) => {
@@ -633,16 +679,26 @@ document.getElementById("product-form").addEventListener("submit", async (e) => 
   const saveProductToDB = (newImageUrls) => {
     const allImages = [...existingImages, ...newImageUrls];
     if (allImages.length === 0) allImages.push(oldUrl || 'https://placehold.co/400');
+
+    // Collect per-product extras
+    const extrasArr = [];
+    document.querySelectorAll('#prod-extras-list .prod-extra-row').forEach(row => {
+      const name = row.querySelector('.extra-name').value.trim();
+      const price = row.querySelector('.extra-price').value.trim();
+      if (name) extrasArr.push({ name, price: price ? Number(price) : 0 });
+    });
+
     const payload = {
       name: document.getElementById("prod-name").value,
       category: document.getElementById("prod-category").value,
       price: document.getElementById("prod-price").value,
       originalPrice: document.getElementById("prod-original-price").value ? Number(document.getElementById("prod-original-price").value) : null,
       badge: document.getElementById("prod-badge").value,
-      img: allImages[0],        // keep backward compat
+      img: allImages[0],
       images: allImages,
       desc: document.getElementById("prod-desc").value,
-      outOfStock: document.getElementById("prod-outofstock").checked
+      outOfStock: document.getElementById("prod-outofstock").checked,
+      extras: extrasArr
     };
     const task = id ? db.collection("products").doc(id).update(payload) : db.collection("products").add(payload);
     task.then(() => { btn.disabled = false; closeProductModal(); });
@@ -695,6 +751,15 @@ window.editProduct = function(id) {
       <img src="${url}" data-url="${url}" class="w-16 h-16 object-cover rounded-lg border border-outline/20" title="Image ${i+1}">
       <button type="button" onclick="removePreviewImg(${i})" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center font-black hover:bg-red-700">×</button>
     </div>`).join('');
+
+  // Load per-product extras
+  renderProdExtraRows(p.extras || []);
+  if (p.extras && p.extras.length > 0) {
+    const panel = document.getElementById('prod-extras-panel');
+    const arrow = document.getElementById('prod-extras-arrow');
+    if (panel) panel.classList.remove('hidden');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+  }
 
   document.getElementById('product-modal-title').innerText = 'Edit Product';
   document.getElementById('add-product-modal').classList.remove('hidden');
