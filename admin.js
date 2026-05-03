@@ -93,8 +93,12 @@ function switchTab(tabId) {
 function loadOrders() {
   db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snapshot => {
     const tbody = document.getElementById("orders-tbody");
+    let productSales = {};
+
     if(snapshot.empty) {
       tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-on-surface-variant">No orders yet.</td></tr>`;
+      const salesGrid = document.getElementById("product-sales-grid");
+      if (salesGrid) salesGrid.innerHTML = `<div class="col-span-full text-on-surface-variant">No sales data.</div>`;
       return;
     }
 
@@ -102,7 +106,10 @@ function loadOrders() {
     snapshot.forEach(doc => {
       const data = doc.data();
       const st = data.status || "Pending";
-      const badgeColor = st === "Pending" ? "bg-red-100 text-red-800" : (st === "Confirmed" ? "bg-orange-100 text-orange-800" : "bg-green-100 text-green-800");
+      let badgeColor = "bg-gray-100 text-gray-800";
+      if (st === "Pending") badgeColor = "bg-red-100 text-red-800";
+      else if (st === "Confirmed") badgeColor = "bg-orange-100 text-orange-800";
+      else if (st === "Delivered") badgeColor = "bg-green-100 text-green-800";
       
       const itemsList = data.items ? data.items.map(i => `${i.qty}x ${i.name}`).join("<br/>") : "-";
 
@@ -118,26 +125,74 @@ function loadOrders() {
             <option value="Pending" ${st==='Pending'?'selected':''}>Pending</option>
             <option value="Confirmed" ${st==='Confirmed'?'selected':''}>Confirmed</option>
             <option value="Delivered" ${st==='Delivered'?'selected':''}>Delivered</option>
+            <option value="Cancelled" ${st==='Cancelled'?'selected':''}>Cancelled</option>
           </select>
         </td>
       </tr>`;
+
+      if (st === "Delivered" && data.items) {
+        data.items.forEach(item => {
+          if (!productSales[item.name]) productSales[item.name] = 0;
+          productSales[item.name] += parseInt(item.qty, 10);
+        });
+      }
     });
     tbody.innerHTML = html;
+
+    const salesGrid = document.getElementById("product-sales-grid");
+    if (salesGrid) {
+      let salesHtml = "";
+      const sortedSales = Object.keys(productSales).sort((a, b) => productSales[b] - productSales[a]);
+      if (sortedSales.length === 0) {
+        salesHtml = `<div class="col-span-full text-on-surface-variant">No delivered items yet.</div>`;
+      } else {
+        sortedSales.forEach(name => {
+          salesHtml += `
+            <div class="p-4 bg-white rounded-xl border border-outline/20 shadow-sm flex flex-col">
+              <span class="text-xs text-on-surface-variant mb-1 line-clamp-1" title="${name}">${name}</span>
+              <span class="text-lg font-black text-primary">${productSales[name]} sold</span>
+            </div>
+          `;
+        });
+      }
+      salesGrid.innerHTML = salesHtml;
+    }
   });
 }
 
 window.updateOrderStatus = function(id, newStatus) {
   db.collection("orders").doc(id).update({ status: newStatus }).then(() => {
     if (newStatus === "Delivered") {
+      db.collection("orders").doc(id).get().then(orderDoc => {
+        const orderData = orderDoc.data();
+        if (orderData && orderData.total > 50) {
+          db.collection("referrals").where("orderId", "==", id).get().then(snap => {
+            snap.forEach(doc => {
+              const data = doc.data();
+              if (data.status === "Pending") {
+                doc.ref.update({ status: "Earned" });
+                db.collection("users").doc(data.referrerUid).update({
+                  points: firebase.firestore.FieldValue.increment(data.points),
+                  referralCount: firebase.firestore.FieldValue.increment(1)
+                });
+              }
+            });
+          });
+        } else {
+          db.collection("referrals").where("orderId", "==", id).get().then(snap => {
+            snap.forEach(doc => {
+              if (doc.data().status === "Pending") {
+                doc.ref.update({ status: "Failed (Order <= 50)" });
+              }
+            });
+          });
+        }
+      });
+    } else if (newStatus === "Cancelled") {
       db.collection("referrals").where("orderId", "==", id).get().then(snap => {
         snap.forEach(doc => {
-          const data = doc.data();
-          if (data.status === "Pending") {
-            doc.ref.update({ status: "Earned" });
-            db.collection("users").doc(data.referrerUid).update({
-              points: firebase.firestore.FieldValue.increment(data.points),
-              referralCount: firebase.firestore.FieldValue.increment(1)
-            });
+          if (doc.data().status === "Pending") {
+            doc.ref.update({ status: "Failed (Cancelled)" });
           }
         });
       });
