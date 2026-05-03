@@ -69,7 +69,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 //  👉  TAB NAVIGATION
 // ──────────────────────────────────────────────
 function switchTab(tabId) {
-  const tabs = ['orders', 'products', 'reviews', 'users', 'settings', 'offers'];
+  const tabs = ['orders', 'sales', 'products', 'reviews', 'users', 'settings', 'offers'];
   tabs.forEach(t => {
     document.getElementById(`tab-${t}`).classList.add("hidden");
     const btn = document.getElementById(`tab-btn-${t}`);
