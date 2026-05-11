@@ -87,9 +87,11 @@
       </div>
       <nav class="flex-1 p-2 md:p-4 space-y-1 md:space-y-2 overflow-x-auto md:overflow-x-visible flex md:flex-col gap-2 md:gap-0">
         <button onclick="switchTab('orders')" id="tab-btn-orders" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 bg-primary text-white transition-colors"><span class="material-symbols-outlined text-sm md:text-base">receipt_long</span> Orders</button>
+        <button onclick="switchTab('sales')" id="tab-btn-sales" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">bar_chart</span> Sales Tracking</button>
         <button onclick="switchTab('products')" id="tab-btn-products" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">inventory_2</span> Products</button>
         <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">reviews</span> Reviews</button>
         <button onclick="switchTab('offers')" id="tab-btn-offers" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">redeem</span> Rewards & Promos</button>
+        <button onclick="switchTab('spinwin')" id="tab-btn-spinwin" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">casino</span> Spin & Win</button>
         <button onclick="switchTab('users')" id="tab-btn-users" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">group</span> Users</button>
         <button onclick="switchTab('settings')" id="tab-btn-settings" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">settings</span> Settings</button>
       </nav>
@@ -100,6 +102,8 @@
 
     <!-- Main Content -->
     <main class="flex-1 p-4 md:p-10 overflow-y-auto w-full">
+      <!-- Category suggestions datalist (populated by JS from products) -->
+      <datalist id="categories-datalist"></datalist>
       
       <!-- ORDERS TAB -->
       <section id="tab-orders" class="tab-pane">
@@ -124,6 +128,19 @@
                 <tr><td colspan="6" class="p-8 text-center text-on-surface-variant">Loading orders...</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SALES TRACKING TAB -->
+      <section id="tab-sales" class="tab-pane hidden">
+        <div class="mb-4 md:mb-8">
+          <h2 class="text-2xl md:text-3xl font-black text-primary mb-2 md:mb-4">Product Sales Tracking</h2>
+          <p class="text-xs md:text-sm text-on-surface-variant mb-6">Track total units sold across all delivered orders.</p>
+          <div class="glass-card rounded-2xl p-4 md:p-6 text-sm md:text-base border border-outline/10">
+            <div id="product-sales-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="col-span-full text-on-surface-variant">Loading sales...</div>
+            </div>
           </div>
         </div>
       </section>
@@ -243,6 +260,26 @@
                 <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Description</label>
                 <textarea id="prod-desc" required rows="3" class="w-full bg-white rounded-xl p-3 border border-outline/20"></textarea>
               </div>
+
+              <!-- ── Per-Product Extras / Add-ons ── -->
+              <div class="border border-outline/20 rounded-2xl overflow-hidden">
+                <button type="button" onclick="toggleProdExtras()" class="w-full flex items-center justify-between p-4 bg-surface-container-low hover:bg-surface-container transition-colors text-left">
+                  <div>
+                    <span class="font-bold text-sm text-primary">Extras / Add-ons</span>
+                    <span class="text-[10px] text-on-surface-variant block mt-0.5">e.g. Extra Ice, Oat Milk, Sugar-Free...</span>
+                  </div>
+                  <span class="material-symbols-outlined text-primary transition-transform duration-300" id="prod-extras-arrow">expand_more</span>
+                </button>
+                <div id="prod-extras-panel" class="hidden px-4 pb-4 pt-2 space-y-3 bg-white">
+                  <div id="prod-extras-list" class="space-y-2">
+                    <!-- Populated by JS -->
+                  </div>
+                  <button type="button" onclick="addProdExtraRow()" class="mt-1 w-full py-2 border-2 border-dashed border-outline/30 rounded-xl text-xs font-bold text-on-surface-variant hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-sm">add</span> Add Extra Option
+                  </button>
+                </div>
+              </div>
+
               <div class="flex items-center gap-3">
                 <input type="checkbox" id="prod-outofstock" class="w-5 h-5 rounded text-primary border-outline/20">
                 <label class="font-bold text-sm text-on-surface">Mark as Out of Stock</label>
@@ -677,6 +714,130 @@
           <p id="settings-msg" class="text-center text-sm font-bold text-secondary hidden">Settings saved successfully!</p>
         </form>
 
+      </section>
+
+      <!-- REWARDS & PROMOS TAB -->
+      <section id="tab-offers" class="tab-pane hidden">
+        <div class="mb-4 md:mb-8">
+          <h2 class="text-2xl md:text-3xl font-black text-primary">Rewards &amp; Promotions</h2>
+          <p class="text-xs md:text-sm text-on-surface-variant mt-1">Manage popup notifications and the Spin &amp; Win wheel.</p>
+        </div>
+
+        <form id="offers-form" class="glass-card rounded-2xl p-4 md:p-8 space-y-8">
+
+          <!-- Popup Notification Settings -->
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+               <div>
+                 <h4 class="font-bold text-primary text-lg">Popup Notification</h4>
+                 <p class="text-xs text-on-surface-variant">Configure a global popup that appears once per session.</p>
+               </div>
+               <label class="relative inline-flex items-center cursor-pointer">
+                 <input type="checkbox" id="set-popup-enable" class="sr-only peer">
+                 <div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+               </label>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div class="col-span-1 md:col-span-2">
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Title</label>
+                  <input type="text" id="set-popup-title" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Special Offer!">
+               </div>
+               <div class="col-span-1 md:col-span-2">
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Upload Image / GIF / Video</label>
+                  <div id="popup-media-preview-wrap" class="mb-2 hidden">
+                    <img id="popup-media-current" src="" class="h-32 rounded-xl object-cover border border-outline/20" alt="Current popup image">
+                    <p class="text-[10px] text-on-surface-variant mt-1">Current image. Upload a new one to replace.</p>
+                  </div>
+                  <input type="file" id="set-popup-media-file" accept="image/*,video/*,image/gif" class="w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs">
+                  <p class="text-[10px] text-on-surface-variant mt-1">Supports JPG, PNG, GIF, WebP, MP4.</p>
+               </div>
+               <div class="col-span-1 md:col-span-2">
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Message</label>
+                  <textarea id="set-popup-message" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Get 20% off your first order..."></textarea>
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Button Text (e.g. Claim Now)</label>
+                  <input type="text" id="set-popup-btn-text" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Follow & Claim 20% Off">
+               </div>
+               <div>
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Button Link (Instagram URL)</label>
+                  <input type="text" id="set-popup-btn-link" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. https://instagram.com/brewdipu">
+               </div>
+               <div class="col-span-1 md:col-span-2 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <label class="text-xs font-bold uppercase tracking-widest text-amber-700 mb-1 block">&#127381; Auto-Apply Promo Code (Optional)</label>
+                  <input type="text" id="set-popup-promo-code" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 uppercase" placeholder="e.g. INSTA20" style="letter-spacing:0.15em">
+                  <p class="text-[10px] text-amber-600 mt-1">If set, clicking "Claim Now" will open the Instagram link AND automatically apply this promo code to the customer's cart.</p>
+               </div>
+            </div>
+          </div>
+
+          <div id="offers-upload-progress" class="hidden text-center text-sm font-bold text-primary py-2">&#8987; Uploading media, please wait...</div>
+
+          <button type="submit" class="w-full py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-black hover:shadow-xl transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">save</span> Save Popup Settings
+          </button>
+          <p id="offers-msg" class="text-center text-sm font-bold text-secondary hidden">Popup settings saved!</p>
+        </form>
+
+      </section>
+
+      <!-- SPIN & WIN TAB (separate from Rewards) -->
+      <section id="tab-spinwin" class="tab-pane hidden">
+        <div class="mb-4 md:mb-8">
+          <h2 class="text-2xl md:text-3xl font-black text-primary">Spin & Win</h2>
+          <p class="text-xs md:text-sm text-on-surface-variant mt-1">Upload a custom wheel image and configure the spin-to-win experience for your customers.</p>
+        </div>
+
+        <form id="spinwin-form" class="glass-card rounded-2xl p-4 md:p-8 space-y-6">
+          <div class="flex justify-between items-center">
+            <div>
+              <h4 class="font-bold text-primary text-lg">Enable Spin & Win</h4>
+              <p class="text-xs text-on-surface-variant">Show the floating spin button on the storefront.</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="set-spin-enable" class="sr-only peer">
+              <div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="col-span-1 md:col-span-2">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Upload Wheel Image</label>
+              <div id="spin-img-preview-wrap" class="mb-2 hidden">
+                <img id="spin-img-current" src="" class="h-40 rounded-xl object-contain border border-outline/20 mx-auto" alt="Current wheel image">
+                <p class="text-[10px] text-on-surface-variant mt-1 text-center">Current wheel image. Upload a new one to replace.</p>
+              </div>
+              <input type="file" id="set-spin-wheel-img" accept="image/*" class="w-full bg-surface-container-lowest rounded-xl p-3 border border-outline/10 text-sm">
+              <p class="text-[10px] text-on-surface-variant mt-1">Upload a wheel image (PNG/WebP recommended). This is the spinning wheel your customers see.</p>
+            </div>
+            <div class="col-span-1 md:col-span-2">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Rewards (Comma Separated)</label>
+              <input type="text" id="set-spin-rewards" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. 50 Points, Try Again, 10 Points, 100 Points, Try Again, 20 Points">
+              <p class="text-[10px] text-on-surface-variant mt-1">If the text includes "Points", those points will be awarded to logged-in users.</p>
+            </div>
+            <div class="col-span-1 md:col-span-2">
+              <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">CTA Text (heading & button label)</label>
+              <input type="text" id="set-spin-cta" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Spin & Get Offer!">
+            </div>
+            <div class="col-span-1 md:col-span-2 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+              <label class="text-xs font-bold uppercase tracking-widest text-blue-700 mb-1 block">📱 Instagram Follow Requirement (Optional)</label>
+              <input type="text" id="set-spin-insta-link" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. https://instagram.com/brewdipu">
+              <p class="text-[10px] text-blue-600 mt-1">If set, users must click "Follow on Instagram" before they can spin the wheel.</p>
+            </div>
+            <div class="col-span-1 md:col-span-2 p-4 bg-green-50 border border-green-200 rounded-xl">
+              <label class="text-xs font-bold uppercase tracking-widest text-green-700 mb-1 block">⏱️ Auto Popup Delay (Seconds)</label>
+              <input type="number" id="set-spin-popup-delay" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. 3" min="0" max="60" value="3">
+              <p class="text-[10px] text-green-600 mt-1">The spin wheel will automatically pop up after this many seconds when a user opens the website. Set 0 to disable auto-popup (only show floating button).</p>
+            </div>
+          </div>
+
+          <div id="spinwin-upload-progress" class="hidden text-center text-sm font-bold text-primary py-2">&#8987; Uploading wheel image, please wait...</div>
+
+          <button type="submit" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-black hover:shadow-xl transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">save</span> Save Spin & Win
+          </button>
+          <p id="spinwin-msg" class="text-center text-sm font-bold text-secondary hidden">Spin & Win settings saved!</p>
+        </form>
       </section>
 
     </main>

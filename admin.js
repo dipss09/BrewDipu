@@ -19,6 +19,7 @@ try {
 
 const db = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();
 
 // No hardcoded PRODUCTS array anymore. All driven via Firestore.
 // ──────────────────────────────────────────────
@@ -69,7 +70,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 //  👉  TAB NAVIGATION
 // ──────────────────────────────────────────────
 function switchTab(tabId) {
-  const tabs = ['orders', 'products', 'reviews', 'users', 'settings', 'offers'];
+  const tabs = ['orders', 'sales', 'products', 'reviews', 'users', 'settings', 'offers', 'spinwin'];
   tabs.forEach(t => {
     document.getElementById(`tab-${t}`).classList.add("hidden");
     const btn = document.getElementById(`tab-btn-${t}`);
@@ -93,8 +94,12 @@ function switchTab(tabId) {
 function loadOrders() {
   db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snapshot => {
     const tbody = document.getElementById("orders-tbody");
+    let productSales = {};
+
     if(snapshot.empty) {
       tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-on-surface-variant">No orders yet.</td></tr>`;
+      const salesGrid = document.getElementById("product-sales-grid");
+      if (salesGrid) salesGrid.innerHTML = `<div class="col-span-full text-on-surface-variant">No sales data.</div>`;
       return;
     }
 
@@ -102,7 +107,10 @@ function loadOrders() {
     snapshot.forEach(doc => {
       const data = doc.data();
       const st = data.status || "Pending";
-      const badgeColor = st === "Pending" ? "bg-red-100 text-red-800" : (st === "Confirmed" ? "bg-orange-100 text-orange-800" : "bg-green-100 text-green-800");
+      let badgeColor = "bg-gray-100 text-gray-800";
+      if (st === "Pending") badgeColor = "bg-red-100 text-red-800";
+      else if (st === "Confirmed") badgeColor = "bg-orange-100 text-orange-800";
+      else if (st === "Delivered") badgeColor = "bg-green-100 text-green-800";
       
       const itemsList = data.items ? data.items.map(i => `${i.qty}x ${i.name}`).join("<br/>") : "-";
 
@@ -118,26 +126,74 @@ function loadOrders() {
             <option value="Pending" ${st==='Pending'?'selected':''}>Pending</option>
             <option value="Confirmed" ${st==='Confirmed'?'selected':''}>Confirmed</option>
             <option value="Delivered" ${st==='Delivered'?'selected':''}>Delivered</option>
+            <option value="Cancelled" ${st==='Cancelled'?'selected':''}>Cancelled</option>
           </select>
         </td>
       </tr>`;
+
+      if (st === "Delivered" && data.items) {
+        data.items.forEach(item => {
+          if (!productSales[item.name]) productSales[item.name] = 0;
+          productSales[item.name] += parseInt(item.qty, 10);
+        });
+      }
     });
     tbody.innerHTML = html;
+
+    const salesGrid = document.getElementById("product-sales-grid");
+    if (salesGrid) {
+      let salesHtml = "";
+      const sortedSales = Object.keys(productSales).sort((a, b) => productSales[b] - productSales[a]);
+      if (sortedSales.length === 0) {
+        salesHtml = `<div class="col-span-full text-on-surface-variant">No delivered items yet.</div>`;
+      } else {
+        sortedSales.forEach(name => {
+          salesHtml += `
+            <div class="p-4 bg-white rounded-xl border border-outline/20 shadow-sm flex flex-col">
+              <span class="text-xs text-on-surface-variant mb-1 line-clamp-1" title="${name}">${name}</span>
+              <span class="text-lg font-black text-primary">${productSales[name]} sold</span>
+            </div>
+          `;
+        });
+      }
+      salesGrid.innerHTML = salesHtml;
+    }
   });
 }
 
 window.updateOrderStatus = function(id, newStatus) {
   db.collection("orders").doc(id).update({ status: newStatus }).then(() => {
     if (newStatus === "Delivered") {
+      db.collection("orders").doc(id).get().then(orderDoc => {
+        const orderData = orderDoc.data();
+        if (orderData && orderData.total > 50) {
+          db.collection("referrals").where("orderId", "==", id).get().then(snap => {
+            snap.forEach(doc => {
+              const data = doc.data();
+              if (data.status === "Pending") {
+                doc.ref.update({ status: "Earned" });
+                db.collection("users").doc(data.referrerUid).update({
+                  points: firebase.firestore.FieldValue.increment(data.points),
+                  referralCount: firebase.firestore.FieldValue.increment(1)
+                });
+              }
+            });
+          });
+        } else {
+          db.collection("referrals").where("orderId", "==", id).get().then(snap => {
+            snap.forEach(doc => {
+              if (doc.data().status === "Pending") {
+                doc.ref.update({ status: "Failed (Order <= 50)" });
+              }
+            });
+          });
+        }
+      });
+    } else if (newStatus === "Cancelled") {
       db.collection("referrals").where("orderId", "==", id).get().then(snap => {
         snap.forEach(doc => {
-          const data = doc.data();
-          if (data.status === "Pending") {
-            doc.ref.update({ status: "Earned" });
-            db.collection("users").doc(data.referrerUid).update({
-              points: firebase.firestore.FieldValue.increment(data.points),
-              referralCount: firebase.firestore.FieldValue.increment(1)
-            });
+          if (doc.data().status === "Pending") {
+            doc.ref.update({ status: "Failed (Cancelled)" });
           }
         });
       });
@@ -281,6 +337,36 @@ function loadSettings() {
         document.getElementById("set-f4-desc").value = data.features.f4Desc || "Every order supports a local artisan and a dream of crafting better coffee for everyone.";
       }
 
+      // Popup Notification
+      if (data.popup) {
+         document.getElementById("set-popup-enable").checked = !!data.popup.enabled;
+         document.getElementById("set-popup-title").value = data.popup.title || "";
+         document.getElementById("set-popup-message").value = data.popup.message || "";
+         document.getElementById("set-popup-btn-text").value = data.popup.btnText || "";
+         document.getElementById("set-popup-btn-link").value = data.popup.btnLink || "";
+         document.getElementById("set-popup-promo-code").value = data.popup.promoCode || "";
+         // Show current image preview
+         if (data.popup.media) {
+           const wrap = document.getElementById("popup-media-preview-wrap");
+           const img = document.getElementById("popup-media-current");
+           if (wrap && img) { img.src = data.popup.media; wrap.classList.remove("hidden"); }
+         }
+      }
+
+      // Spin & Win
+      if (data.spinWheel) {
+         document.getElementById("set-spin-enable").checked = !!data.spinWheel.enabled;
+         document.getElementById("set-spin-rewards").value = data.spinWheel.rewards || "";
+         document.getElementById("set-spin-cta").value = data.spinWheel.ctaText || "Spin to Get Offer!";
+         document.getElementById("set-spin-insta-link").value = data.spinWheel.instaLink || "";
+         document.getElementById("set-spin-popup-delay").value = data.spinWheel.popupDelay != null ? data.spinWheel.popupDelay : 3;
+         if (data.spinWheel.wheelImg) {
+           const wrap = document.getElementById("spin-img-preview-wrap");
+           const img = document.getElementById("spin-img-current");
+           if (wrap && img) { img.src = data.spinWheel.wheelImg; wrap.classList.remove("hidden"); }
+         }
+      }
+
       // Collections — dynamic array
       if (data.collectionsData && data.collectionsData.length) {
         renderCollectionRows(data.collectionsData);
@@ -367,11 +453,12 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
   const collectionRows = document.querySelectorAll('#collections-list .collec-row');
   let finalCollectionsData = currentSettings.collectionsData ? JSON.parse(JSON.stringify(currentSettings.collectionsData)) : [];
   // Resize array to match current rows
-  while (finalCollectionsData.length < collectionRows.length) finalCollectionsData.push({ title: '', sub: '', img: '' });
+  while (finalCollectionsData.length < collectionRows.length) finalCollectionsData.push({ title: '', target: '', sub: '', img: '' });
   finalCollectionsData = finalCollectionsData.slice(0, collectionRows.length);
 
   collectionRows.forEach((row, idx) => {
     finalCollectionsData[idx].title = row.querySelector('.collec-title').value;
+    finalCollectionsData[idx].target = row.querySelector('.collec-target').value;
     finalCollectionsData[idx].sub   = row.querySelector('.collec-sub').value;
     const imgFile = row.querySelector('.collec-img-file').files[0];
     if (imgFile) {
@@ -449,6 +536,96 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
     });
 });
 
+// ──────────────────────────────────────────────
+//  🎁  OFFERS / PROMOTIONS FORM HANDLER
+// ──────────────────────────────────────────────
+// ── POPUP-ONLY FORM (Rewards & Promos tab) ─────────────
+document.getElementById("offers-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = e.target.querySelector("button[type='submit']");
+  submitBtn.disabled = true;
+  const progressText = document.getElementById("offers-upload-progress");
+
+  let finalPopupMedia = currentSettings.popup ? (currentSettings.popup.media || "") : "";
+  const mediaFileInput = document.getElementById("set-popup-media-file");
+  const filePromises = [];
+
+  if (mediaFileInput && mediaFileInput.files[0]) {
+    filePromises.push(compressAndGetBase64(mediaFileInput.files[0]).then(url => finalPopupMedia = url));
+  }
+
+  if (filePromises.length > 0) {
+    progressText.classList.remove("hidden");
+    try { await Promise.all(filePromises); }
+    catch (err) { alert("Upload failed: " + err); submitBtn.disabled = false; progressText.classList.add("hidden"); return; }
+    progressText.classList.add("hidden");
+  }
+
+  const payload = {
+    popup: {
+      enabled: document.getElementById("set-popup-enable").checked,
+      title: document.getElementById("set-popup-title").value,
+      media: finalPopupMedia,
+      message: document.getElementById("set-popup-message").value,
+      btnText: document.getElementById("set-popup-btn-text").value,
+      btnLink: document.getElementById("set-popup-btn-link").value,
+      promoCode: document.getElementById("set-popup-promo-code").value.toUpperCase().trim(),
+    },
+  };
+
+  db.collection("settings").doc("storeConfig").set(payload, { merge: true })
+    .then(() => {
+      const msg = document.getElementById("offers-msg");
+      msg.classList.remove("hidden");
+      submitBtn.disabled = false;
+      if (mediaFileInput) mediaFileInput.value = "";
+      setTimeout(() => msg.classList.add("hidden"), 3000);
+    });
+});
+
+// ── SPIN & WIN FORM (own tab) ───────────────────────────
+document.getElementById("spinwin-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = e.target.querySelector("button[type='submit']");
+  submitBtn.disabled = true;
+  const progressText = document.getElementById("spinwin-upload-progress");
+
+  let finalWheelImg = currentSettings.spinWheel ? (currentSettings.spinWheel.wheelImg || "") : "";
+  const wheelImgInput = document.getElementById("set-spin-wheel-img");
+  const filePromises = [];
+
+  if (wheelImgInput && wheelImgInput.files[0]) {
+    filePromises.push(compressAndGetBase64(wheelImgInput.files[0], 600).then(url => finalWheelImg = url));
+  }
+
+  if (filePromises.length > 0) {
+    progressText.classList.remove("hidden");
+    try { await Promise.all(filePromises); }
+    catch (err) { alert("Upload failed: " + err); submitBtn.disabled = false; progressText.classList.add("hidden"); return; }
+    progressText.classList.add("hidden");
+  }
+
+  const payload = {
+    spinWheel: {
+      enabled: document.getElementById("set-spin-enable").checked,
+      rewards: document.getElementById("set-spin-rewards").value,
+      ctaText: document.getElementById("set-spin-cta").value || "Spin to Get Offer!",
+      wheelImg: finalWheelImg,
+      instaLink: document.getElementById("set-spin-insta-link").value.trim(),
+      popupDelay: parseInt(document.getElementById("set-spin-popup-delay").value) || 0,
+    },
+  };
+
+  db.collection("settings").doc("storeConfig").set(payload, { merge: true })
+    .then(() => {
+      const msg = document.getElementById("spinwin-msg");
+      msg.classList.remove("hidden");
+      submitBtn.disabled = false;
+      if (wheelImgInput) wheelImgInput.value = "";
+      setTimeout(() => msg.classList.add("hidden"), 3000);
+    });
+});
+
 // ── Dynamic Collections Helpers ──────────────────────────────────
 window.addCollectionRow = function(data = {}) {
   const list = document.getElementById('collections-list');
@@ -463,6 +640,8 @@ window.addCollectionRow = function(data = {}) {
       </button>
     </div>
     <input type="text" class="collec-title w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Cold Coffee" value="${data.title||''}">
+    <input type="text" class="collec-target w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Target Category (must match product category exactly)" value="${data.target||''}" list="categories-datalist">
+    <p class="text-[10px] text-amber-600 -mt-1">⚠️ Must match a product category name exactly (e.g. "Corn Chaat", not "Corn Chart")</p>
     <input type="text" class="collec-sub w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Brewed for 18 hours" value="${data.sub||''}">
     ${data.img ? `<img src="${data.img}" class="w-16 h-16 object-cover rounded-lg border border-outline/20 mb-1">` : ''}
     <input type="file" class="collec-img-file w-full bg-surface-container-lowest rounded-xl p-2 border border-outline/10 text-xs" accept="image/*">
@@ -528,10 +707,57 @@ function renderCustomizationRows(dataArr) {
 }
 
 // ──────────────────────────────────────────────
-//  🚀  BASE64 IMAGE COMPRESSOR Helper
+//  🚀  IMAGE UPLOAD & COMPRESSION Helper (Firebase Storage)
 // ──────────────────────────────────────────────
 function compressAndGetBase64(file, maxWidth = 800) {
   return new Promise((resolve, reject) => {
+    let done = false;
+    const finish = (fn, val) => { if (!done) { done = true; fn(val); } };
+
+    // SAFETY: 20-second global timeout → fall back to base64 data URL
+    const globalTimeout = setTimeout(() => {
+      console.warn('[Upload] Global timeout for', file.name, '— using base64 fallback');
+      // Read file as base64 directly as last resort
+      const r = new FileReader();
+      r.onload = (ev) => finish(resolve, ev.target.result);
+      r.onerror = () => finish(reject, 'Timeout + file read failed');
+      r.readAsDataURL(file);
+    }, 20000);
+
+    const ok = (val) => { clearTimeout(globalTimeout); finish(resolve, val); };
+    const fail = (err) => { clearTimeout(globalTimeout); finish(reject, err); };
+
+    const fileType = file.type || '';
+    const isGif = fileType === 'image/gif';
+    const isVideo = fileType.startsWith('video/');
+
+    // GIFs and videos: try Firebase Storage, fallback to base64
+    if (isGif || isVideo) {
+      try {
+        const ext = isGif ? 'gif' : (file.name.split('.').pop() || 'mp4');
+        const fileName = 'uploads/' + Date.now() + '_' + Math.random().toString(36).substring(2) + '.' + ext;
+        const ref = storage.ref().child(fileName);
+        const task = ref.put(file);
+        const uploadTimeout = setTimeout(() => {
+          console.warn('[Upload] Storage timeout for GIF/video, using base64');
+          const r2 = new FileReader();
+          r2.onload = (ev) => ok(ev.target.result);
+          r2.onerror = () => fail('File read failed');
+          r2.readAsDataURL(file);
+        }, 12000);
+        task.on('state_changed', null,
+          (err) => { clearTimeout(uploadTimeout); console.warn('[Upload] Storage error:', err); const r3 = new FileReader(); r3.onload = (ev) => ok(ev.target.result); r3.readAsDataURL(file); },
+          () => { clearTimeout(uploadTimeout); task.snapshot.ref.getDownloadURL().then(ok).catch(fail); }
+        );
+      } catch(e) {
+        const r4 = new FileReader();
+        r4.onload = (ev) => ok(ev.target.result);
+        r4.readAsDataURL(file);
+      }
+      return;
+    }
+
+    // Standard images: compress via canvas, then try Storage with fallback
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = event => {
@@ -539,25 +765,36 @@ function compressAndGetBase64(file, maxWidth = 800) {
       img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        if (width > height && width > maxWidth) {
-          height *= maxWidth / width;
-          width = maxWidth;
-        } else if (height > maxWidth) {
-          width *= maxWidth / height;
-          height = maxWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        // Heavily compress jpeg (0.6 quality gives very small footprint suitable for Firestore)
-        resolve(canvas.toDataURL('image/jpeg', 0.6));
+        let w = img.width, h = img.height;
+        if (w > h && w > maxWidth) { h *= maxWidth / w; w = maxWidth; }
+        else if (h > maxWidth) { w *= maxWidth / h; h = maxWidth; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+        // Get base64 immediately as our fallback
+        const base64Fallback = canvas.toDataURL('image/jpeg', 0.65);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return ok(base64Fallback);
+          try {
+            const fileName = 'uploads/' + Date.now() + '_' + Math.random().toString(36).substring(2) + '.jpg';
+            const ref = storage.ref().child(fileName);
+            const task = ref.put(blob);
+            // 12-second upload timeout → use base64 fallback
+            const uploadTimeout = setTimeout(() => {
+              console.warn('[Upload] Storage upload timeout for', file.name, '— using base64');
+              ok(base64Fallback);
+            }, 12000);
+            task.on('state_changed', null,
+              (err) => { clearTimeout(uploadTimeout); console.warn('[Upload] Storage error, using base64:', err); ok(base64Fallback); },
+              () => { clearTimeout(uploadTimeout); task.snapshot.ref.getDownloadURL().then(ok).catch(() => ok(base64Fallback)); }
+            );
+          } catch(e) { ok(base64Fallback); }
+        }, 'image/jpeg', 0.7);
       };
-      img.onerror = (e) => reject("Image processing failed");
+      img.onerror = () => fail('Image processing failed for ' + file.name);
     };
-    reader.onerror = (e) => reject("File reading failed");
+    reader.onerror = () => fail('File reading failed for ' + file.name);
   });
 }
 
@@ -604,6 +841,11 @@ function loadProducts() {
     });
     if(html === "") html = `<div class="p-8 text-center text-on-surface-variant col-span-full">No products found.</div>`;
     grid.innerHTML = html;
+
+    // Populate category suggestions datalist for collection Target Category
+    const cats = [...new Set(currentProducts.map(p => (p.category || '').trim()).filter(Boolean))];
+    const dl = document.getElementById('categories-datalist');
+    if (dl) dl.innerHTML = cats.map(c => `<option value="${c}">`).join('');
   });
 }
 
@@ -616,6 +858,52 @@ function closeProductModal() {
   document.getElementById('product-modal-title').innerText = 'Add Product';
   const preview = document.getElementById('prod-img-preview');
   if (preview) preview.innerHTML = '';
+  // Reset extras panel
+  const extrasList = document.getElementById('prod-extras-list');
+  if (extrasList) extrasList.innerHTML = '';
+  const panel = document.getElementById('prod-extras-panel');
+  const arrow = document.getElementById('prod-extras-arrow');
+  if (panel) panel.classList.add('hidden');
+  if (arrow) { arrow.textContent = 'expand_more'; arrow.style.transform = ''; }
+}
+
+// ── Per-Product Extras Helpers ──────────────────────────────────
+window.toggleProdExtras = function() {
+  const panel = document.getElementById('prod-extras-panel');
+  const arrow = document.getElementById('prod-extras-arrow');
+  const isHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden', !isHidden);
+  arrow.style.transform = isHidden ? 'rotate(180deg)' : '';
+};
+
+window.addProdExtraRow = function(data = {}) {
+  const list = document.getElementById('prod-extras-list');
+  const idx = list.querySelectorAll('.prod-extra-row').length;
+  const div = document.createElement('div');
+  div.className = 'prod-extra-row flex gap-2 items-center';
+  div.innerHTML = `
+    <input type="text" class="extra-name flex-1 bg-surface-container-lowest rounded-xl p-2.5 text-sm border border-outline/20" placeholder="e.g. Extra Ice" value="${data.name || ''}">
+    <input type="number" class="extra-price w-20 bg-surface-container-lowest rounded-xl p-2.5 text-sm border border-outline/20" placeholder="₹" min="0" value="${data.price !== undefined ? data.price : ''}">
+    <button type="button" onclick="this.closest('.prod-extra-row').remove()" class="text-red-400 hover:text-red-600 transition-colors shrink-0">
+      <span class="material-symbols-outlined text-base">delete</span>
+    </button>
+  `;
+  list.appendChild(div);
+  // Auto-open panel when first row added
+  const panel = document.getElementById('prod-extras-panel');
+  const arrow = document.getElementById('prod-extras-arrow');
+  if (panel.classList.contains('hidden')) {
+    panel.classList.remove('hidden');
+    arrow.style.transform = 'rotate(180deg)';
+  }
+};
+
+function renderProdExtraRows(dataArr) {
+  const list = document.getElementById('prod-extras-list');
+  list.innerHTML = '';
+  if (dataArr && dataArr.length > 0) {
+    dataArr.forEach(item => addProdExtraRow(item));
+  }
 }
 
 document.getElementById("product-form").addEventListener("submit", async (e) => {
@@ -633,16 +921,26 @@ document.getElementById("product-form").addEventListener("submit", async (e) => 
   const saveProductToDB = (newImageUrls) => {
     const allImages = [...existingImages, ...newImageUrls];
     if (allImages.length === 0) allImages.push(oldUrl || 'https://placehold.co/400');
+
+    // Collect per-product extras
+    const extrasArr = [];
+    document.querySelectorAll('#prod-extras-list .prod-extra-row').forEach(row => {
+      const name = row.querySelector('.extra-name').value.trim();
+      const price = row.querySelector('.extra-price').value.trim();
+      if (name) extrasArr.push({ name, price: price ? Number(price) : 0 });
+    });
+
     const payload = {
       name: document.getElementById("prod-name").value,
       category: document.getElementById("prod-category").value,
       price: document.getElementById("prod-price").value,
       originalPrice: document.getElementById("prod-original-price").value ? Number(document.getElementById("prod-original-price").value) : null,
       badge: document.getElementById("prod-badge").value,
-      img: allImages[0],        // keep backward compat
+      img: allImages[0],
       images: allImages,
       desc: document.getElementById("prod-desc").value,
-      outOfStock: document.getElementById("prod-outofstock").checked
+      outOfStock: document.getElementById("prod-outofstock").checked,
+      extras: extrasArr
     };
     const task = id ? db.collection("products").doc(id).update(payload) : db.collection("products").add(payload);
     task.then(() => { btn.disabled = false; closeProductModal(); });
@@ -695,6 +993,15 @@ window.editProduct = function(id) {
       <img src="${url}" data-url="${url}" class="w-16 h-16 object-cover rounded-lg border border-outline/20" title="Image ${i+1}">
       <button type="button" onclick="removePreviewImg(${i})" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center font-black hover:bg-red-700">×</button>
     </div>`).join('');
+
+  // Load per-product extras
+  renderProdExtraRows(p.extras || []);
+  if (p.extras && p.extras.length > 0) {
+    const panel = document.getElementById('prod-extras-panel');
+    const arrow = document.getElementById('prod-extras-arrow');
+    if (panel) panel.classList.remove('hidden');
+    if (arrow) arrow.style.transform = 'rotate(180deg)';
+  }
 
   document.getElementById('product-modal-title').innerText = 'Edit Product';
   document.getElementById('add-product-modal').classList.remove('hidden');
