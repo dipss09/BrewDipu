@@ -347,6 +347,7 @@ function loadSettings() {
          document.getElementById("set-popup-message").value = data.popup.message || "";
          document.getElementById("set-popup-btn-text").value = data.popup.btnText || "";
          document.getElementById("set-popup-btn-link").value = data.popup.btnLink || "";
+         document.getElementById("set-popup-delay").value = data.popup.delay !== undefined ? data.popup.delay : 3;
          document.getElementById("set-popup-promo-code").value = data.popup.promoCode || "";
          // Show current image preview
          if (data.popup.media) {
@@ -594,6 +595,7 @@ document.getElementById("offers-form").addEventListener("submit", async (e) => {
         message: document.getElementById("set-popup-message").value,
         btnText: document.getElementById("set-popup-btn-text").value,
         btnLink: document.getElementById("set-popup-btn-link").value,
+        delay: parseInt(document.getElementById("set-popup-delay").value) || 0,
         promoCode: document.getElementById("set-popup-promo-code").value.toUpperCase().trim(),
       },
     };
