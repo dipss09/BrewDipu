@@ -91,6 +91,7 @@
         <button onclick="switchTab('products')" id="tab-btn-products" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">inventory_2</span> Products</button>
         <button onclick="switchTab('reviews')" id="tab-btn-reviews" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">reviews</span> Reviews</button>
         <button onclick="switchTab('offers')" id="tab-btn-offers" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">redeem</span> Rewards & Promos</button>
+        <button onclick="switchTab('popups')" id="tab-btn-popups" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">notifications_active</span> Popups</button>
         <button onclick="switchTab('spinwin')" id="tab-btn-spinwin" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">casino</span> Spin & Win</button>
         <button onclick="switchTab('users')" id="tab-btn-users" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">group</span> Users</button>
         <button onclick="switchTab('settings')" id="tab-btn-settings" class="whitespace-nowrap md:w-full text-left px-3 md:px-4 py-2 md:py-3 rounded-xl text-sm md:text-base font-bold flex items-center gap-2 md:gap-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors"><span class="material-symbols-outlined text-sm md:text-base">settings</span> Settings</button>
@@ -689,12 +690,27 @@
 
         <form id="offers-form" class="glass-card rounded-2xl p-4 md:p-8 space-y-8">
 
-          <!-- Popup Notification Settings -->
+          <button type="submit" class="w-full py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-black hover:shadow-xl transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">save</span> Save Promo Settings
+          </button>
+          <p id="offers-msg" class="text-center text-sm font-bold text-secondary hidden">Promo settings saved!</p>
+        </form>
+
+      </section>
+
+      <!-- POPUPS TAB -->
+      <section id="tab-popups" class="tab-pane hidden">
+        <div class="mb-4 md:mb-8">
+          <h2 class="text-2xl md:text-3xl font-black text-primary">Popup Notifications</h2>
+          <p class="text-xs md:text-sm text-on-surface-variant mt-1">Configure an automatic popup that offers a discount for following you on Instagram.</p>
+        </div>
+
+        <form id="popups-form" class="glass-card rounded-2xl p-4 md:p-8 space-y-8">
           <div class="space-y-4">
             <div class="flex justify-between items-center">
                <div>
-                 <h4 class="font-bold text-primary text-lg">Popup Notification</h4>
-                 <p class="text-xs text-on-surface-variant">Configure a global popup that appears once per session.</p>
+                 <h4 class="font-bold text-primary text-lg">Enable Popup</h4>
+                 <p class="text-xs text-on-surface-variant">Show this popup once per session.</p>
                </div>
                <label class="relative inline-flex items-center cursor-pointer">
                  <input type="checkbox" id="set-popup-enable" class="sr-only peer">
@@ -717,11 +733,11 @@
                </div>
                <div class="col-span-1 md:col-span-2">
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Message</label>
-                  <textarea id="set-popup-message" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Get 20% off your first order..."></textarea>
+                  <textarea id="set-popup-message" rows="2" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="Follow us to get 10% off your order!"></textarea>
                </div>
                <div>
-                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Button Text (e.g. Claim Now)</label>
-                  <input type="text" id="set-popup-btn-text" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Follow & Claim 20% Off">
+                  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Button Text (e.g. Follow Us)</label>
+                  <input type="text" id="set-popup-btn-text" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20" placeholder="e.g. Follow Us">
                </div>
                <div>
                   <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">Button Link (Instagram URL)</label>
@@ -733,18 +749,18 @@
                </div>
                <div class="col-span-1 md:col-span-2 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                   <label class="text-xs font-bold uppercase tracking-widest text-amber-700 mb-1 block">&#127381; Auto-Apply Promo Code (Optional)</label>
-                  <input type="text" id="set-popup-promo-code" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 uppercase" placeholder="e.g. INSTA20" style="letter-spacing:0.15em">
-                  <p class="text-[10px] text-amber-600 mt-1">If set, clicking the button will open the Instagram link, then explicitly reveal and automatically apply this promo code to the customer's cart.</p>
+                  <input type="text" id="set-popup-promo-code" class="w-full bg-white rounded-xl p-3 text-sm border border-outline/20 uppercase" placeholder="e.g. INSTA10" style="letter-spacing:0.15em">
+                  <p class="text-[10px] text-amber-600 mt-1">If set, clicking the link applies an automatic 10% discount on checkout. Ensure the code matches!</p>
                </div>
             </div>
           </div>
 
-          <div id="offers-upload-progress" class="hidden text-center text-sm font-bold text-primary py-2">&#8987; Uploading media, please wait...</div>
+          <div id="popups-upload-progress" class="hidden text-center text-sm font-bold text-primary py-2">&#8987; Uploading media, please wait...</div>
 
           <button type="submit" class="w-full py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-black hover:shadow-xl transition-all flex items-center justify-center gap-2">
             <span class="material-symbols-outlined">save</span> Save Popup Settings
           </button>
-          <p id="offers-msg" class="text-center text-sm font-bold text-secondary hidden">Popup settings saved!</p>
+          <p id="popups-msg" class="text-center text-sm font-bold text-secondary hidden">Popup settings saved!</p>
         </form>
 
       </section>

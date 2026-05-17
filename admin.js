@@ -73,7 +73,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 //  👉  TAB NAVIGATION
 // ──────────────────────────────────────────────
 function switchTab(tabId) {
-  const tabs = ['orders', 'sales', 'products', 'reviews', 'users', 'settings', 'offers', 'spinwin'];
+  const tabs = ['orders', 'sales', 'products', 'reviews', 'users', 'settings', 'offers', 'popups', 'spinwin'];
   tabs.forEach(t => {
     document.getElementById(`tab-${t}`).classList.add("hidden");
     const btn = document.getElementById(`tab-btn-${t}`);
@@ -570,8 +570,8 @@ document.getElementById("settings-form").addEventListener("submit", async (e) =>
 // ──────────────────────────────────────────────
 //  🎁  OFFERS / PROMOTIONS FORM HANDLER
 // ──────────────────────────────────────────────
-// ── POPUP-ONLY FORM (Rewards & Promos tab) ─────────────
-document.getElementById("offers-form").addEventListener("submit", async (e) => {
+// ── POPUP-ONLY FORM (Popups tab) ─────────────
+document.getElementById("popups-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const submitBtn = e.target.querySelector("button[type='submit']");
   const btnOrigHTML = submitBtn.innerHTML;
@@ -607,7 +607,7 @@ document.getElementById("offers-form").addEventListener("submit", async (e) => {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">check_circle</span> Saved!';
     submitBtn.classList.remove("bg-primary"); submitBtn.classList.add("bg-green-600");
-    const msg = document.getElementById("offers-msg");
+    const msg = document.getElementById("popups-msg");
     msg.classList.remove("hidden");
     if (mediaFileInput) mediaFileInput.value = "";
     setTimeout(() => { msg.classList.add("hidden"); submitBtn.innerHTML = btnOrigHTML; submitBtn.classList.add("bg-primary"); submitBtn.classList.remove("bg-green-600"); }, 3000);
