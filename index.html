@@ -2141,15 +2141,15 @@
         <div class="relative mb-2 md:mb-8 aspect-square rounded-lg md:rounded-2xl overflow-hidden bg-surface-container">
           ${(p.images && p.images.length > 1) ? `
           <!-- Multi-image carousel -->
-          <div class="w-full h-full relative" id="carousel-${p.id}">
-            ${p.images.map((imgUrl, i) => `<img class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''} ${i===0?'opacity-100':'opacity-0'}" src="${imgUrl}" alt="${p.name} view ${i+1}" loading="lazy" data-carousel-img>`).join('')}
+          <div class="w-full h-full relative bg-white/5" id="carousel-${p.id}">
+            ${p.images.map((imgUrl, i) => `<img class="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''} ${i===0?'opacity-100':'opacity-0'}" src="${imgUrl}" alt="${p.name} view ${i+1}" loading="lazy" data-carousel-img>`).join('')}
             <div class="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-1 z-10">
               ${p.images.map((_,i) => `<button onclick="event.stopPropagation();carouselGo('${p.id}',${i})" class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-white/60 transition-colors ${i===0?'bg-white':'bg-white/30'}" data-dot-${p.id}></button>`).join('')}
             </div>
             <button onclick="event.stopPropagation();carouselPrev('${p.id}')" class="absolute left-1 top-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 shadow"><span class="material-symbols-outlined text-[14px] md:text-base">chevron_left</span></button>
             <button onclick="event.stopPropagation();carouselNext('${p.id}')" class="absolute right-1 top-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center z-10 shadow"><span class="material-symbols-outlined text-[14px] md:text-base">chevron_right</span></button>
           </div>` : `
-          <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}"
+          <img class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? 'grayscale opacity-70' : ''}"
             src="${p.img}" alt="${p.name}" loading="lazy"/>`}
           <div class="absolute top-1 right-1 md:top-4 md:right-4 bg-primary text-white px-1.5 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-sm font-bold shadow-lg flex items-center gap-1">
              ${p.originalPrice && p.originalPrice > p.price ? `<span class="line-through text-white/70 text-[8px] md:text-xs font-normal">₹${p.originalPrice}</span>` : ''} 
@@ -2483,6 +2483,7 @@
           document.getElementById('popup-message').innerHTML = `<strong>Thank you for following!</strong><br/>Your promo code has been revealed and applied to your cart.`;
           
           sessionStorage.setItem('pendingPromoCode', code);
+          sessionStorage.setItem('pendingPromoPct', '10');
           const refInput = document.getElementById('f-ref-code');
           if (refInput) refInput.value = code;
           const hintEl = document.getElementById('popup-promo-hint');
@@ -2639,6 +2640,21 @@
       let myCodeUrl = document.getElementById("profile-ref-code").value;
       let myCodeMatch = myCodeUrl.match(/ref=([^&]+)/i);
       let myCode = myCodeMatch ? myCodeMatch[1].toUpperCase() : null;
+
+      // 0. Check if this is the auto-applied Instagram Popup discount
+      const pendingCode = sessionStorage.getItem('pendingPromoCode');
+      const pendingPct = sessionStorage.getItem('pendingPromoPct');
+      if (pendingCode && pendingPct && codeInput === pendingCode) {
+          currentDiscountType = "discountCode";
+          appliedPromoCode = codeInput;
+          currentDiscountPct = parseInt(pendingPct) || 10;
+
+          statusEl.textContent = `Promo code applied! ${currentDiscountPct}% Discount unlocked.`;
+          statusEl.className = "text-xs font-bold mt-1 text-[#006e20] leading-tight";
+          document.getElementById("f-rewards").value = "";
+          renderOrderSummary();
+          return;
+      }
 
       // 1. Check Promo Codes first
       try {
@@ -4476,7 +4492,7 @@
       // Populate image track
       const track = document.getElementById('pzoom-img-track');
       track.innerHTML = pzoomImages.map(url =>
-        `<img src="${url}" alt="${p.name}" class="flex-shrink-0 w-full h-full object-cover" loading="eager" style="min-width:100%">`
+        `<div class="flex-shrink-0 w-full h-full bg-white/5 flex items-center justify-center" style="min-width:100%"><img src="${url}" alt="${p.name}" class="w-full h-full object-contain" loading="eager"></div>`
       ).join('');
       track.style.transform = 'translateX(0)';
 
